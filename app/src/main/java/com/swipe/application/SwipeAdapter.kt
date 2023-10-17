@@ -4,9 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageView
 
-class SwipeAdapter(private val mData:List<Int>): BaseAdapter() {
+class SwipeAdapter(private val mData:List<Games>): BaseAdapter() {
     override fun getCount(): Int {
         return mData.size
     }
@@ -19,11 +18,15 @@ class SwipeAdapter(private val mData:List<Int>): BaseAdapter() {
         return p0.toLong()
     }
 
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        var convertView: View? = p1
-        convertView = LayoutInflater.from(p2!!.context).inflate(R.layout.card_items, p2, false)
-        val imgViewCard = convertView.findViewById(R.id.imgViewCard) as ImageView
-        imgViewCard.setImageResource(mData[p0])
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
+        var holder: SwipeHolder? = convertView?.tag as? SwipeHolder
+        val convertView = LayoutInflater.from(parent?.context).inflate(R.layout.card_items, parent, false)
+        if (holder == null) {
+            holder = SwipeHolder(convertView)
+            convertView.tag = holder
+        }
+        holder.bindData(mData[position])
+
         return convertView
     }
 

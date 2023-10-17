@@ -6,10 +6,7 @@ import android.os.Build
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
-import android.view.View.LAYER_TYPE_HARDWARE
-import android.view.View.MeasureSpec
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
 import android.widget.Adapter
 import android.widget.FrameLayout
 import java.util.Random
@@ -112,38 +109,32 @@ class SwipeStack @JvmOverloads constructor(
         mIsFirstLayout= false
 
     }
-    private fun addNextView(){
-        if(mCurrentViewIndex < mAdapter!!.count){
+    private fun addNextView() {
+        if (mCurrentViewIndex < mAdapter!!.count) {
             val bottomView = mAdapter!!.getView(mCurrentViewIndex, this, this)
             bottomView.setTag(R.id.new_view, true)
-            if(!mDisableHwAcceleration){
+
+            if (!mDisableHwAcceleration) {
                 bottomView.setLayerType(LAYER_TYPE_HARDWARE, null)
             }
-            if(mViewRotation>0){
-                bottomView.rotation = (mRandom!!.nextInt(mViewRotation) - mViewRotation/2).toFloat()
+
+            if (mViewRotation > 0) {
+                bottomView.rotation = (mRandom!!.nextInt(mViewRotation) - mViewRotation / 2).toFloat()
             }
-            val width = width - (paddingLeft +paddingRight )
-            val height = height - (paddingTop + paddingBottom)
-            var params = bottomView.layoutParams
-            if(params == null){
-                params = LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                )
-            }
-            var measureSpecWidth = MeasureSpec.AT_MOST
-            var measureSpecHeight = MeasureSpec.AT_MOST
-            if(params.width == LayoutParams.MATCH_PARENT){
-                measureSpecWidth = MeasureSpec.EXACTLY
-            }
-            if(params.height == LayoutParams.MATCH_PARENT){
-                measureSpecHeight = MeasureSpec.EXACTLY
-            }
-            bottomView.measure(measureSpecWidth or width, measureSpecHeight or height)
-            addViewInLayout(bottomView, 0 , params, true)
+
+            val widthMeasureSpec = MeasureSpec.makeMeasureSpec(width - (paddingLeft + paddingRight), MeasureSpec.AT_MOST)
+            val heightMeasureSpec = MeasureSpec.makeMeasureSpec(height - (paddingTop + paddingBottom), MeasureSpec.AT_MOST)
+
+            bottomView.measure(widthMeasureSpec, heightMeasureSpec)
+
+            val params = FrameLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT
+            )
+
+            addViewInLayout(bottomView, 0, params, true)
             mCurrentViewIndex++
         }
-
     }
     private fun reorderItems(){
         for(x in 0 until childCount){
