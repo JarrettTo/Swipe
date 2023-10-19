@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/transparent_bottom_overlay.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:top="-50dp" android:right="-50dp" android:left="-50dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="@color/background"
+            android:endColor="#00FFFFFF"
+            android:type="linear"
+            android:angle="90" />
+        </shape>
+    </item>
+</layer-list>
+
+
