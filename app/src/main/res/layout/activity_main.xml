@@ -1,18 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="#13122B"
+    android:backgroundTint="#13122B">
 
-    <com.swipe.application.SwipeStack
-        android:id="@+id/swipeStack"
-        android:layout_width="259dp"
-        android:layout_height="373dp"
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#13122B"
+        android:backgroundTint="#13122B"
+        android:orientation="horizontal"
+        android:paddingTop="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/swipeStack">
+
+        <Button
+            android:id="@+id/button8"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="Home"
+            android:textAllCaps="false"
+            android:textColor="#9190A8"
+            android:textSize="11sp"
+            app:icon="@drawable/home"
+            app:iconGravity="top"
+            app:iconSize="30dp"
+            app:iconTint="#9190A8" />
+
+        <Button
+            android:id="@+id/button9"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="Groups"
+            android:textAllCaps="false"
+            android:textColor="#9190A8"
+            android:textSize="11sp"
+            android:textStyle="normal"
+            app:icon="@drawable/group"
+            app:iconGravity="top"
+            app:iconSize="30dp"
+            app:iconTint="#9190A8" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="Library"
+            android:textAllCaps="false"
+            android:textColor="#9190A8"
+            android:textSize="11sp"
+            app:icon="@drawable/book"
+            app:iconGravity="top"
+            app:iconSize="30dp"
+            app:iconTint="#9190A8" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="Search"
+            android:textAllCaps="false"
+            android:textColor="#9190A8"
+            android:textSize="11sp"
+            app:icon="@drawable/search"
+            app:iconGravity="top"
+            app:iconSize="30dp"
+            app:iconTint="#9190A8" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="User"
+            android:textAllCaps="false"
+            android:textColor="#9190A8"
+            android:textSize="11sp"
+            app:icon="@drawable/user"
+            app:iconGravity="top"
+            app:iconSize="30dp"
+            app:iconTint="#9190A8" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="91dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Games you may like,"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="XxTheLegendxX"
+                android:textColor="#F17300"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+
+            android:layout_marginLeft="110dp"
+            android:autoText="false"
+            android:background="@drawable/gear"
+            android:backgroundTint="#FFFFFF"
+            android:foreground="@drawable/gear"
+            android:foregroundTint="#9190A8" />
+
+    </LinearLayout>
+
+    <com.swipe.application.SwipeStack
+        android:id="@+id/swipeStack"
+        android:layout_width="409dp"
+        android:layout_height="539dp"
+        android:layout_marginTop="44dp"
+        android:paddingBottom="200dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
     </com.swipe.application.SwipeStack>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

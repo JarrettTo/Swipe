@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
+
 class MainActivity : AppCompatActivity() {
 
     private val gameList: ArrayList<Games> = DataHelper.initializeData()

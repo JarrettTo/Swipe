@@ -11,6 +11,7 @@ import android.widget.Adapter
 import android.widget.FrameLayout
 import java.util.Random
 import android.os.Bundle
+import android.view.Gravity
 import androidx.annotation.Nullable
 
 class SwipeStack @JvmOverloads constructor(
@@ -129,8 +130,10 @@ class SwipeStack @JvmOverloads constructor(
 
             val params = FrameLayout.LayoutParams(
                 LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT
+                LayoutParams.WRAP_CONTENT,
+
             )
+            params.gravity=Gravity.CENTER_VERTICAL
 
             addViewInLayout(bottomView, 0, params, true)
             mCurrentViewIndex++
@@ -142,7 +145,7 @@ class SwipeStack @JvmOverloads constructor(
             val topViewIndex= childCount -1
             val distanceToViewAbove = topViewIndex * mViewSpacing - x * mViewSpacing
             val newPositionX = (width - childView.measuredWidth) / 2
-            val newPositionY = distanceToViewAbove +paddingTop
+            val newPositionY = distanceToViewAbove + 150
             childView.layout(
                 newPositionX,
                 paddingTop,
@@ -153,7 +156,7 @@ class SwipeStack @JvmOverloads constructor(
                 childView.translationZ = x.toFloat()
             }
             val isNewView = childView.getTag(R.id.new_view) as Boolean
-            val scaleFactor = Math.pow(mScaleFactor.toDouble(), (childCount -x).toDouble()).toFloat()
+            val scaleFactor = mScaleFactor
             if(x==topViewIndex){
                 mSwipeHelper!!.unregisterObservedView()
                 topView=childView
@@ -277,7 +280,7 @@ class SwipeStack @JvmOverloads constructor(
         const val DEFAULT_STACK_ROTATION = 8
         const val DEFAULT_SWIPE_ROTATION = 30f
         const val DEFAULT_SWIPE_OPACITY = 1f
-        const val DEFAULT_SCALE_FACTOR = 1f
+        const val DEFAULT_SCALE_FACTOR = 1.25f
         const val DEFAULT_DISABLE_HW_ACCLERATION = true
         private const val KEY_SUPER_STATE="superState"
         private const val KEY_CURRENT_INDEX="currentIndex"
