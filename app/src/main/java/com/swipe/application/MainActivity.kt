@@ -11,14 +11,20 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private val gameList: ArrayList<Games> = DataHelper.initializeData()
+
+    private var gameList: ArrayList<Games> = arrayListOf()
     private val groupList: ArrayList<Groups> = DataHelper.initializeGroups()
     private lateinit var swipeStack: SwipeStack
+
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (gameList.isEmpty()) {
+            gameList = DataHelper.initializeData()
+        }
 
         val swipeStack: SwipeStack = findViewById(R.id.swipeStack)
 

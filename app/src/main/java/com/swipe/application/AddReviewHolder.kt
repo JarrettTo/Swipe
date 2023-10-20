@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,7 +26,9 @@ class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         iconComment.setOnClickListener {
             Log.d("GameDetailsHolder", "iconComment Clicked")
+            Toast.makeText(itemView.context, "Adding review...", Toast.LENGTH_LONG).show()
         }
+
     }
 
     fun bindStars() {

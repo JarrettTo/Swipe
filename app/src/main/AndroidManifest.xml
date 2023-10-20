@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
 
         <activity android:name=".MainActivity"
@@ -21,7 +22,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GameDetailsActivity">
+            android:name=".GameDetailsActivity"
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name=".GroupActivity">

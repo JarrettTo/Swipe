@@ -118,6 +118,7 @@
                     android:layout_gravity="center"
                     android:backgroundTint="@color/orange"
                     android:text="See More"
+                    android:layout_marginBottom="50dp"
                     android:textSize="12sp" />
 
             </LinearLayout>
