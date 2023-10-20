@@ -46,6 +46,9 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
         val genreList = game.genre ?: emptyList()
         bindGenres(genreList)
 
+        val addReview = AddReviewHolder(itemView)
+        addReview.bindData()
+
         val similarTitlesList = game.similarGames ?: emptyList()
         bindSimilarTitles(similarTitlesList)
 
@@ -54,9 +57,6 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
         val reviewList = game.reviews ?: emptyList()
         bindReviews(reviewList)
-
-        val addReview = AddReviewHolder(itemView)
-        addReview.bindData()
     }
 
 

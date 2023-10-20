@@ -6,13 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/backButton"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="@drawable/back_arrow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+
         android:layout_margin="20dp"/>
 
     <ImageView
@@ -57,7 +58,7 @@
             android:id="@+id/game_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:text="TextView"
             android:textColor="@color/white"
             android:textSize="12sp" />
@@ -65,7 +66,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:orientation="horizontal">
 
             <!-- First Inner LinearLayout -->
@@ -139,7 +140,7 @@
             android:layout_width="250dp"
             android:layout_height="150dp"
             android:layout_gravity="center"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:id="@+id/similar_titles"
@@ -159,7 +160,7 @@
                 android:id="@+id/similar_titles_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:orientation="horizontal" />
         </HorizontalScrollView>
 
@@ -181,7 +182,7 @@
                 android:id="@+id/popular_players_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:orientation="horizontal" />
         </HorizontalScrollView>
 
@@ -209,7 +210,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/playButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -218,7 +219,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="30dp"
             android:layout_gravity="center_horizontal"/>
 
     </LinearLayout>
