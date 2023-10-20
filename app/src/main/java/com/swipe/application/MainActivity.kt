@@ -7,6 +7,7 @@ import android.widget.Spinner
 
 import android.util.Log
 import android.view.View
+import android.widget.Button
 
 import androidx.appcompat.app.AppCompatActivity
 
@@ -21,10 +22,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-
-
-
         val swipeStack: SwipeStack = findViewById(R.id.swipeStack)
 
         val swipeAdapter = SwipeAdapter(gameList) { clickedGame ->
@@ -38,6 +35,16 @@ class MainActivity : AppCompatActivity() {
             }
             intent.putExtra("gameDetails", gameDetailsBundle)
 
+            startActivity(intent)
+        }
+
+        val searchButton: Button = findViewById(R.id.search_button)
+        searchButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, SearchActivity::class.java)
+            val gameDetailsBundle = Bundle().apply {
+                putSerializable("allGames", gameList)
+            }
+            intent.putExtra("allGames", gameDetailsBundle)
             startActivity(intent)
         }
 

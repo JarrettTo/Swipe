@@ -104,6 +104,38 @@ class DataHelper {
                 )
             )
 
+            data.add(
+                Games(
+                    4,
+                    R.drawable.starcraft,
+                    "Temp Game 1",
+                    "Temp",
+                    arrayListOf("RTS", "Action", "Adventure"),
+                    arrayListOf("Windows", "Mac"),
+                    "Free",
+                    R.raw.video3,
+                    arrayListOf(data[0], data[1]),
+                    arrayListOf(users[3]),
+                    null
+                )
+            )
+
+            data.add(
+                Games(
+                    5,
+                    R.drawable.starcraft,
+                    "Temp Game 2",
+                    "Temp",
+                    arrayListOf("RTS", "Action", "Adventure"),
+                    arrayListOf("Windows", "Mac"),
+                    "Free",
+                    R.raw.video3,
+                    arrayListOf(data[0], data[1]),
+                    arrayListOf(users[3]),
+                    null
+                )
+            )
+
             data.shuffle()
 
             return data;

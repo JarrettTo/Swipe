@@ -23,5 +23,8 @@
         <activity
             android:name=".GameDetailsActivity">
         </activity>
+        <activity
+            android:name=".SearchActivity">
+        </activity>
     </application>
 </manifest>
