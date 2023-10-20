@@ -1,11 +1,13 @@
 package com.swipe.application
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Button
 
-class SwipeAdapter(private val mData:List<Games>): BaseAdapter() {
+class SwipeAdapter(private val mData: List<Games>, private var onItemClick: (Games) -> Unit): BaseAdapter() {
     override fun getCount(): Int {
         return mData.size
     }
@@ -25,7 +27,21 @@ class SwipeAdapter(private val mData:List<Games>): BaseAdapter() {
             holder = SwipeHolder(convertView)
             convertView.tag = holder
         }
-        holder.bindData(mData[position])
+
+        val currentItem = mData[position]
+
+        holder.bindData(currentItem)
+
+        val seeMoreButton = convertView.findViewById<Button>(R.id.seeMoreButton)
+        val seeMoreGenresButton = convertView.findViewById<Button>(R.id.seeMoreGenresButton)
+
+        seeMoreButton?.setOnClickListener {
+            onItemClick(currentItem)
+        }
+
+        seeMoreGenresButton?.setOnClickListener {
+            onItemClick(currentItem)
+        }
 
         return convertView
     }

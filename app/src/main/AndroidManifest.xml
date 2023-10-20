@@ -20,8 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Other activities and components can be declared here -->
-
+        <activity
+            android:name=".GameDetailsActivity">
+        </activity>
     </application>
 </manifest>
