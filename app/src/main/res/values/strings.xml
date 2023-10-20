@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string-array name="spinner_choices">
+        <item>Personal Feed</item>
+        <item>The Kittens</item>
+    </string-array>
 </resources>
