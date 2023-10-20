@@ -3,6 +3,7 @@ package com.swipe.application
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,8 +41,14 @@ class SearchActivity : AppCompatActivity() {
 
             startActivity(intent)
         }
-
         gamesListView.adapter = adapter
+
+        val homeButton: Button = findViewById(R.id.home_button)
+        homeButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
