@@ -10,5 +10,8 @@ data class Games(
     val genre: ArrayList<String>?,
     val platform: ArrayList<String>?,
     val price: String?,
-    var videoId: Int
+    var videoId: Int,
+    val similarGames: ArrayList<Games>?,
+    val popularPlayers: ArrayList<Users>?,
+    val reviews: ArrayList<Reviews>?
 ) : Serializable

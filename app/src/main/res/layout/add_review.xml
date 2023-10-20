@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:layout_editor_absoluteX="1dp"
+    tools:layout_editor_absoluteY="1dp">
+
+    <include
+        layout="@layout/game_or_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <include
+            layout="@layout/star_rating_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout"
+                android:layout_width="235dp"
+                android:layout_height="wrap_content"
+                android:hint="Add a review..."
+                android:minHeight="64dp"
+                app:boxBackgroundColor="@android:color/darker_gray"
+                app:boxBackgroundMode="filled"
+                app:hintTextColor="@android:color/white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/addReview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:minHeight="64dp"
+                    android:textColor="@android:color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/iconComment"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Add Comment"
+                android:src="@drawable/send" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/star1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="4dp"
+        android:src="@drawable/unfilled_star"
+        android:onClick="onStarClick"
+        android:contentDescription="Unfilled star 1"/>
+
+    <ImageView
+        android:id="@+id/star2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="4dp"
+        android:src="@drawable/unfilled_star"
+        android:onClick="onStarClick"
+        android:contentDescription="Unfilled star 2"/>
+
+    <ImageView
+        android:id="@+id/star3"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="4dp"
+        android:src="@drawable/unfilled_star"
+        android:onClick="onStarClick"
+        android:contentDescription="Unfilled star 3"/>
+
+    <ImageView
+        android:id="@+id/star4"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="4dp"
+        android:src="@drawable/unfilled_star"
+        android:onClick="onStarClick"
+        android:contentDescription="Unfilled star 4"/>
+
+    <ImageView
+        android:id="@+id/star5"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="4dp"
+        android:src="@drawable/unfilled_star"
+        android:onClick="onStarClick"
+        android:contentDescription="Unfilled star 5"/>
+</LinearLayout>
