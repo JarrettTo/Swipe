@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     private val gameList: ArrayList<Games> = DataHelper.initializeData()
+    private val groupList: ArrayList<Groups> = DataHelper.initializeGroups()
     private lateinit var swipeStack: SwipeStack
 
     @SuppressLint("MissingInflatedId")
@@ -39,6 +40,15 @@ class MainActivity : AppCompatActivity() {
                 putSerializable("allGames", gameList)
             }
             intent.putExtra("allGames", gameDetailsBundle)
+            startActivity(intent)
+        }
+        val groupsButton: Button = findViewById(R.id.groups_button)
+        groupsButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, GroupActivity::class.java)
+            val groupBundle = Bundle().apply {
+                putSerializable("allGroups", groupList)
+            }
+            intent.putExtra("allGroups", groupBundle)
             startActivity(intent)
         }
 

@@ -3,6 +3,7 @@ package com.swipe.application
 class DataHelper {
     companion object {
         fun initializeData(): ArrayList<Games> {
+
             val users = ArrayList<Users>()
             users.add(
                 Users(
@@ -139,6 +140,19 @@ class DataHelper {
             data.shuffle()
 
             return data;
+        }
+        fun initializeGroups() : ArrayList<Groups>{
+            val groups = ArrayList<Groups>()
+            groups.add(
+                Groups("The Kittens", R.drawable.lol, "This ggroup is made for the kittens of demacia or smth like dat", 4)
+            )
+            groups.add(
+                Groups("I Miss You", R.drawable.bjergsen, "Relapse hours go crazy cos my love is mine all mine", 2)
+            )
+            groups.add(
+                Groups("SHEESH ESPORTS", R.drawable.starcraft, "This group is the starcraft pro team champion", 6)
+            )
+            return groups
         }
     }
 }
