@@ -21,7 +21,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GameDetailsActivity">
+            android:name=".GameDetailsActivity"
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name=".SearchActivity">

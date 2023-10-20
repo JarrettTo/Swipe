@@ -35,7 +35,6 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:hint="Add a review..."
-                android:minHeight="64dp"
                 app:boxBackgroundColor="@android:color/darker_gray"
                 app:boxBackgroundMode="filled"
                 app:hintTextColor="@android:color/white">
@@ -44,7 +43,7 @@
                     android:id="@+id/addReview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="textMultiLine"
                     android:minHeight="64dp"
                     android:textColor="@android:color/white" />
             </com.google.android.material.textfield.TextInputLayout>
