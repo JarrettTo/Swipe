@@ -13,7 +13,8 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/recycleGroup"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextText">
+        app:layout_constraintTop_toBottomOf="@+id/editTextText"
+        app:layout_constraintVertical_bias="0.56">
 
         <Button
             android:id="@+id/button"
@@ -44,9 +45,9 @@
 
     <EditText
         android:id="@+id/editTextText"
-        android:layout_width="273dp"
-        android:layout_height="42dp"
-        android:layout_marginTop="44dp"
+        android:layout_width="279dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/rounded_et_bg"
         android:ems="10"
         android:inputType="text"
@@ -60,13 +61,15 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleGroup"
-        android:layout_width="360dp"
-        android:layout_height="475dp"
-        android:layout_gravity="center"
+        android:layout_width="376dp"
+        android:layout_height="547dp"
+        android:layout_gravity="start"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintStart_toStartOf="parent" />
 
     <include
