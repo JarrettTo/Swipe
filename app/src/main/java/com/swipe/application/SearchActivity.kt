@@ -1,5 +1,6 @@
 package com.swipe.application
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.SearchView
@@ -28,7 +29,18 @@ class SearchActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         gamesListView.layoutManager = layoutManager
 
-        adapter = SearchAdapter(gamesNamesList.orEmpty().filterNotNull())
+        // Pass a listener to the adapter to handle item clicks
+        adapter = SearchAdapter(gamesNamesList.orEmpty().filterNotNull()) { clickedGameName ->
+            val intent = Intent(this@SearchActivity, GameDetailsActivity::class.java)
+            val index = gameList?.indexOfFirst { it.gameName == clickedGameName }
+            val gameDetailsBundle = Bundle().apply {
+                putSerializable("gameDetails", index?.let { gameList?.get(it) })
+            }
+            intent.putExtra("gameDetails", gameDetailsBundle)
+
+            startActivity(intent)
+        }
+
         gamesListView.adapter = adapter
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

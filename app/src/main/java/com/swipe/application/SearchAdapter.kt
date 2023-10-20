@@ -1,13 +1,15 @@
 package com.swipe.application
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class SearchAdapter(private var gamesList: List<String>) : RecyclerView.Adapter<SearchAdapter.SearchHolder>() {
+class SearchAdapter(
+    private var gamesList: List<String>,
+    private val itemClickListener: (String) -> Unit
+) : RecyclerView.Adapter<SearchAdapter.SearchHolder>() {
 
     class SearchHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val gameTextView: TextView = itemView.findViewById(R.id.list_view_in_search)
@@ -19,7 +21,13 @@ class SearchAdapter(private var gamesList: List<String>) : RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: SearchHolder, position: Int) {
-        holder.gameTextView.text = gamesList[position]
+        val gameName = gamesList[position]
+        holder.gameTextView.text = gameName
+
+        // Set click listener
+        holder.itemView.setOnClickListener {
+            itemClickListener.invoke(gameName)
+        }
     }
 
     override fun getItemCount(): Int {
