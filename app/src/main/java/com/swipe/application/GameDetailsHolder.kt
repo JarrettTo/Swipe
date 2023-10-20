@@ -1,25 +1,20 @@
 package com.swipe.application
 
 import android.content.Context
-import android.graphics.Color
 import android.net.Uri
-import android.util.Log
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.VideoView
-import android.widget.Button
 import android.widget.MediaController
-import androidx.core.widget.NestedScrollView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
-class GameDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class GameDetailsHolder(itemView: View, private val context: Context) : RecyclerView.ViewHolder(itemView) {
     private val image: ImageView = itemView.findViewById(R.id.game_photo)
     private val gameName: TextView = itemView.findViewById(R.id.game_name)
     private val description: TextView = itemView.findViewById(R.id.game_description)
@@ -27,9 +22,12 @@ class GameDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val genresContainer: LinearLayout = itemView.findViewById(R.id.genresContainer2)
     private val platformList: TextView = itemView.findViewById(R.id.platform_list)
     private val price: TextView = itemView.findViewById(R.id.show_price)
+    private val similarTitlesTextView: TextView = itemView.findViewById(R.id.similar_titles)
     private val similarTitlesContainer: LinearLayout = itemView.findViewById(R.id.similar_titles_container)
+    private val popularPlayersTextView: TextView = itemView.findViewById(R.id.popular_players)
     private val popularPlayersContainer: LinearLayout = itemView.findViewById(R.id.popular_players_container)
     private val reviewsContainer: LinearLayout = itemView.findViewById(R.id.reviews_container)
+    private val playButton: Button = itemView.findViewById(R.id.playButton)
 
     fun bindData(game: Games) {
         image.setImageResource(game.imageId)
@@ -37,8 +35,7 @@ class GameDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         description.text = game.description
         platformList.text = game.platform.toString()
         price.text = game.price
-
-        val genreList = game.genre ?: emptyList()
+        playButton.setBackgroundColor(ContextCompat.getColor(this.context, R.color.orange))
 
         videoId.setVideoURI(Uri.parse("android.resource://${itemView.context.packageName}/${game.videoId}"))
 
@@ -46,7 +43,20 @@ class GameDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         mediaController.setAnchorView(videoId)
         videoId.setMediaController(mediaController)
 
+        val genreList = game.genre ?: emptyList()
         bindGenres(genreList)
+
+        val similarTitlesList = game.similarGames ?: emptyList()
+        bindSimilarTitles(similarTitlesList)
+
+        val popularPlayersList = game.popularPlayers ?: emptyList()
+        bindPopularPlayers(popularPlayersList)
+
+        val reviewList = game.reviews ?: emptyList()
+        bindReviews(reviewList)
+
+        val addReview = AddReviewHolder(itemView)
+        addReview.bindData()
     }
 
 
@@ -78,6 +88,80 @@ class GameDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             toFloat(),
             context.resources.displayMetrics
         ).toInt()
+    }
+
+    fun bindSimilarTitles(similarTitles: List<Games>) {
+        if (similarTitles.isNotEmpty()) {
+            similarTitlesContainer.visibility = View.VISIBLE
+            similarTitlesTextView.visibility = View.VISIBLE
+
+            similarTitlesContainer.removeAllViews()
+
+            val inflater = LayoutInflater.from(itemView.context)
+
+            for (similarTitle in similarTitles) {
+                val similarTitleView = inflater.inflate(R.layout.game_or_user, similarTitlesContainer, false)
+                val gameOrUserHolder = GameOrUserHolder(similarTitleView)
+
+                gameOrUserHolder.bindData(similarTitle)
+
+                similarTitlesContainer.addView(similarTitleView)
+            }
+        } else {
+            similarTitlesContainer.visibility = View.GONE
+            similarTitlesTextView.visibility = View.GONE
+        }
+    }
+
+    fun bindPopularPlayers(popularPlayers: List<Users>) {
+        if (popularPlayers.isNotEmpty()) {
+            popularPlayersContainer.visibility = View.VISIBLE
+            popularPlayersTextView.visibility = View.VISIBLE
+
+            popularPlayersContainer.removeAllViews()
+
+            val inflater = LayoutInflater.from(itemView.context)
+
+            for (popularPlayer in popularPlayers) {
+                val popularPlayerView = inflater.inflate(R.layout.game_or_user, popularPlayersContainer, false)
+                val gameOrUserHolder = GameOrUserHolder(popularPlayerView)
+
+                gameOrUserHolder.bindData(popularPlayer)
+
+                popularPlayersContainer.addView(popularPlayerView)
+            }
+        } else {
+            popularPlayersContainer.visibility = View.GONE
+            popularPlayersTextView.visibility = View.GONE
+        }
+    }
+
+    fun bindReviews(reviews: List<Reviews>) {
+        if (reviews.isNotEmpty()) {
+            reviewsContainer.visibility = View.VISIBLE
+
+            reviewsContainer.removeAllViews()
+
+            val inflater = LayoutInflater.from(itemView.context)
+
+            for (popularPlayer in reviews) {
+                val reviewsView = inflater.inflate(R.layout.show_review, reviewsContainer, false)
+                val reviewHolder = ShowReviewHolder(reviewsView)
+
+                reviewHolder.bindData(popularPlayer)
+
+                val layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                layoutParams.bottomMargin = 10.dpToPx(itemView.context)
+                reviewsView.layoutParams = layoutParams
+
+                reviewsContainer.addView(reviewsView)
+            }
+        } else {
+            popularPlayersContainer.visibility = View.GONE
+        }
     }
 
 }

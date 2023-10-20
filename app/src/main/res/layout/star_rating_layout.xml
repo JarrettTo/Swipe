@@ -11,7 +11,6 @@
         android:layout_height="50dp"
         android:padding="4dp"
         android:src="@drawable/unfilled_star"
-        android:onClick="onStarClick"
         android:contentDescription="Unfilled star 1"/>
 
     <ImageView
@@ -20,7 +19,6 @@
         android:layout_height="50dp"
         android:padding="4dp"
         android:src="@drawable/unfilled_star"
-        android:onClick="onStarClick"
         android:contentDescription="Unfilled star 2"/>
 
     <ImageView
@@ -29,7 +27,6 @@
         android:layout_height="50dp"
         android:padding="4dp"
         android:src="@drawable/unfilled_star"
-        android:onClick="onStarClick"
         android:contentDescription="Unfilled star 3"/>
 
     <ImageView
@@ -38,7 +35,6 @@
         android:layout_height="50dp"
         android:padding="4dp"
         android:src="@drawable/unfilled_star"
-        android:onClick="onStarClick"
         android:contentDescription="Unfilled star 4"/>
 
     <ImageView
@@ -47,6 +43,5 @@
         android:layout_height="50dp"
         android:padding="4dp"
         android:src="@drawable/unfilled_star"
-        android:onClick="onStarClick"
         android:contentDescription="Unfilled star 5"/>
 </LinearLayout>
