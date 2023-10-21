@@ -18,7 +18,7 @@ class LibraryActivity: AppCompatActivity() {
         val gamesList = intent.getBundleExtra("allGames")?.getSerializable("allGames") as? ArrayList<Games>
 
         recyclerView = findViewById(R.id.LibraryRecycler)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
         //adapter = LibraryAdapter(gamesList)
         adapter = gamesList?.let { LibraryAdapter(it) }!!
 
