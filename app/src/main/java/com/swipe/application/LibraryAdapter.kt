@@ -14,7 +14,7 @@ class LibraryAdapter (private val data: ArrayList<Games>): RecyclerView.Adapter<
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.library_row, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.game_or_user, parent, false)
         return LibraryHolder(view, parent.context)
     }
     override fun getItemCount(): Int{
