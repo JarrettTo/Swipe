@@ -5,7 +5,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class GameOrUserHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? = null) : RecyclerView.ViewHolder(itemView) {
     private val icon: ImageView = itemView.findViewById(R.id.icon)
     private val name: TextView = itemView.findViewById(R.id.name)
 
@@ -17,5 +17,11 @@ class GameOrUserHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bindData(game: Games) {
         icon.setImageResource(game.imageId)
         name.text = game.gameName
+
+        clickListener?.let { listener ->
+            itemView.setOnClickListener {
+                listener.invoke()
+            }
+        }
     }
 }

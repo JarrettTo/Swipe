@@ -1,7 +1,9 @@
 package com.swipe.application
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -101,7 +103,14 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
             for (similarTitle in similarTitles) {
                 val similarTitleView = inflater.inflate(R.layout.game_or_user, similarTitlesContainer, false)
-                val gameOrUserHolder = GameOrUserHolder(similarTitleView)
+                val gameOrUserHolder = GameOrUserHolder(similarTitleView) {
+                    val intent = Intent(similarTitleView.context, GameDetailsActivity::class.java)
+                    val gameDetailsBundle = Bundle().apply {
+                        putSerializable("gameDetails", similarTitle)
+                    }
+                    intent.putExtra("gameDetails", gameDetailsBundle)
+                    similarTitleView.context.startActivity(intent)
+                }
 
                 gameOrUserHolder.bindData(similarTitle)
 
