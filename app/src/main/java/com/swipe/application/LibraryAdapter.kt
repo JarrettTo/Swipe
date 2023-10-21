@@ -15,7 +15,7 @@ class LibraryAdapter (private val data: ArrayList<Games>): RecyclerView.Adapter<
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.game_or_user, parent, false)
-        return LibraryHolder(view, parent.context)
+        return LibraryHolder(view, parent.context){}
     }
     override fun getItemCount(): Int{
         return data!!.size
@@ -25,10 +25,4 @@ class LibraryAdapter (private val data: ArrayList<Games>): RecyclerView.Adapter<
         holder.bindData(data!![position])
     }
 
-//    class LibraryGamesHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-//        val gameImage: ImageView = itemView.findViewById(R.id.icon)
-//        val gameTitle: TextView = itemView.findViewById(R.id.name)
-//        val cardView: CardView = itemView.findViewById(R.id.CardView)
-//
-//    }
 }
