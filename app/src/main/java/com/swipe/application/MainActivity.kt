@@ -7,6 +7,7 @@ import android.widget.Spinner
 import android.widget.Button
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +16,6 @@ class MainActivity : AppCompatActivity() {
     private var gameList: ArrayList<Games> = arrayListOf()
     private val groupList: ArrayList<Groups> = DataHelper.initializeGroups()
     private lateinit var swipeStack: SwipeStack
-
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +55,23 @@ class MainActivity : AppCompatActivity() {
                 putSerializable("allGroups", groupList)
             }
             intent.putExtra("allGroups", groupBundle)
+            startActivity(intent)
+        }
+
+        val libraryButton: Button = findViewById(R.id.library_button)
+        libraryButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, LibraryActivity::class.java)
+            val gameDetailsBundle = Bundle().apply {
+                putSerializable("allGames", gameList)
+            }
+            intent.putExtra("allGames", gameDetailsBundle)
+            startActivity(intent)
+        }
+
+
+        val profileButton: Button = findViewById(R.id.user_button)
+        profileButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, Login::class.java)
             startActivity(intent)
         }
 

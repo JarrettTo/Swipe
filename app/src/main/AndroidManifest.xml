@@ -31,5 +31,11 @@
         <activity
             android:name=".SearchActivity">
         </activity>
+        <activity
+            android:name=".Login">
+        </activity>
+        <activity
+            android:name=".LibraryActivity">
+        </activity>
     </application>
 </manifest>
