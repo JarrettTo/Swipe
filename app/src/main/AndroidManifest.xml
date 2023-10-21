@@ -32,7 +32,7 @@
             android:name=".SearchActivity">
         </activity>
         <activity
-            android:name=".Login">
+            android:name=".LoginFragment">
         </activity>
         <activity
             android:name=".LibraryActivity">

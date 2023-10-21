@@ -28,10 +28,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Library_title" />
 
-    <include
-        android:id="@+id/navbar"
-        layout="@layout/bottom_navigation"
 
-        app:layout_constraintStart_toStartOf="parent"
-        />
 </androidx.constraintlayout.widget.ConstraintLayout>
