@@ -153,11 +153,11 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
             val inflater = LayoutInflater.from(itemView.context)
 
-            for (popularPlayer in reviews) {
+            for (review in reviews) {
                 val reviewsView = inflater.inflate(R.layout.show_review, reviewsContainer, false)
                 val reviewHolder = ShowReviewHolder(reviewsView)
 
-                reviewHolder.bindData(popularPlayer)
+                reviewHolder.bindData(review)
 
                 val layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -169,7 +169,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
                 reviewsContainer.addView(reviewsView)
             }
         } else {
-            popularPlayersContainer.visibility = View.GONE
+            reviewsContainer.visibility = View.GONE
         }
     }
 
