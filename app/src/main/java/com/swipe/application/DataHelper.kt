@@ -1,9 +1,122 @@
 package com.swipe.application
-
+import android.util.Log
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 class DataHelper {
     companion object {
-        fun initializeData(): ArrayList<Games> {
 
+
+// ...
+        fun fetchGameInfoSteamAPI(id : Int){
+            Thread {
+                try {
+                    val url = URL("https://store.steampowered.com/api/appdetails?appids=${id}")
+                    val httpURLConnection = url.openConnection() as HttpURLConnection
+                    httpURLConnection.requestMethod = "GET"
+                    httpURLConnection.connect()
+
+                    val responseCode = httpURLConnection.responseCode
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
+                        val jsonResponse = JSONObject(response)
+                        val data = jsonResponse.getJSONObject(id.toString()).getJSONObject("data")
+
+
+
+                        val description = data.getString("detailed_description")
+
+                        val genres = data.getJSONArray("genres")
+                        val genreString = ArrayList<String>()
+                        for (i in 0 until genres.length()) {
+                            val genreJson = genres.getJSONObject(i)
+                            val name = genreJson.getString("description")
+                            Log.d("TEST:","Genre desc ${name}")
+                            genreString.add(name)
+                            // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+
+                        }
+                        val platforms = data.getJSONObject("platforms")
+                        val platformString = ArrayList<String>()
+                        val windows = platforms.getBoolean("windows")
+                        val mac = platforms.getBoolean("mac")
+                        val linux = platforms.getBoolean("linux")
+                        if(windows){
+                            platformString.add("windows")
+                            Log.d("TEST:","Windows Platform")
+                        }
+                        if(mac){
+                            platformString.add("mac")
+                            Log.d("TEST:","Mac Platform")
+                        }
+                        if(linux){
+                            platformString.add("linux")
+                            Log.d("TEST:","Linux Platform")
+                        }
+
+                        val price = data.getJSONObject("price_overview")
+                        val formatted = price.getString("final_formatted")
+                            // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+
+
+                        Log.d("TEST:","Game price ${formatted}")
+
+                            // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+
+
+
+                        // Now 'data' contains all the games fetched from the API
+                        // You might want to update the UI on the main thread, for example:
+
+                    } else {
+                        // Handle error response...
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Handle the exception...
+                }
+            }.start()
+        }
+        fun fetchGamesFromSteamAPI() {
+            Thread {
+                try {
+                    val url = URL("https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
+                    val httpURLConnection = url.openConnection() as HttpURLConnection
+                    httpURLConnection.requestMethod = "GET"
+                    httpURLConnection.connect()
+
+                    val responseCode = httpURLConnection.responseCode
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
+                        val jsonResponse = JSONObject(response)
+                        val gamesArray = jsonResponse.getJSONObject("applist").getJSONArray("apps")
+
+                        for (i in 0 until gamesArray.length()) {
+                            val gameJson = gamesArray.getJSONObject(i)
+                            val name = gameJson.getString("name")
+                            val appId = gameJson.getInt("appid")
+                            Log.d("TEST:","Game Name ${name}")
+                            Log.d("TEST:","Game Id ${appId}")
+                            // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+                            fetchGameInfoSteamAPI(appId)
+                        }
+
+
+                        // Now 'data' contains all the games fetched from the API
+                        // You might want to update the UI on the main thread, for example:
+
+                    } else {
+                        // Handle error response...
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Handle the exception...
+                }
+            }.start()
+        }
+
+        fun initializeData(): ArrayList<Games> {
+            fetchGamesFromSteamAPI()
             val users = ArrayList<Users>()
             users.add(
                 Users(

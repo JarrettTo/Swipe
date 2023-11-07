@@ -11,13 +11,15 @@ import android.widget.Adapter
 import android.widget.FrameLayout
 import java.util.Random
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import androidx.annotation.Nullable
 
 class SwipeStack @JvmOverloads constructor(
     context : Context?,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+
 ) : ViewGroup(context, attrs, defStyleAttr) {
     private var mAdapter: Adapter? = null
     private var mRandom: Random? = null
@@ -34,14 +36,19 @@ class SwipeStack @JvmOverloads constructor(
     private var mIsFirstLayout = true
     var topView : View? = null
         private set
+    private lateinit var saveGame : (Games) -> Unit
     private var mSwipeHelper: SwipeHelper?= null
     private var mDataObserver : DataSetObserver?= null
-    private var mListener: SwipeStackListener?= null
+    private lateinit var mListener: MySwipeStackListener
     private var mProgressListener: SwipeProgressListener ?= null
 
     init {
         readAttributes(attrs)
         initialize()
+    }
+    fun setSaveGame(saveGame : (Games) -> Unit){
+        this@SwipeStack.saveGame = saveGame
+        mListener= MySwipeStackListener(saveGame)
     }
     private fun readAttributes(attributeSet: AttributeSet?){
         val attrs = context.obtainStyledAttributes(attributeSet, R.styleable.SwipeStack)
@@ -221,7 +228,11 @@ class SwipeStack @JvmOverloads constructor(
 
     }
     fun onViewSwipedToRight(){
-        if(mListener != null) mListener!!.onViewSwipedToRight(currentPosition)
+
+        if(mListener != null){
+
+            mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
+        }
         removeTopView()
 
     }
@@ -236,7 +247,7 @@ class SwipeStack @JvmOverloads constructor(
             mAdapter!!.registerDataSetObserver(mDataObserver )
         }
     fun setListener(@Nullable listener: SwipeStackListener?){
-        mListener = listener
+        mListener = (listener as MySwipeStackListener?)!!
     }
     fun setSwipeProgressListener(@Nullable listener: SwipeProgressListener?){
         mProgressListener = listener
@@ -259,15 +270,17 @@ class SwipeStack @JvmOverloads constructor(
     }
 
     interface SwipeStackListener {
-        fun onViewSwipedToLeft(position: Int)
-        fun onViewSwipedToRight(position: Int)
+        fun onViewSwipedToLeft(position: Int){
+
+        }
+        fun onViewSwipedToRight(games: Games)
 
         fun onStackEmpty()
     }
 
     interface SwipeProgressListener{
         fun onSwipeStart(position: Int)
-        fun onSwipeProgress(position: Int, progress: Float)
+        fun onSwipeProgress(position: Int, progress: Float){}
         fun onSwipeEnd(position: Int)
     }
 
@@ -284,5 +297,24 @@ class SwipeStack @JvmOverloads constructor(
         const val DEFAULT_DISABLE_HW_ACCLERATION = true
         private const val KEY_SUPER_STATE="superState"
         private const val KEY_CURRENT_INDEX="currentIndex"
+    }
+    class MySwipeStackListener(val saveGame: (Games) -> Unit) : SwipeStackListener {
+
+        override fun onViewSwipedToLeft(position: Int) {
+            // Implementation of what should happen when a view is swiped left
+
+        }
+
+        override fun onViewSwipedToRight(games: Games) {
+            // Implementation of what should happen when a view is swiped right
+
+
+            saveGame(games)
+        }
+
+        override fun onStackEmpty() {
+            // Implementation of what should happen when the stack is empty
+            println("The stack is empty")
+        }
     }
 }
