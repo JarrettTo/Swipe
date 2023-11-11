@@ -37,7 +37,14 @@ class MainFragment : Fragment() {
         }
 
         if (gameList.isEmpty()) {
-            gameList = DataHelper.initializeData()
+            try{
+                DataHelper.fetchGamesFromSteamAPI()
+                gameList = DataHelper.retrieveGames(100)
+            } catch (e: Exception){
+                e.printStackTrace()
+            }
+
+
         }
 
         val swipeStack: SwipeStack = view.findViewById(R.id.swipeStack)

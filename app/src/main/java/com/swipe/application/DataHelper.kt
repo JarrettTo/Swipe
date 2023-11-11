@@ -3,15 +3,63 @@ import android.util.Log
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+
 class DataHelper {
+
     companion object {
-
-
+        val gameIds : ArrayList<Int> = ArrayList()
+        var gameArray : ArrayList<Games> = ArrayList()
+        var index = 0
 // ...
-        fun fetchGameInfoSteamAPI(id : Int){
+        interface GameInfoCallback {
+            fun onResult(result: Boolean)
+        }
+        fun retrieveGames(start : Int, end : Int) : ArrayList<Games>{
+            var i = start
+            var count = 0
+            gameArray.clear()
+            while (i<gameIds.size && count<end) {
+
+                // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+                fetchGameInfoSteamAPI(gameIds[i], object : GameInfoCallback {
+                    override fun onResult(result: Boolean) {
+                        if(result){
+                            count+=1
+                        }
+
+                    }
+                })
+                i+=1
+            }
+            index = i
+            return gameArray
+        }
+        fun retrieveGames(end : Int) : ArrayList<Games>{
+            var i = index
+            var count = 0
+            gameArray.clear()
+            while (i<gameIds.size && count<end) {
+
+                // Create a Games object. You'll need to fill in the details according to your Games class constructor.
+                fetchGameInfoSteamAPI(gameIds[i], object : GameInfoCallback {
+                    override fun onResult(result: Boolean) {
+                        if(result){
+                            count+=1
+                        }
+
+                    }
+                })
+                i+=1
+            }
+            index = i
+            return gameArray
+        }
+        fun fetchGameInfoSteamAPI(id : Int, callback: GameInfoCallback) {
             Thread {
                 try {
-                    val url = URL("https://store.steampowered.com/api/appdetails?appids=${id}")
+                    val url = URL("https://store.steampowered.com/api/appdetails?appids=${id}&fbclid=IwAR3JLhpqp1zVApoAyYn9ldO5kYA0LVI7B2Ut3tImAyfkZYupUqqzotHJdt4")
                     val httpURLConnection = url.openConnection() as HttpURLConnection
                     httpURLConnection.requestMethod = "GET"
                     httpURLConnection.connect()
@@ -21,9 +69,12 @@ class DataHelper {
                         val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
                         val jsonResponse = JSONObject(response)
                         val data = jsonResponse.getJSONObject(id.toString()).getJSONObject("data")
-
-
-
+                        val name = data.getString("name")
+                        val type = data.getString("type")
+                        if(type!="game"){
+                            callback.onResult(false)
+                            return@Thread
+                        }
                         val description = data.getString("detailed_description")
 
                         val genres = data.getJSONArray("genres")
@@ -62,24 +113,35 @@ class DataHelper {
                         Log.d("TEST:","Game price ${formatted}")
 
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-
-
-
+                        val newGame = Games(id,0, name,description,genreString,platformString,formatted,0,null,null,null)
+                        gameArray.add(newGame)
+                        if(type=="game"){
+                            callback.onResult(true)
+                            return@Thread
+                        }
                         // Now 'data' contains all the games fetched from the API
                         // You might want to update the UI on the main thread, for example:
 
                     } else {
+
+                        callback.onResult(false)
+                        return@Thread
+
                         // Handle error response...
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    callback.onResult(false)
+                    return@Thread
                     // Handle the exception...
                 }
             }.start()
         }
         fun fetchGamesFromSteamAPI() {
+            var count = 0
             Thread {
                 try {
+
                     val url = URL("https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
                     val httpURLConnection = url.openConnection() as HttpURLConnection
                     httpURLConnection.requestMethod = "GET"
@@ -90,16 +152,26 @@ class DataHelper {
                         val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
                         val jsonResponse = JSONObject(response)
                         val gamesArray = jsonResponse.getJSONObject("applist").getJSONArray("apps")
-
-                        for (i in 0 until gamesArray.length()) {
+                        var i = 0
+                        while (i<gamesArray.length()) {
                             val gameJson = gamesArray.getJSONObject(i)
                             val name = gameJson.getString("name")
                             val appId = gameJson.getInt("appid")
-                            Log.d("TEST:","Game Name ${name}")
-                            Log.d("TEST:","Game Id ${appId}")
+
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                            fetchGameInfoSteamAPI(appId)
+                            /*fetchGameInfoSteamAPI(appId,(count>=index), object : GameInfoCallback {
+                                override fun onResult(result: Boolean) {
+                                    if(result){
+                                        count+=1
+                                    }
+
+                                }
+                            })*/
+                            gameIds.add(appId)
+                            i+=1
                         }
+
+
 
 
                         // Now 'data' contains all the games fetched from the API
