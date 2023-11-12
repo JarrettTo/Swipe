@@ -20,8 +20,8 @@ class SwipeStack @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 
-) : ViewGroup(context, attrs, defStyleAttr) {
-    private var mAdapter: Adapter? = null
+) : ViewGroup(context, attrs, defStyleAttr)   {
+    private var mAdapter: SwipeAdapter? = null
     private var mRandom: Random? = null
     var allowedSwipeDirections = 0
     private var mAnimationDuration = 0
@@ -50,6 +50,9 @@ class SwipeStack @JvmOverloads constructor(
         this@SwipeStack.saveGame = saveGame
         mListener= MySwipeStackListener(saveGame)
     }
+
+
+
     private fun readAttributes(attributeSet: AttributeSet?){
         val attrs = context.obtainStyledAttributes(attributeSet, R.styleable.SwipeStack)
         try{
@@ -120,20 +123,28 @@ class SwipeStack @JvmOverloads constructor(
     private fun addNextView() {
         if (mCurrentViewIndex < mAdapter!!.count) {
             val bottomView = mAdapter!!.getView(mCurrentViewIndex, this, this)
-            bottomView.setTag(R.id.new_view, true)
+            if (bottomView != null) {
+                bottomView.setTag(R.id.new_view, true)
+            }
 
             if (!mDisableHwAcceleration) {
-                bottomView.setLayerType(LAYER_TYPE_HARDWARE, null)
+                if (bottomView != null) {
+                    bottomView.setLayerType(LAYER_TYPE_HARDWARE, null)
+                }
             }
 
             if (mViewRotation > 0) {
-                bottomView.rotation = (mRandom!!.nextInt(mViewRotation) - mViewRotation / 2).toFloat()
+                if (bottomView != null) {
+                    bottomView.rotation = (mRandom!!.nextInt(mViewRotation) - mViewRotation / 2).toFloat()
+                }
             }
 
             val widthMeasureSpec = MeasureSpec.makeMeasureSpec(width - (paddingLeft + paddingRight), MeasureSpec.AT_MOST)
             val heightMeasureSpec = MeasureSpec.makeMeasureSpec(height - (paddingTop + paddingBottom), MeasureSpec.AT_MOST)
 
-            bottomView.measure(widthMeasureSpec, heightMeasureSpec)
+            if (bottomView != null) {
+                bottomView.measure(widthMeasureSpec, heightMeasureSpec)
+            }
 
             val params = FrameLayout.LayoutParams(
                 LayoutParams.WRAP_CONTENT,
@@ -162,7 +173,12 @@ class SwipeStack @JvmOverloads constructor(
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 childView.translationZ = x.toFloat()
             }
-            val isNewView = childView.getTag(R.id.new_view) as Boolean
+            var isNewView= false
+            if(childView.getTag(R.id.new_view) != null){
+                isNewView = childView.getTag(R.id.new_view) as Boolean
+            }
+
+
             val scaleFactor = mScaleFactor
             if(x==topViewIndex){
                 mSwipeHelper!!.unregisterObservedView()
@@ -223,7 +239,11 @@ class SwipeStack @JvmOverloads constructor(
     }
 
     fun onViewSwipedToLeft(){
-        if(mListener != null) mListener!!.onViewSwipedToLeft(currentPosition)
+        if(mListener != null){
+            mListener!!.onViewSwipedToLeft(0)
+
+            mAdapter!!.updateList()
+        }
         removeTopView()
 
     }
@@ -231,7 +251,10 @@ class SwipeStack @JvmOverloads constructor(
 
         if(mListener != null){
 
-            mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
+            mListener!!.onViewSwipedToRight(mAdapter?.getItem(0) as Games)
+
+            mAdapter!!.updateList()
+
         }
         removeTopView()
 
@@ -243,9 +266,13 @@ class SwipeStack @JvmOverloads constructor(
         get() = mAdapter
         set(adapter){
             if(mAdapter!=null) mAdapter!!.unregisterDataSetObserver((mDataObserver))
-            mAdapter = adapter
+            mAdapter = adapter as SwipeAdapter?
             mAdapter!!.registerDataSetObserver(mDataObserver )
+            mAdapter!!.onDataChanged = { updateViewsFromAdapter() }
         }
+    fun updateViewsFromAdapter() {
+
+    }
     fun setListener(@Nullable listener: SwipeStackListener?){
         mListener = (listener as MySwipeStackListener?)!!
     }
@@ -318,3 +345,5 @@ class SwipeStack @JvmOverloads constructor(
         }
     }
 }
+
+

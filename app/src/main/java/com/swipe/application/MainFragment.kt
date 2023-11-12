@@ -39,7 +39,7 @@ class MainFragment : Fragment() {
         if (gameList.isEmpty()) {
             try{
                 DataHelper.fetchGamesFromSteamAPI()
-                gameList = DataHelper.retrieveGames(100)
+                gameList = DataHelper.retrieveGames(10)
             } catch (e: Exception){
                 e.printStackTrace()
             }
@@ -63,6 +63,10 @@ class MainFragment : Fragment() {
 
 
         swipeStack.adapter = swipeAdapter
+
+
+
+
         swipeStack.setSaveGame(this::saveGame)
         val spinner: Spinner = view.findViewById(R.id.spinner)
         val choices = arrayOf("Personal Feed", "The Kittens")
@@ -78,5 +82,7 @@ class MainFragment : Fragment() {
         userSession.addLikedGameId(games.gameId.toString())
         Log.d("TEST:","New User Liked ${likedMessageIds}")
     }
+
+
 
 }

@@ -10,20 +10,21 @@ class DataHelper {
 
     companion object {
         val gameIds : ArrayList<Int> = ArrayList()
-        var gameArray : ArrayList<Games> = ArrayList()
+
         var index = 0
 // ...
         interface GameInfoCallback {
             fun onResult(result: Boolean)
         }
         fun retrieveGames(start : Int, end : Int) : ArrayList<Games>{
+            var gameArray : ArrayList<Games> = ArrayList()
             var i = start
             var count = 0
             gameArray.clear()
             while (i<gameIds.size && count<end) {
 
                 // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                fetchGameInfoSteamAPI(gameIds[i], object : GameInfoCallback {
+                fetchGameInfoSteamAPI(gameIds[i],gameArray, object : GameInfoCallback {
                     override fun onResult(result: Boolean) {
                         if(result){
                             count+=1
@@ -37,13 +38,15 @@ class DataHelper {
             return gameArray
         }
         fun retrieveGames(end : Int) : ArrayList<Games>{
+            var gameArray : ArrayList<Games> = ArrayList()
             var i = index
             var count = 0
             gameArray.clear()
+            Log.d("GAME:","I'm being called")
             while (i<gameIds.size && count<end) {
 
                 // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                fetchGameInfoSteamAPI(gameIds[i], object : GameInfoCallback {
+                fetchGameInfoSteamAPI(gameIds[i], gameArray, object : GameInfoCallback {
                     override fun onResult(result: Boolean) {
                         if(result){
                             count+=1
@@ -54,13 +57,15 @@ class DataHelper {
                 i+=1
             }
             index = i
+            Log.d("GAME:","Game Array Len ${gameArray.size}")
             return gameArray
         }
-        fun fetchGameInfoSteamAPI(id : Int, callback: GameInfoCallback) {
-            Thread {
+        fun fetchGameInfoSteamAPI(id : Int, gameArray : ArrayList<Games>, callback: GameInfoCallback) {
+            val thread2 = Thread {
+                var httpURLConnection: HttpURLConnection? = null
                 try {
                     val url = URL("https://store.steampowered.com/api/appdetails?appids=${id}&fbclid=IwAR3JLhpqp1zVApoAyYn9ldO5kYA0LVI7B2Ut3tImAyfkZYupUqqzotHJdt4")
-                    val httpURLConnection = url.openConnection() as HttpURLConnection
+                    httpURLConnection = url.openConnection() as HttpURLConnection
                     httpURLConnection.requestMethod = "GET"
                     httpURLConnection.connect()
 
@@ -75,6 +80,7 @@ class DataHelper {
                             callback.onResult(false)
                             return@Thread
                         }
+                        Log.d("TEST:","Game Type ${type}")
                         val description = data.getString("detailed_description")
 
                         val genres = data.getJSONArray("genres")
@@ -82,7 +88,7 @@ class DataHelper {
                         for (i in 0 until genres.length()) {
                             val genreJson = genres.getJSONObject(i)
                             val name = genreJson.getString("description")
-                            Log.d("TEST:","Genre desc ${name}")
+
                             genreString.add(name)
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
 
@@ -94,15 +100,15 @@ class DataHelper {
                         val linux = platforms.getBoolean("linux")
                         if(windows){
                             platformString.add("windows")
-                            Log.d("TEST:","Windows Platform")
+
                         }
                         if(mac){
                             platformString.add("mac")
-                            Log.d("TEST:","Mac Platform")
+
                         }
                         if(linux){
                             platformString.add("linux")
-                            Log.d("TEST:","Linux Platform")
+
                         }
 
                         val price = data.getJSONObject("price_overview")
@@ -110,7 +116,7 @@ class DataHelper {
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
 
 
-                        Log.d("TEST:","Game price ${formatted}")
+
 
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
                         val newGame = Games(id,0, name,description,genreString,platformString,formatted,0,null,null,null)
@@ -134,16 +140,21 @@ class DataHelper {
                     callback.onResult(false)
                     return@Thread
                     // Handle the exception...
+                } finally {
+                    httpURLConnection?.disconnect() // Ensure the connection is closed in the finally block
                 }
-            }.start()
+            }
+            thread2.start()
+            thread2.join()
         }
         fun fetchGamesFromSteamAPI() {
             var count = 0
-            Thread {
+            val thread1 = Thread {
+                var httpURLConnection: HttpURLConnection? = null
                 try {
 
                     val url = URL("https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
-                    val httpURLConnection = url.openConnection() as HttpURLConnection
+                    httpURLConnection = url.openConnection() as HttpURLConnection
                     httpURLConnection.requestMethod = "GET"
                     httpURLConnection.connect()
 
@@ -170,7 +181,7 @@ class DataHelper {
                             gameIds.add(appId)
                             i+=1
                         }
-
+                        Log.d("GAME:","I'm being called AAAAAAAAAAAAA")
 
 
 
@@ -183,8 +194,12 @@ class DataHelper {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     // Handle the exception...
+                }finally {
+                    httpURLConnection?.disconnect() // Ensure the connection is closed in the finally block
                 }
-            }.start()
+            }
+            thread1.start()
+            thread1.join()
         }
 
         fun initializeData(): ArrayList<Games> {
