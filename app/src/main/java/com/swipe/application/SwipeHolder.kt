@@ -17,6 +17,8 @@ import android.widget.Button
 import android.widget.MediaController
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+
 
 class SwipeHolder(itemView: View) : ViewHolder(itemView) {
     private val image: ImageView = itemView.findViewById(R.id.photoBackground)
@@ -27,17 +29,32 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
     private val seeMoreGenresButton: Button = itemView.findViewById(R.id.seeMoreGenresButton)
 
     fun bindData(game: Games) {
-        image.setImageResource(game.imageId)
+        if(game.imageId!=0){
+            image.setImageResource(game.imageId)
+        } else{
+            Glide.with(itemView.context)
+                .load(game.imageURL)
+                .into(image);
+
+        }
+
         gameName.text = game.gameName
         description.text = game.description
 
         val genreList = game.genre ?: emptyList()
 
-        videoId.setVideoURI(Uri.parse("android.resource://${itemView.context.packageName}/${game.videoId}"))
+
 
         val mediaController = MediaController(itemView.context)
         mediaController.setAnchorView(videoId)
         videoId.setMediaController(mediaController)
+        if(game.videoId !=0){
+            videoId.setVideoURI(Uri.parse("android.resource://${itemView.context.packageName}/${game.videoId}"))
+        }else{
+            Log.d("URL", "THIS IS: ${game.videoUrl}")
+            videoId.setVideoURI(Uri.parse(game.videoUrl))
+
+        }
 
         bindGenres(genreList)
 

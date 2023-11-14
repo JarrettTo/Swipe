@@ -115,11 +115,14 @@ class DataHelper {
                         val formatted = price.getString("final_formatted")
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
 
-
-
-
+                        val headerImage = data.getString("header_image")
+                        val movies = data.getJSONArray("movies")
+                        val videoIndex = movies.getJSONObject(0)
+                        val videoJson = videoIndex.getJSONObject("mp4")
+                        var video = videoJson.getString("480")
+                        video = video.replace("http", "https")
                             // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                        val newGame = Games(id,0, name,description,genreString,platformString,formatted,0,null,null,null)
+                        val newGame = Games(id,0, headerImage,  name,description,genreString,platformString,formatted,0,video,null,null,null)
                         gameArray.add(newGame)
                         if(type=="game"){
                             callback.onResult(true)
@@ -261,12 +264,14 @@ class DataHelper {
                 Games(
                     1,
                     R.drawable.lol,
+                    null,
                     "League of Legends",
                     "League of Legends, commonly referred to as League, is a 2009 multiplayer online battle arena video game developed and published by Riot Games. Inspired by Defense of the Ancients, a custom map for Warcraft III, Riot's founders sought to develop a stand-alone game in the same genre.",
                     arrayListOf("MOBA", "ARPG", "Action Role-Playing Game"),
                     arrayListOf("Windows", "Mac"),
                     "Free",
                     R.raw.video1,
+                    null,
                     null,
                     arrayListOf(users[0], users[1]),
                     arrayListOf(reviews[0], reviews[1])
@@ -277,12 +282,14 @@ class DataHelper {
                 Games(
                     2,
                     R.drawable.mlbb,
+                    null,
                     "Mobile Legends: Bang Bang",
                     "Mobile Legends: Bang Bang is a mobile multiplayer online battle arena game developed and published by Moonton, a subsidiary of ByteDance. Released in 2016, the game grew in popularity; most prominently in Southeast Asia.",
                     arrayListOf("MOBA", "ARPG"),
                     arrayListOf("Windows", "Mac", "Linux"),
                     "Free",
                     R.raw.video2,
+                    null,
                     arrayListOf(data[0]),
                     arrayListOf(users[2]),
                     arrayListOf(reviews[2])
@@ -293,12 +300,14 @@ class DataHelper {
                 Games(
                     3,
                     R.drawable.starcraft,
+                    null,
                     "StarCraft II: Wings of Liberty",
                     "StarCraft II: Wings of Liberty is a science fiction real-time strategy video game developed and published by Blizzard Entertainment. It was released worldwide in July 2010 for Microsoft Windows and Mac OS X. ",
                     arrayListOf("RTS", "Action", "Adventure"),
                     arrayListOf("Windows", "Mac"),
                     "Free",
                     R.raw.video3,
+                    null,
                     arrayListOf(data[0], data[1]),
                     arrayListOf(users[3]),
                     null
@@ -309,12 +318,14 @@ class DataHelper {
                 Games(
                     4,
                     R.drawable.starcraft,
+                    null,
                     "Temp Game 1",
                     "Temp",
                     arrayListOf("RTS", "Action", "Adventure"),
                     arrayListOf("Windows", "Mac"),
                     "Free",
                     R.raw.video3,
+                    null,
                     arrayListOf(data[0], data[1]),
                     arrayListOf(users[3]),
                     null
@@ -325,12 +336,14 @@ class DataHelper {
                 Games(
                     5,
                     R.drawable.starcraft,
+                    null,
                     "Temp Game 2",
                     "Temp",
                     arrayListOf("RTS", "Action", "Adventure"),
                     arrayListOf("Windows", "Mac"),
                     "Free",
                     R.raw.video3,
+                    null,
                     arrayListOf(data[0], data[1]),
                     arrayListOf(users[3]),
                     null
