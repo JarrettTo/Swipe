@@ -13,6 +13,7 @@ import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.firebase.database.FirebaseDatabase
 
 
 class MainFragment : Fragment() {
@@ -20,6 +21,8 @@ class MainFragment : Fragment() {
     private lateinit var userSession: UserSession
     private var gameList: ArrayList<Games> = arrayListOf()
     private lateinit var swipeStack: SwipeStack
+    private val database = FirebaseDatabase.getInstance()
+    private val myRef = database.getReference("test")
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
@@ -81,6 +84,9 @@ class MainFragment : Fragment() {
         Log.d("TEST:","Game Id ${games.gameId}")
         userSession.addLikedGameId(games.gameId.toString())
         Log.d("TEST:","New User Liked ${likedMessageIds}")
+        myRef.child(userSession.userName!!).setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
+            Log.d("TEST:","SUCCESS!")
+        }
     }
 
 

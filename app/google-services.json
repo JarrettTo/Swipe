@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "189518170306",
+    "firebase_url": "https://swipe-56887-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "swipe-56887",
+    "storage_bucket": "swipe-56887.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189518170306:android:152d445a7f74bf95ba135b",
+        "android_client_info": {
+          "package_name": "com.swipe.application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOsNSl8PsihR8AzJDoGq735N22xXoTXiQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
