@@ -60,7 +60,7 @@
         android:textColorHint="#FF5733"
         android:textSize="24sp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/LoginBtn"
         android:layout_width="128dp"
         android:layout_height="66dp"
