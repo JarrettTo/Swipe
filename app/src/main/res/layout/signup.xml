@@ -22,13 +22,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Login"
+        android:text="Sign Up"
         android:textColor="#FDFDFD"
         android:textSize="34sp"
         android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/username_log"
+        android:id="@+id/username_signup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -44,38 +44,54 @@
         android:textSize="24sp" />
 
     <EditText
-        android:id="@+id/password_log"
+        android:id="@+id/password_signup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:background="@drawable/rounded_et_bg"
-        android:backgroundTint="#FFFFFF"
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
         android:padding="10dp"
         android:paddingLeft="13dp"
+        android:textColor="#DDDDDD"
+        android:textColorHint="#DDDDDD"
+        android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/confirm_password_signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/rounded_et_bg"
+        android:ems="10"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:padding="10dp"
+        android:paddingLeft="13dp"
+        android:textColor="#DDDDDD"
         android:textColorHint="#DDDDDD"
         android:textSize="24sp" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/LoginBtn"
+        android:id="@+id/signupBtn"
         android:layout_width="128dp"
         android:layout_height="66dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:background="@drawable/rounded_button"
-        android:text="Login"
+        android:text="Sign Up"
         android:textColor="@color/white" />
 
     <TextView
-        android:id="@+id/signUpText"
+        android:id="@+id/loginText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="88dp"
-        android:text="Don't have an account yet? Sign Up Here!"
+        android:layout_marginTop="16dp"
+        android:text="Already have an account? Log in Here"
         android:textColor="#FF5733"
         android:textSize="16sp"
         android:clickable="true"

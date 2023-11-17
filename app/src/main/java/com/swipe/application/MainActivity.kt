@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
         val profileButton: Button = findViewById(R.id.user_button)
         profileButton.setOnClickListener {
-            replaceFragment(LoginFragment())
+            replaceFragment(UserProfileFragment())
         }
 
 
