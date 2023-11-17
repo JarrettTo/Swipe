@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import android.widget.VideoView
 import android.widget.MediaController
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 
 class GameDetailsHolder(itemView: View, private val context: Context) : RecyclerView.ViewHolder(itemView) {
     private val image: ImageView = itemView.findViewById(R.id.game_photo)
@@ -32,15 +34,26 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
     private val playButton: Button = itemView.findViewById(R.id.playButton)
 
     fun bindData(game: Games) {
-        image.setImageResource(game.imageId)
+        if(game.imageId!=0){
+            image.setImageResource(game.imageId)
+        } else{
+            Glide.with(itemView.context)
+                .load(game.imageURL)
+                .into(image);
+
+        }
+
         gameName.text = game.gameName
         description.text = game.description
         platformList.text = game.platform.toString()
         price.text = game.price
         playButton.setBackgroundColor(ContextCompat.getColor(this.context, R.color.orange))
 
-        videoId.setVideoURI(Uri.parse("android.resource://${itemView.context.packageName}/${game.videoId}"))
-
+        if(game.videoId !=0){
+            videoId.setVideoURI(Uri.parse("android.resource://${itemView.context.packageName}/${game.videoId}"))
+        }else{
+            videoId.setVideoURI(Uri.parse(game.videoUrl))
+        }
         val mediaController = MediaController(itemView.context)
         mediaController.setAnchorView(videoId)
         videoId.setMediaController(mediaController)

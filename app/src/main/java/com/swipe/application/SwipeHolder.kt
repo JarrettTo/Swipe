@@ -78,34 +78,38 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
 
         val maxWidth = calculateMaxWidthForGenres()
 
+        var totalWidth = 0
         for ((index, genre) in genres.withIndex()) {
-            if (index >= 0) {
-                val space = View(itemView.context)
-                space.layoutParams = LinearLayout.LayoutParams(4.dpToPx(itemView.context), 1.dpToPx(itemView.context))
-                genresContainer.addView(space)
-            }
-
-            val oblongShapeView = inflater.inflate(oblongShapeLayout, genresContainer, false)
-            val genreTextView = oblongShapeView.findViewById<TextView>(R.id.genreTextView)
+            val oblongShapeView = inflater.inflate(oblongShapeLayout, null, false)
+            val genreTextView: TextView = oblongShapeView.findViewById(R.id.genreTextView)
             genreTextView.text = genre
-
-            // Measure the width of the oblong shape view
             oblongShapeView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
             val genreWidth = oblongShapeView.measuredWidth
 
-            Log.d("BindGenres", "Adding genre [$index]: $genre, width: $genreWidth")
+            val spaceWidth = if (index > 0) 4.dpToPx(itemView.context) else 0
 
-            genresContainer.addView(oblongShapeView)
-
-            if (genreWidth > maxWidth) {
+            if (totalWidth + genreWidth + spaceWidth > maxWidth) {
+                Log.d("BindGenres", "Would be size: ${totalWidth + genreWidth + spaceWidth}")
                 break
             }
+
+            if (index > 0) {
+                val space = View(itemView.context)
+                space.layoutParams = LinearLayout.LayoutParams(spaceWidth, 1.dpToPx(itemView.context))
+                genresContainer.addView(space)
+                totalWidth += spaceWidth
+            }
+
+            genresContainer.addView(oblongShapeView)
+            totalWidth += genreWidth
+
+            Log.d("BindGenres", "Total width after adding genre [$index]: $genre, width: $totalWidth")
         }
     }
 
 
     private fun calculateMaxWidthForGenres(): Int {
-        return 150
+        return 500
     }
 
     fun Int.dpToPx(context: Context): Int {
