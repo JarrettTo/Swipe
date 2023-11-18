@@ -38,18 +38,9 @@ class MainFragment : Fragment() {
         if(userName !=""){
             usernameTextView.text = userName
         }
-
-        if (gameList.isEmpty()) {
-            try{
-                DataHelper.fetchGamesFromSteamAPI()
-                gameList = DataHelper.retrieveGames(10)
-            } catch (e: Exception){
-                e.printStackTrace()
-            }
-
-
-        }
-
+        Log.d("DEBUG", "Arguments: ${arguments}")
+        gameList = arguments?.getSerializable("gameList") as? ArrayList<Games>  ?: arrayListOf()
+        Log.d("DEBUG", "gameList in Fragment: $gameList")
         val swipeStack: SwipeStack = view.findViewById(R.id.swipeStack)
   
         val swipeAdapter = SwipeAdapter(gameList) { clickedGame ->
@@ -84,9 +75,10 @@ class MainFragment : Fragment() {
         Log.d("TEST:","Game Id ${games.gameId}")
         userSession.addLikedGameId(games.gameId.toString())
         Log.d("TEST:","New User Liked ${likedMessageIds}")
-        myRef.child(userSession.userName!!).setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
+        myRef.child(userSession.userName!!).child("likes").setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
             Log.d("TEST:","SUCCESS!")
         }
+
     }
 
 

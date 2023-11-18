@@ -251,7 +251,7 @@ class SwipeStack @JvmOverloads constructor(
 
         if(mListener != null){
 
-            mListener!!.onViewSwipedToRight(mAdapter?.getItem(0) as Games)
+            mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
 
             mAdapter!!.updateList()
 

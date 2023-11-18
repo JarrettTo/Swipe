@@ -1,9 +1,18 @@
 package com.swipe.application
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.getValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 class DataHelper {
@@ -354,18 +363,34 @@ class DataHelper {
 
             return data;
         }
-        fun initializeGroups() : ArrayList<Groups>{
+
+
+        suspend fun retrieveGroups(groupsId: MutableSet<String>?): ArrayList<Groups> = withContext(Dispatchers.IO){
             val groups = ArrayList<Groups>()
-            groups.add(
-                Groups("The Kittens", R.drawable.lol, "This ggroup is made for the kittens of demacia or smth like dat", 4)
-            )
-            groups.add(
-                Groups("I Miss You", R.drawable.bjergsen, "Relapse hours go crazy cos my love is mine all mine", 2)
-            )
-            groups.add(
-                Groups("SHEESH ESPORTS", R.drawable.starcraft, "This group is the starcraft pro team champion", 6)
-            )
-            return groups
+            val countDownLatch = CountDownLatch(groupsId!!.size)
+            for (id in groupsId) {
+                val groupRef = FirebaseDatabase.getInstance().getReference("test").child("groups").child(id)
+                try {
+                    Log.d("TEST:", "CHECK ")
+                    val snapshot = groupRef.get().await()
+                    if (snapshot.exists()) {
+                        val groupId = snapshot.child("id").getValue(String::class.java) ?: ""
+                        val groupName = snapshot.child("name").getValue(String::class.java) ?: ""
+                        val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
+                        val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
+                        val groupImage = snapshot.child("image").getValue(String::class.java) ?: ""
+                        val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                        val group = Groups(groupId, groupName, groupCount,groupDesc, groupImage, groupLikedGames)
+                        Log.d("WHYY:", "CHECK ${group}")
+                        groups.add(group)
+                    }
+                } catch (e: Exception) {
+                    // Handle exceptions
+                    Log.e("FirebaseError", "Error fetching data", e)
+                }
+            }
+            return@withContext groups
         }
     }
 }

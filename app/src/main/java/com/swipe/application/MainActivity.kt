@@ -3,6 +3,7 @@ package com.swipe.application
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 
 import androidx.appcompat.app.AppCompatActivity
@@ -19,10 +20,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        replaceFragment(MainFragment())
+
+        if (gameList.isEmpty()) {
+            try{
+                DataHelper.fetchGamesFromSteamAPI()
+                gameList = DataHelper.retrieveGames(10)
+            } catch (e: Exception){
+                e.printStackTrace()
+            }
+
+
+        }
+        val bundle = Bundle()
+        bundle.putSerializable("gameList", gameList)
+        Log.d("DEBUG", "LIST: ${bundle}")
+        val mf = MainFragment()
+        mf.arguments=bundle
+        replaceFragment(mf)
+
+
         val homeButton: Button = findViewById(R.id.home_button)
         homeButton.setOnClickListener {
-            replaceFragment(MainFragment())
+            val mf = MainFragment()
+            mf.arguments=bundle
+            replaceFragment(mf)
         }
         val searchButton: Button = findViewById(R.id.search_button)
         searchButton.setOnClickListener {
