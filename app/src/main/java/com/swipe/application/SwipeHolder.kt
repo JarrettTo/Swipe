@@ -26,7 +26,6 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
     private val description: TextView = itemView.findViewById(R.id.description)
     private val videoId: VideoView = itemView.findViewById(R.id.gameplayVideo)
     private val genresContainer: LinearLayout = itemView.findViewById(R.id.genresContainer)
-    private val seeMoreGenresButton: Button = itemView.findViewById(R.id.seeMoreGenresButton)
 
     fun bindData(game: Games) {
         if(game.imageId!=0){
@@ -42,8 +41,6 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
         description.text = game.description
 
         val genreList = game.genre ?: emptyList()
-
-
 
         val mediaController = MediaController(itemView.context)
         mediaController.setAnchorView(videoId)
@@ -61,9 +58,13 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
         val nestedScrollView = itemView.findViewById<NestedScrollView>(R.id.nestedScrollView)
         val darkOverlay = itemView.findViewById<View>(R.id.darkOverlay)
 
+        nestedScrollView.post {
+            nestedScrollView.scrollTo(0, 100)
+        }
+
         nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             val totalScrollRange = nestedScrollView.getChildAt(0).height - nestedScrollView.height
-            val alpha = (scrollY.toFloat() / totalScrollRange).coerceIn(0.0f, 1.0f)
+            val alpha = (scrollY.toFloat() / totalScrollRange).coerceIn(0.5f, 1.0f)
             darkOverlay.alpha = alpha
         }
     }
@@ -77,36 +78,33 @@ class SwipeHolder(itemView: View) : ViewHolder(itemView) {
 
         val maxWidth = calculateMaxWidthForGenres()
 
-        var shouldShowMoreButton = false
-
+        var totalWidth = 0
         for ((index, genre) in genres.withIndex()) {
-            val oblongShapeView = inflater.inflate(oblongShapeLayout, genresContainer, false)
-            val genreTextView = oblongShapeView.findViewById<TextView>(R.id.genreTextView)
+            val oblongShapeView = inflater.inflate(oblongShapeLayout, null, false)
+            val genreTextView: TextView = oblongShapeView.findViewById(R.id.genreTextView)
             genreTextView.text = genre
-
-            // Measure the width of the oblong shape view
             oblongShapeView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
             val genreWidth = oblongShapeView.measuredWidth
 
-            Log.d("BindGenres", "Adding genre [$index]: $genre, width: $genreWidth")
+            val spaceWidth = if (index > 0) 4.dpToPx(itemView.context) else 0
+
+            if (totalWidth + genreWidth + spaceWidth > maxWidth) {
+                Log.d("BindGenres", "Would be size: ${totalWidth + genreWidth + spaceWidth}")
+                break
+            }
 
             if (index > 0) {
-                // Add a transparent spacer view
                 val space = View(itemView.context)
-                space.layoutParams = LinearLayout.LayoutParams(4.dpToPx(itemView.context), 1.dpToPx(itemView.context))
+                space.layoutParams = LinearLayout.LayoutParams(spaceWidth, 1.dpToPx(itemView.context))
                 genresContainer.addView(space)
+                totalWidth += spaceWidth
             }
 
             genresContainer.addView(oblongShapeView)
+            totalWidth += genreWidth
 
-            if (genreWidth > maxWidth) {
-                shouldShowMoreButton = true
-                break
-            }
+            Log.d("BindGenres", "Total width after adding genre [$index]: $genre, width: $totalWidth")
         }
-
-        // Show "..." button if there are more genres
-        seeMoreGenresButton.visibility = if (shouldShowMoreButton) View.VISIBLE else View.GONE
     }
 
 

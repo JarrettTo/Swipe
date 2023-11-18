@@ -60,13 +60,8 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
         holder.bindData(currentItem)
 
         val seeMoreButton = convertView.findViewById<Button>(R.id.seeMoreButton)
-        val seeMoreGenresButton = convertView.findViewById<Button>(R.id.seeMoreGenresButton)
 
         seeMoreButton?.setOnClickListener {
-            onItemClick(currentItem)
-        }
-
-        seeMoreGenresButton?.setOnClickListener {
             onItemClick(currentItem)
         }
 
