@@ -45,6 +45,7 @@ dependencies {
     // Add the dependency for the Realtime Database library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-database")
+    implementation 'com.google.firebase:firebase-database-ktx:20.3.0'
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
     implementation 'androidx.appcompat:appcompat:1.6.1'

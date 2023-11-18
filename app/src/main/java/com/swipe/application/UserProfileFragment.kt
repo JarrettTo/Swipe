@@ -57,6 +57,9 @@ class UserProfileFragment : Fragment() {
         bioOriginal = bioText.text.toString().trim()
 
         uploadPhotoButton.setOnClickListener {
+            val isCancelMode = uploadPhotoButton.text.toString() == "Cancel"
+
+            uploadPhotoButton.isSelected = !isCancelMode
             if (uploadPhotoButton.text == "Cancel") {
                 revertToOriginalPhoto(userPhoto, uploadPhotoButton)
             } else {
@@ -123,14 +126,12 @@ class UserProfileFragment : Fragment() {
             val userPhoto: ImageView = view?.findViewById(R.id.icon) ?: return
             userPhoto.setImageURI(selectedImageUri)
             uploadPhotoButton.text = "Cancel"
-            uploadPhotoButton.setBackgroundColor(Color.RED)
         }
     }
 
     private fun revertToOriginalPhoto(userPhoto: ImageView, uploadPhotoButton: Button) {
         userPhoto.setImageDrawable(originalDrawable)
         uploadPhotoButton.text = "Upload Photo"
-        uploadPhotoButton.setBackgroundColor(Color.parseColor("#F17300"))
         selectedImageUri = null
     }
 
