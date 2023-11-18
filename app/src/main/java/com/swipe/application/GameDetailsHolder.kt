@@ -118,7 +118,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
                 val similarTitleView = inflater.inflate(R.layout.game_or_user, similarTitlesContainer, false)
                 val gameOrUserHolder = GameOrUserHolder(similarTitleView)
 
-                gameOrUserHolder.bindData(similarTitle)
+                gameOrUserHolder.bindData(similarTitle, true)
 
                 similarTitlesContainer.addView(similarTitleView)
             }

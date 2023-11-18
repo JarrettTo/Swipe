@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class GameOrUserAdapter(private val items: List<Any>, private val clickListener: (() -> Unit)? = null) : RecyclerView.Adapter<GameOrUserHolder>() {
-
+    var isNotDeleteMode = false
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameOrUserHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.game_or_user, parent, false)
         return GameOrUserHolder(view, clickListener)
@@ -16,7 +16,7 @@ class GameOrUserAdapter(private val items: List<Any>, private val clickListener:
     override fun onBindViewHolder(holder: GameOrUserHolder, position: Int) {
         val item = items[position]
         when (item) {
-            is Games -> holder.bindData(item)
+            is Games -> holder.bindData(item, isNotDeleteMode)
             is Users -> holder.bindData(item)
         }
 

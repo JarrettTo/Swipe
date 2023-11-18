@@ -34,5 +34,8 @@
         <activity
             android:name=".PlaylistDetailsActivity">
         </activity>
+        <activity
+            android:name=".AddGamesToPlaylist">
+        </activity>
     </application>
 </manifest>

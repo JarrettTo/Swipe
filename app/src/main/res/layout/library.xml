@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Library_title"
         >
@@ -38,7 +38,7 @@
             android:background="@drawable/rounded_button"
             android:layout_marginStart="28dp"
             android:text="  Create Playlist  "
-            android:textColor="@color/background" />
+            android:textColor="@color/white" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/deleteButton"
@@ -47,7 +47,7 @@
             android:background="@drawable/rounded_button_w_selector"
             android:layout_marginStart="10dp"
             android:text="  Remove Playlist  "
-            android:textColor="@color/background" />
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

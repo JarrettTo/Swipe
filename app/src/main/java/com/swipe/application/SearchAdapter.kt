@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class SearchAdapter(
-    private var gamesList: List<String>,
+    private var gamesList: List<String?>,
     private val itemClickListener: (String) -> Unit
 ) : RecyclerView.Adapter<SearchAdapter.SearchHolder>() {
 
@@ -26,7 +26,9 @@ class SearchAdapter(
 
         // Set click listener
         holder.itemView.setOnClickListener {
-            itemClickListener.invoke(gameName)
+            if (gameName != null) {
+                itemClickListener.invoke(gameName)
+            }
         }
     }
 
@@ -34,7 +36,7 @@ class SearchAdapter(
         return gamesList.size
     }
 
-    fun filterList(filteredList: List<String>) {
+    fun filterList(filteredList: List<String?>) {
         gamesList = filteredList
         notifyDataSetChanged()
     }

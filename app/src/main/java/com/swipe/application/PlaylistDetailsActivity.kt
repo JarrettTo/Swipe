@@ -53,25 +53,30 @@ class PlaylistDetailsActivity : AppCompatActivity() {
         username.text = playlistDetails.username
         number.text = "${playlistDetails.games?.size ?: 0} games"
 
+        recyclerView = findViewById(R.id.PlaylistRecycler)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        val gameOrUserAdapter = GameOrUserAdapter(playlistDetails.games ?: emptyList())
+        recyclerView.adapter = gameOrUserAdapter
+        gameOrUserAdapter.isNotDeleteMode = true
+
         backButton.setOnClickListener {
             onBackPressed()
         }
 
         addButton.setOnClickListener {
-
+            val intent = Intent(this, AddGamesToPlaylist::class.java)
+            startActivity(intent)
         }
 
         delButton.setOnClickListener {
-
+            delButton.isSelected = !delButton.isSelected
+            gameOrUserAdapter.isNotDeleteMode = !delButton.isSelected
+            gameOrUserAdapter.notifyDataSetChanged()
         }
 
         uploadPhotoButton.setOnClickListener {
             openGalleryForImage()
         }
-
-        recyclerView = findViewById(R.id.PlaylistRecycler)
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
-        recyclerView.adapter = GameOrUserAdapter(playlistDetails.games ?: emptyList())
     }
 
     private fun openGalleryForImage() {
