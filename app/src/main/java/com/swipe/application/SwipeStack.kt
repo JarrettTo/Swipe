@@ -245,6 +245,7 @@ class SwipeStack @JvmOverloads constructor(
             mAdapter!!.updateList()
         }
         removeTopView()
+        mAdapter!!.removeItem(currentPosition)
 
     }
     fun onViewSwipedToRight(){
@@ -257,10 +258,11 @@ class SwipeStack @JvmOverloads constructor(
 
         }
         removeTopView()
+        mAdapter!!.removeItem(currentPosition)
 
     }
     val currentPosition: Int
-        get() = mCurrentViewIndex - childCount
+        get() = 0
 
     var adapter: Adapter?
         get() = mAdapter
