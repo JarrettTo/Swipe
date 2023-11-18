@@ -116,14 +116,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
             for (similarTitle in similarTitles) {
                 val similarTitleView = inflater.inflate(R.layout.game_or_user, similarTitlesContainer, false)
-                val gameOrUserHolder = GameOrUserHolder(similarTitleView) {
-                    val intent = Intent(similarTitleView.context, GameDetailsActivity::class.java)
-                    val gameDetailsBundle = Bundle().apply {
-                        putSerializable("gameDetails", similarTitle)
-                    }
-                    intent.putExtra("gameDetails", gameDetailsBundle)
-                    similarTitleView.context.startActivity(intent)
-                }
+                val gameOrUserHolder = GameOrUserHolder(similarTitleView)
 
                 gameOrUserHolder.bindData(similarTitle)
 

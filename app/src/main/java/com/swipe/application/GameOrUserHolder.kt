@@ -1,5 +1,6 @@
 package com.swipe.application
 
+import android.content.Intent
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -20,7 +21,10 @@ class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? 
 
         clickListener?.let { listener ->
             itemView.setOnClickListener {
-                listener.invoke()
+                val intent = Intent(itemView.context, GameDetailsActivity::class.java).apply {
+                    putExtra("gameDetails", game)
+                }
+                itemView.context.startActivity(intent)
             }
         }
     }

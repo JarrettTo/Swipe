@@ -16,10 +16,39 @@
         android:text="Library"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
-        android:textSize="24sp"
+        android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Library" />
+
+    <LinearLayout
+        android:id="@+id/name_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Library_title"
+        >
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/createButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/rounded_button"
+            android:layout_marginStart="28dp"
+            android:text="  Create Playlist  "
+            android:textColor="@color/background" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/rounded_button_w_selector"
+            android:layout_marginStart="10dp"
+            android:text="  Remove Playlist  "
+            android:textColor="@color/background" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/LibraryRecycler"

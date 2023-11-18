@@ -1,20 +1,14 @@
 package com.swipe.application
 
-import android.text.Layout
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.imageview.ShapeableImageView
 
-class LibraryAdapter (private val data: ArrayList<Games>): RecyclerView.Adapter<LibraryHolder>(){
-
+class LibraryAdapter (private val data: ArrayList<Playlist>): RecyclerView.Adapter<LibraryHolder>(){
+    var isNotDeleteMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.game_or_user, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.show_playlist, parent, false)
         return LibraryHolder(view, parent.context){}
     }
     override fun getItemCount(): Int{
@@ -22,7 +16,7 @@ class LibraryAdapter (private val data: ArrayList<Games>): RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: LibraryHolder, position: Int) {
-        holder.bindData(data!![position])
+        holder.bindData(data[position], isNotDeleteMode)
     }
 
 }

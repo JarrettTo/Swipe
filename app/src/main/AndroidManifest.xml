@@ -31,5 +31,8 @@
         <activity
             android:name=".SignUpActivity">
         </activity>
+        <activity
+            android:name=".PlaylistDetailsActivity">
+        </activity>
     </application>
 </manifest>

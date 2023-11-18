@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#13122B">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/back_arrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="2dp"
+            android:background="@drawable/rounded_icon_bg">>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp" >
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/games" />
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/upload_photo_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="  Upload Photo  "
+        android:background="@drawable/rounded_button"
+        android:textColor="#FFFFFF" />
+
+        <EditText
+            android:id="@+id/playlist_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:text="TextView"
+            android:textColor="#FDFDFD"
+            android:textStyle="bold"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:id="@+id/name_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/username_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="username"
+                android:textColorHint="@color/white"
+                android:layout_marginRight="10dp"
+                android:textColor="#FDFDFD"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/num_games"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center_horizontal"
+                android:text="numberofgames"
+                android:textColorHint="@color/white"
+                android:textColor="#FDFDFD"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/game_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Games"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="italic"
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/add_button"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:text="+"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/rounded_button"
+                android:textColor="@color/background" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/del_button"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:text="-"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/rounded_button"
+                android:textColor="@color/background" />
+
+        </LinearLayout>
+
+        <com.swipe.application.NonScrollableRecyclerView
+            android:id="@+id/PlaylistRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" />
+
+    </LinearLayout>
+</ScrollView>
