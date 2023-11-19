@@ -2,6 +2,7 @@ package com.swipe.application
 
 import android.app.AlertDialog
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class LibraryFragment : Fragment() {
+    private var selectedImageUri: Uri? = null
     private lateinit var groupView: RecyclerView
     private lateinit var adapter: LibraryAdapter
     private val playlistList: ArrayList<Playlist> = DataHelper.initializePlaylist()

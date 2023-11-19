@@ -28,4 +28,8 @@ class GroupAdapter(private var data: ArrayList<Groups>?) : RecyclerView.Adapter<
         notifyDataSetChanged() // This will refresh the RecyclerView with new data
     }
 
+    fun addGroup(newGroup: Groups) {
+        data?.add(newGroup)
+    }
+
 }

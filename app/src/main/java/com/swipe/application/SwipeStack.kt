@@ -14,6 +14,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import androidx.annotation.Nullable
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 class SwipeStack @JvmOverloads constructor(
     context : Context?,
@@ -245,6 +249,7 @@ class SwipeStack @JvmOverloads constructor(
             mAdapter!!.updateList()
         }
         removeTopView()
+        mCurrentViewIndex--
         mAdapter!!.removeItem(currentPosition)
 
     }
@@ -258,11 +263,14 @@ class SwipeStack @JvmOverloads constructor(
 
         }
         removeTopView()
+        mCurrentViewIndex--
         mAdapter!!.removeItem(currentPosition)
 
     }
+
+
     val currentPosition: Int
-        get() = 0
+        get() = mCurrentViewIndex - childCount
 
     var adapter: Adapter?
         get() = mAdapter

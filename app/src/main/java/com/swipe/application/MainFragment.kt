@@ -13,6 +13,7 @@ import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.FirebaseDatabase
 
 
@@ -75,7 +76,7 @@ class MainFragment : Fragment() {
         Log.d("TEST:","Game Id ${games.gameId}")
         userSession.addLikedGameId(games.gameId.toString())
         Log.d("TEST:","New User Liked ${likedMessageIds}")
-        myRef.child(userSession.userName!!).child("likes").setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
+        myRef.child("users").child(userSession.userName!!).child("likes").setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
             Log.d("TEST:","SUCCESS!")
         }
 

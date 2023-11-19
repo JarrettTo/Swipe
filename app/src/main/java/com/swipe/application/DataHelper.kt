@@ -1,4 +1,5 @@
 package com.swipe.application
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -10,6 +11,9 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
@@ -25,51 +29,36 @@ class DataHelper {
         interface GameInfoCallback {
             fun onResult(result: Boolean)
         }
-        fun retrieveGames(start : Int, end : Int) : ArrayList<Games>{
-            var gameArray : ArrayList<Games> = ArrayList()
-            var i = start
-            var count = 0
-            gameArray.clear()
-            while (i<gameIds.size && count<end) {
 
-                // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                fetchGameInfoSteamAPI(gameIds[i],gameArray, object : GameInfoCallback {
-                    override fun onResult(result: Boolean) {
-                        if(result){
-                            count+=1
-                        }
-
-                    }
-                })
-                i+=1
-            }
-            index = i
-            return gameArray
-        }
-        fun retrieveGames(end : Int) : ArrayList<Games>{
-            var gameArray : ArrayList<Games> = ArrayList()
+        fun retrieveGames(end: Int): List<Games> {
+            val gameArray: MutableList<Games> = mutableListOf() // Use a mutable list
             var i = index
             var count = 0
-            gameArray.clear()
-            Log.d("GAME:","I'm being called")
-            while (i<gameIds.size && count<end) {
 
-                // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                fetchGameInfoSteamAPI(gameIds[i], gameArray, object : GameInfoCallback {
+            // Create a coroutine scope to manage the coroutines
+             // coroutineScope is used to wait for all launched child coroutines
+            while (i < gameIds.size && count < end) {
+                val gameId = gameIds[i]
+
+                // Launch a coroutine for each game fetch
+
+                fetchGameInfoSteamAPI(gameId, gameArray, object : GameInfoCallback {
                     override fun onResult(result: Boolean) {
-                        if(result){
-                            count+=1
+                        if (result) {
+                            count += 1
                         }
-
                     }
                 })
-                i+=1
+
+                i += 1
             }
-            index = i
-            Log.d("GAME:","Game Array Len ${gameArray.size}")
+
+
+            index = i // Update index after all coroutines are complete
+            Log.d("GAME:", "Game Array Len ${gameArray.size}")
             return gameArray
         }
-        fun fetchGameInfoSteamAPI(id : Int, gameArray : ArrayList<Games>, callback: GameInfoCallback) {
+        fun fetchGameInfoSteamAPI(id : Int, gameArray : MutableList<Games>, callback: GameInfoCallback)   {
             val thread2 = Thread {
                 var httpURLConnection: HttpURLConnection? = null
                 try {
@@ -158,6 +147,7 @@ class DataHelper {
             }
             thread2.start()
             thread2.join()
+
         }
         fun fetchGamesFromSteamAPI() {
             var count = 0
@@ -393,6 +383,104 @@ class DataHelper {
             return@withContext groups
         }
 
+        suspend fun retrieveGroup(id: String): Groups? = withContext(Dispatchers.IO){
+
+            val groupRef =   FirebaseDatabase.getInstance().getReference("test").child("groups").child(id)
+            try {
+                Log.d("TEST:", "CHECK ")
+                val snapshot = groupRef.get().await()
+                if (snapshot.exists()) {
+                    val groupId = snapshot.child("id").getValue(String::class.java) ?: ""
+                    val groupName = snapshot.child("name").getValue(String::class.java) ?: ""
+                    val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
+                    val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
+                    val groupImage = snapshot.child("image").getValue(String::class.java) ?: ""
+                    val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                    val group = Groups(groupId, groupName, groupCount,groupDesc, groupImage, groupLikedGames)
+                    return@withContext group
+                }
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("FirebaseError", "Error fetching data", e)
+            }
+
+            return@withContext null
+        }
+        suspend fun insertGroup(name: String, desc: String, uri: String, user: String): String = withContext(Dispatchers.IO){
+
+            val dbRef = FirebaseDatabase.getInstance().getReference("test")
+            val groupRef = dbRef.child("groups")
+            val userRef = dbRef.child("users")
+            val newUser= groupRef.push()
+            try {
+                Log.d("TEST:", "CHECK ")
+                newUser.child("name").setValue(name)
+                newUser.child("desc").setValue(desc)
+                newUser.child("uri").setValue("wow")
+                newUser.child("count").setValue(1)
+                newUser.child("likes")
+                userRef.child(user).child("groups").orderByKey().limitToLast(1).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.hasChildren()) {
+                            // Get the last key and increment it
+                            val lastKey = snapshot.children.last().key?.toIntOrNull() ?: 0
+                            val newKey = lastKey + 1
+
+                            // Use newKey to write the new group data
+                            userRef.child(user).child("groups").child(newKey.toString()).setValue(newUser.key.toString())
+                        } else {
+                            // If there are no children, start with key 1
+                            userRef.child(user).child("groups").child("1").setValue(newUser.key.toString())
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        // Handle error
+                    }
+                })
+                return@withContext newUser.key.toString()
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("FirebaseError", "Error fetching data", e)
+            }
+
+            return@withContext "error"
+        }
+        suspend fun joinGroup(code: String, user: String): Boolean= withContext(Dispatchers.IO){
+
+            val dbRef = FirebaseDatabase.getInstance().getReference("test")
+            val userRef = dbRef.child("users")
+            try {
+
+                userRef.child(user).child("groups").orderByKey().limitToLast(1).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.hasChildren()) {
+                            // Get the last key and increment it
+                            val lastKey = snapshot.children.last().key?.toIntOrNull() ?: 0
+                            val newKey = lastKey + 1
+
+                            // Use newKey to write the new group data
+                            userRef.child(newKey.toString()).setValue(code)
+                        } else {
+                            // If there are no children, start with key 1
+                            userRef.child("1").setValue(code)
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        // Handle error
+
+                    }
+                })
+                return@withContext true
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("FirebaseError", "Error fetching data", e)
+            }
+
+            return@withContext false
+        }
         fun initializePlaylist() : ArrayList<Playlist>{
             val data = ArrayList<Games>()
             data.add(

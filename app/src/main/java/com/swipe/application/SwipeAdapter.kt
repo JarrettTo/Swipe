@@ -6,6 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick: (Games) -> Unit): BaseAdapter() {
     var swipeCount = 0
@@ -21,20 +26,29 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
         mData.removeAt(p0)
     }
     fun updateList() {
-       //remove item at the top of the stack
+        //remove item at the top of the stack
         swipeCount+=1
-        if(swipeCount > 7){
-            Log.d("MDATA", "Current size:${mData.size}")
-            mData.addAll(DataHelper.retrieveGames(15))
+        if(mData.size < 7){
 
-            val gameNames: List<String?> = mData.map { it.gameName }
-            Log.d("MDATA", "New MDATA Content:${gameNames}")
-            swipeCount=0
-            notifyDataSetChanged()
+            try {
+                val games = DataHelper.retrieveGames(10)
+                // Now update your adapter's data set with these games
+                // Make sure to update the adapter on the main thread if needed
+
+                    // Update your adapter's data and refresh the UI
+                mData.addAll(games)
+                Log.d("REFRESH","NEW GROUPS: ${mData}")
+
+            } catch (e: Exception) {
+                // Handle any errors here
+            }
+
         }
 
 
+
     }
+
 
 
     override fun notifyDataSetChanged() {

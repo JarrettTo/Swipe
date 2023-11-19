@@ -28,11 +28,14 @@ class UserSession(context: Context) {
         currentIds.add(gameId)
         likedGameIds = currentIds // This will trigger the 'set' method and save the changes
     }
-    fun addGroupId(groupId: String) {
-
+    fun addGroupId(groupId: String) : Boolean {
+        if(groups?.contains(groupId) == true){
+            return false
+        }
         val currentIds = groups?.toMutableSet() ?: mutableSetOf()
         currentIds.add(groupId)
         groups = currentIds // This will trigger the 'set' method and save the changes
+        return true
     }
     fun removeLikedGameId(gameId: String) {
         val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
