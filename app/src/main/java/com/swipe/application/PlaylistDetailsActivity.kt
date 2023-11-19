@@ -41,13 +41,7 @@ class PlaylistDetailsActivity : AppCompatActivity() {
         val delButton: Button = findViewById(R.id.del_button)
         val backButton: Button = findViewById(R.id.backButton)
 
-        if (playlistDetails.imageId != 0) {
-            playlistDetails.imageId?.let { image.setImageResource(it) }
-        } else {
-            Glide.with(this)  // Use 'this' for context
-                .load(playlistDetails.imageURL)
-                .into(image)
-        }
+        playlistDetails.imageId?.let { image.setImageResource(it) }
 
         playlistName.text = playlistDetails.playlistName
         username.text = playlistDetails.username

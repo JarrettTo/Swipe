@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 
 fun Int.dpToPx(context: Context): Int {
     return TypedValue.applyDimension(
@@ -21,7 +24,7 @@ fun Int.dpToPx(context: Context): Int {
     ).toInt()
 }
 
-class LibraryHolder(itemView: View, private val context: Context, private val clickListener: (() -> Unit)? = null) :
+class LibraryHolder(itemView: View, private val context: Context, private val listener: PlaylistActionListener, private val clickListener: (() -> Unit)? = null) :
     RecyclerView.ViewHolder(itemView) {
     private val playlistLogo: ImageView = itemView.findViewById(R.id.icon)
     private val playlistName: TextView = itemView.findViewById(R.id.playlist_name)
@@ -39,6 +42,7 @@ class LibraryHolder(itemView: View, private val context: Context, private val cl
         
         deleteButton.setOnClickListener {
             showDeleteConfirmationDialog(playlistName.text.toString().trim())
+            listener.onDeletePlaylistAction(playlistName.text.toString().trim())
         }
 
         val marginTop = 20.dpToPx(context)
@@ -84,5 +88,4 @@ class LibraryHolder(itemView: View, private val context: Context, private val cl
 
         alertDialog.show()
     }
-
 }

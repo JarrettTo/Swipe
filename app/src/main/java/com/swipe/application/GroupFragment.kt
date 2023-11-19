@@ -23,6 +23,7 @@ class GroupFragment : Fragment() {
     private lateinit var userSession: UserSession
     private lateinit var groupList: ArrayList<Groups>
     private lateinit var adapter: GroupAdapter
+    private val groupDataHelper = GroupDataHelper()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,7 +36,7 @@ class GroupFragment : Fragment() {
         groupView.layoutManager = layoutManager
         Log.d("GROUPIDS:", "CHECK ${groups}")
         lifecycleScope.launch {
-            val groupList = DataHelper.retrieveGroups(groups)
+            val groupList = groupDataHelper.retrieveGroups(groups)
             Log.d("GROUP:", "CHECK ${groupList}")
             adapter = GroupAdapter(groupList)
             groupView.adapter = adapter
@@ -135,7 +136,7 @@ class GroupFragment : Fragment() {
     private fun createGroup(name:String, desc:String, uri: String){
 
         lifecycleScope.launch {
-            var groupCode = DataHelper.insertGroup(name, desc, uri, userSession.userName!!)
+            var groupCode = groupDataHelper.insertGroup(name, desc, uri, userSession.userName!!)
             Log.d("CODE", "CODE: ${groupCode}")
             userSession.addGroupId(groupCode)
             val newGroup = Groups(groupCode, name, 1, desc, uri,arrayListOf())
@@ -154,7 +155,7 @@ class GroupFragment : Fragment() {
 
         lifecycleScope.launch {
 
-            val group = DataHelper.retrieveGroup(code)
+            val group = groupDataHelper.retrieveGroup(code)
             Log.d("group", "group: ${group}")
             if(group != null){
                 if(!userSession.addGroupId(code)){
@@ -162,7 +163,7 @@ class GroupFragment : Fragment() {
                     callback.onResult(false)
                 }
                 else{
-                    DataHelper.joinGroup(code, userSession.userName!!)
+                    groupDataHelper.joinGroup(code, userSession.userName!!)
                     adapter.addGroup(group)
                     adapter?.notifyDataSetChanged()
                     callback.onResult(true)

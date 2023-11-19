@@ -19,15 +19,26 @@ class UserSession(context: Context) {
         get() = prefs.getStringSet("liked_game_ids", mutableSetOf())
         set(value) = prefs.edit().putStringSet("liked_game_ids", value).apply()
     var groups: MutableSet<String>?
-
         get() = prefs.getStringSet("groups", sample)
         set(value) = prefs.edit().putStringSet("groups", value).apply()
+
+    var playlist: MutableSet<String>?
+        get() = prefs.getStringSet("groups", mutableSetOf())
+        set(value) = prefs.edit().putStringSet("groups", value).apply()
+
     fun addLikedGameId(gameId: String) {
 
         val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
         currentIds.add(gameId)
         likedGameIds = currentIds // This will trigger the 'set' method and save the changes
     }
+
+    fun removeLikedGameId(gameId: String) {
+        val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
+        currentIds.remove(gameId)
+        likedGameIds = currentIds // This will trigger the 'set' method and save the changes
+    }
+
     fun addGroupId(groupId: String) : Boolean {
         if(groups?.contains(groupId) == true){
             return false
@@ -37,10 +48,21 @@ class UserSession(context: Context) {
         groups = currentIds // This will trigger the 'set' method and save the changes
         return true
     }
-    fun removeLikedGameId(gameId: String) {
-        val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
-        currentIds.remove(gameId)
-        likedGameIds = currentIds // This will trigger the 'set' method and save the changes
+
+    fun addPlaylistId(playlistId: String) : Boolean {
+        if(playlist?.contains(playlistId) == true){
+            return false
+        }
+        val currentIds = groups?.toMutableSet() ?: mutableSetOf()
+        currentIds.add(playlistId)
+        playlist = currentIds
+        return true
+    }
+
+    fun removePlaylistId(playlistId: String) {
+        val currentIds = playlist?.toMutableSet() ?: mutableSetOf()
+        currentIds.remove(playlistId)
+        playlist = currentIds
     }
 
 }
