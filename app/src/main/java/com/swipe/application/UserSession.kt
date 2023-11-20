@@ -53,7 +53,7 @@ class UserSession(context: Context) {
         if(playlist?.contains(playlistId) == true){
             return false
         }
-        val currentIds = groups?.toMutableSet() ?: mutableSetOf()
+        val currentIds = playlist?.toMutableSet() ?: mutableSetOf()
         currentIds.add(playlistId)
         playlist = currentIds
         return true

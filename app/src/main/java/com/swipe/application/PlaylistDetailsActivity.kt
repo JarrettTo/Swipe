@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -135,9 +136,14 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         }
 
         saveButton.setOnClickListener {
-            PlaylistNameOriginal = playlistName.text.toString().trim()
-            lifecycleScope.launch {
-                playlistDataHelper.updatePlaylistName(playlistDetails.playlistId, PlaylistNameOriginal)
+            val newName = playlistName.text.toString().trim()
+            if (newName != ""){
+                PlaylistNameOriginal = newName
+                lifecycleScope.launch {
+                    playlistDataHelper.updatePlaylistName(playlistDetails.playlistId, PlaylistNameOriginal)
+                }
+            } else {
+                showCustomToast("Playlist Name should not be empty")
             }
             saveContainer.visibility = View.INVISIBLE
         }
@@ -190,6 +196,19 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         }
     }
 
+    private fun showCustomToast(message: String) {
+        val inflater = layoutInflater
+        val layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.toast_container))
+
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with (Toast(applicationContext)) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
+        }
+    }
 }
 class NonScrollableRecyclerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0

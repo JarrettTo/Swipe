@@ -12,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -107,9 +109,12 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
 
         createButton.setOnClickListener {
             val playlistName = playlistNameEditText.text.toString().trim()
-
-            createPlaylist(playlistName)
-            alertDialog.dismiss()
+            if (playlistName != "") {
+                createPlaylist(playlistName)
+                alertDialog.dismiss()
+            } else {
+                showCustomToast("Playlist Name should not be empty")
+            }
         }
 
         alertDialog.show()
@@ -149,6 +154,20 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
                 Log.d("del playlist", "Not found.")
             }
 
+        }
+    }
+
+    private fun showCustomToast(message: String) {
+        val inflater = layoutInflater
+        val layout = inflater.inflate(R.layout.custom_toast, requireActivity().findViewById(R.id.toast_container))
+
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with (Toast(requireContext())) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
         }
     }
 }

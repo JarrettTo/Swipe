@@ -81,11 +81,11 @@ class UserProfileFragment : Fragment() {
                 }
                 if (count != 0 && count < 3) {
                     getActivity()?.let {
-                        Toast.makeText(it, "Please fill up old, new, and confirm password fields", Toast.LENGTH_LONG).show()
+                        showCustomToast("Please fill up old, new, and confirm password fields")
                     }
                 } else if (newPassword.text.toString() != confirmPassword.text.toString()) {
                     getActivity()?.let {
-                        Toast.makeText(it, "New and confirm password do not match", Toast.LENGTH_LONG).show()
+                        showCustomToast("New and confirm password do not match")
                     }
                 }
 
@@ -93,7 +93,7 @@ class UserProfileFragment : Fragment() {
 
             } else {
                 getActivity()?.let {
-                    Toast.makeText(it, "There are no unsaved changes", Toast.LENGTH_LONG).show()
+                    showCustomToast("There are no unsaved changes")
                 }
             }
         }
@@ -144,4 +144,19 @@ class UserProfileFragment : Fragment() {
 
         return isPhotoChanged || isFirstNameChanged || isLastNameChanged || isBioChanged || isPasswordNotEmpty
     }
+
+    private fun showCustomToast(message: String) {
+        val inflater = layoutInflater
+        val layout = inflater.inflate(R.layout.custom_toast, requireActivity().findViewById(R.id.toast_container))
+
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with (Toast(requireContext())) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
+        }
+    }
+
 }
