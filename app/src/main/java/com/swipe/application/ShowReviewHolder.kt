@@ -16,12 +16,10 @@ class ShowReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val reviewDescription: TextView = itemView.findViewById(R.id.review)
 
     fun bindData(review: Reviews) {
-        // Assuming Users class has properties like icon and name
         userIcon.setImageResource(review.user.profile)
         userName.text = review.user.username
         reviewDescription.text = review.description
 
-        // Set the rating and adjust star images
         setStarImages(review.rating)
     }
 
@@ -31,10 +29,8 @@ class ShowReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         for (i in 0 until starImageViews.size) {
             val starImageView = starImageViews[i]
             if (i < rating) {
-                // Set filled star image
                 starImageView.setImageResource(R.drawable.filled_star)
             } else {
-                // Set unfilled star image
                 starImageView.setImageResource(R.drawable.unfilled_star)
             }
         }

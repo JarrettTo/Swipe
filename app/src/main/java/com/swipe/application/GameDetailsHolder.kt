@@ -1,7 +1,9 @@
 package com.swipe.application
 
+import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +14,17 @@ import android.widget.TextView
 import android.widget.VideoView
 import android.widget.MediaController
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.launch
 
-class GameDetailsHolder(itemView: View, private val context: Context) : RecyclerView.ViewHolder(itemView) {
+class GameDetailsHolder(
+    itemView: View,
+    private val context: Context,
+    private val lifecycleScope: LifecycleCoroutineScope,
+    private val listener: GameDetailsListener
+) : RecyclerView.ViewHolder(itemView) {
     private val image: ImageView = itemView.findViewById(R.id.game_photo)
     private val gameName: TextView = itemView.findViewById(R.id.game_name)
     private val description: TextView = itemView.findViewById(R.id.game_description)
@@ -29,6 +38,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
     private val popularPlayersContainer: LinearLayout = itemView.findViewById(R.id.popular_players_container)
     private val reviewsContainer: LinearLayout = itemView.findViewById(R.id.reviews_container)
     private val playButton: Button = itemView.findViewById(R.id.playButton)
+    private val reviewDataHelper = ReviewDataHelper()
 
     fun bindData(game: Games) {
         if(game.imageId!=0){
@@ -58,7 +68,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
         val genreList = game.genre ?: emptyList()
         bindGenres(genreList)
 
-        val addReview = AddReviewHolder(itemView)
+        val addReview = AddReviewHolder(itemView, game.gameId, lifecycleScope, listener)
         addReview.bindData()
 
         val similarTitlesList = game.similarGames ?: emptyList()
@@ -67,8 +77,14 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
         val popularPlayersList = game.popularPlayers ?: emptyList()
         bindPopularPlayers(popularPlayersList)
 
-        val reviewList = game.reviews ?: emptyList()
-        bindReviews(reviewList)
+        lifecycleScope.launch {
+            val generalReviews = reviewDataHelper.retrieveReviews(game.gameId)
+            val userSpecificReviews = reviewDataHelper.retrieveAllReviewsForUserAndGame(game.gameId, DataHelper().getUser().userID)
+
+            val combinedReviews = (generalReviews + userSpecificReviews).distinctBy { it.reviewID }
+            Log.d("reviews", "$combinedReviews")
+            bindReviews(combinedReviews)
+        }
     }
 
 
@@ -169,6 +185,14 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
                 layoutParams.bottomMargin = 10.dpToPx(itemView.context)
                 reviewsView.layoutParams = layoutParams
 
+                if (review.user == DataHelper().getUser()){
+                    val button = reviewsView.findViewById<Button>(R.id.deleteComment)
+                    button.visibility = View.VISIBLE
+                    button.setOnClickListener {
+                        showDeleteConfirmationDialog(review.reviewID)
+                    }
+                }
+
                 reviewsContainer.addView(reviewsView)
             }
         } else {
@@ -176,4 +200,28 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
         }
     }
 
+    private fun showDeleteConfirmationDialog(reviewID: String) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.remove_prompt, null)
+        val tvConfirmMessage = dialogView.findViewById<TextView>(R.id.tvDeleteConfirm)
+        tvConfirmMessage.text = "Are you sure you want to remove this comment?"
+
+        val dialogBuilder = AlertDialog.Builder(context)
+            .setView(dialogView)
+
+        val alertDialog = dialogBuilder.create()
+
+        dialogView.findViewById<Button>(R.id.btnConfirmYes).setOnClickListener {
+            lifecycleScope.launch {
+                reviewDataHelper.deleteReview(reviewID)
+                listener.onReviewUpdated()
+            }
+            alertDialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnConfirmNo).setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        alertDialog.show()
+    }
 }

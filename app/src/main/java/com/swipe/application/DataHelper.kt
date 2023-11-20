@@ -22,9 +22,10 @@ import java.util.concurrent.Executors
 
 class DataHelper {
     private lateinit var data: ArrayList<Games>
+    private lateinit var users: ArrayList<Users>
 
     fun initializeData(): ArrayList<Games> {
-        val users = ArrayList<Users>()
+        users = ArrayList<Users>()
         users.add(
             Users(
                 "1",
@@ -61,6 +62,7 @@ class DataHelper {
         val reviews = ArrayList<Reviews>()
         reviews.add(
             Reviews(
+                "1",
                 users[0],
                 1,
                 4,
@@ -69,6 +71,7 @@ class DataHelper {
         )
         reviews.add(
             Reviews(
+                "2",
                 users[1],
                 1,
                 5,
@@ -77,6 +80,7 @@ class DataHelper {
         )
         reviews.add(
             Reviews(
+                "3",
                 users[2],
                 2,
                 3,
@@ -292,5 +296,15 @@ class DataHelper {
 
     fun findGamebyID(newGame: String): Games? {
         return data.find { game -> game.gameId.toString() == newGame }
+    }
+
+    fun getUser() : Users {
+        var user = Users(
+            "12346",
+            "heheWOW23",
+            R.drawable.dp,
+            ""
+        )
+        return user
     }
 }

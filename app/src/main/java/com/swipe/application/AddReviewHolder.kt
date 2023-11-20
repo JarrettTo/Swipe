@@ -1,13 +1,17 @@
 package com.swipe.application
 
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import kotlinx.coroutines.launch
 
-class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class AddReviewHolder(itemView: View, private val gameID: Int, private val lifecycleScope: LifecycleCoroutineScope, private val listener: GameDetailsListener) : RecyclerView.ViewHolder(itemView) {
     private val userIcon: ImageView = itemView.findViewById(R.id.icon)
     private val userName: TextView = itemView.findViewById(R.id.name)
     private val star1: ImageView = itemView.findViewById(R.id.star1)
@@ -15,20 +19,38 @@ class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val star3: ImageView = itemView.findViewById(R.id.star3)
     private val star4: ImageView = itemView.findViewById(R.id.star4)
     private val star5: ImageView = itemView.findViewById(R.id.star5)
+    private val review: TextView = itemView.findViewById(R.id.addReview)
     private val iconComment: ImageView = itemView.findViewById(R.id.iconComment)
+    private var currentRating = 5
+    private val reviewDataHelper = ReviewDataHelper()
 
     fun bindData(){
         this.bindStars()
 
-        //temp data
-        userIcon.setImageResource(R.drawable.karltzy)
-        userName.text = "XxTheLegendxX"
-
-        iconComment.setOnClickListener {
-            Log.d("GameDetailsHolder", "iconComment Clicked")
-            Toast.makeText(itemView.context, "Adding review...", Toast.LENGTH_LONG).show()
+        var profileURL = UserSession(itemView.context).profileURL
+        if(profileURL != ""){
+            Glide.with(itemView.context)
+                .load(profileURL)
+                .into(userIcon);
+        } else{
+            UserSession(itemView.context).profileID.let { userIcon.setImageResource(it) }
         }
 
+        userName.text = UserSession(itemView.context).userName
+
+        iconComment.setOnClickListener {
+            val reviewText = review.text.toString()
+            if (reviewText.isNotEmpty()) {
+                val user = DataHelper().getUser()
+                lifecycleScope.launch {
+                    reviewDataHelper.insertReview(gameID, user, currentRating, reviewText)
+                    listener.onReviewUpdated()
+                    review.setText("")
+                }
+            } else {
+                showCustomToast("Please write a review")
+            }
+        }
     }
 
     fun bindStars() {
@@ -37,7 +59,6 @@ class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         for (i in starImageViews.indices) {
             val starImageView = starImageViews[i]
             starImageView.setOnClickListener {
-                // Handle star click
                 updateStarImages(i + 1)
             }
         }
@@ -57,6 +78,21 @@ class AddReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             } else {
                 starImageView.setImageResource(R.drawable.unfilled_star)
             }
+        }
+
+        currentRating = clickedStarPosition
+    }
+
+    private fun showCustomToast(message: String) {
+        val inflater = LayoutInflater.from(itemView.context)
+        val layout = inflater.inflate(R.layout.custom_toast, null)
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with(Toast(itemView.context)) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
         }
     }
 }

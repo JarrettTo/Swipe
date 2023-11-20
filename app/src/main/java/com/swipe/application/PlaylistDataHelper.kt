@@ -26,7 +26,6 @@ class PlaylistDataHelper {
                     val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
                     val games = ArrayList<Games>()
 
-                    // Iterate through each game in the snapshot
                     val gamesSnapshot = snapshot.child("games")
                     for (gameSnapshot in gamesSnapshot.children) {
                         val game = gameSnapshot.getValue(Games::class.java)
@@ -176,9 +175,8 @@ class PlaylistDataHelper {
                         for (gameSnapshot in snapshot.children) {
                             val getGame = gameSnapshot.getValue(Games::class.java)
                             if (getGame != null && getGame.gameId == game.gameId) {
-                                // Remove the game with the matching ID
                                 gameSnapshot.ref.removeValue()
-                                break // Stop the loop once the game is found and removed
+                                break
                             }
                         }
                     }

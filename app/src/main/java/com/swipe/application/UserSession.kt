@@ -15,6 +15,14 @@ class UserSession(context: Context) {
         get() = prefs.getString("user_id", "12346")
         set(value) = prefs.edit().putString("user_id", value).apply()
 
+    var profileID: Int
+        get() = prefs.getInt("profile_id", R.drawable.dp)
+        set(value) = prefs.edit().putInt("user_id", value).apply()
+
+    var profileURL: String?
+        get() = prefs.getString("user_id", "")
+        set(value) = prefs.edit().putString("user_id", value).apply()
+
     var likedGameIds: MutableSet<String>?
         get() = prefs.getStringSet("liked_game_ids", mutableSetOf())
         set(value) = prefs.edit().putStringSet("liked_game_ids", value).apply()
@@ -27,16 +35,15 @@ class UserSession(context: Context) {
         set(value) = prefs.edit().putStringSet("playlists", value).apply()
 
     fun addLikedGameId(gameId: String) {
-
         val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
         currentIds.add(gameId)
-        likedGameIds = currentIds // This will trigger the 'set' method and save the changes
+        likedGameIds = currentIds
     }
 
     fun removeLikedGameId(gameId: String) {
         val currentIds = likedGameIds?.toMutableSet() ?: mutableSetOf()
         currentIds.remove(gameId)
-        likedGameIds = currentIds // This will trigger the 'set' method and save the changes
+        likedGameIds = currentIds
     }
 
     fun addGroupId(groupId: String) : Boolean {
@@ -65,4 +72,7 @@ class UserSession(context: Context) {
         playlist = currentIds
     }
 
+    fun updateProfileURL(newURL: String) {
+        profileURL = newURL
+    }
 }
