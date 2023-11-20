@@ -23,7 +23,7 @@ class SearchFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.search, container, false)
         if (gameList.isEmpty()) {
-            gameList = DataHelper.initializeData()
+            gameList = DataHelper().initializeData()
         }
 
         Log.d("SearchActivity", "All Games: $gameList")

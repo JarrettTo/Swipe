@@ -31,7 +31,7 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
         if(mData.size < 7){
 
             try {
-                val games = DataHelper.retrieveGames(10)
+                val games = GamesDataHelper.retrieveGames(10)
                 // Now update your adapter's data set with these games
                 // Make sure to update the adapter on the main thread if needed
 

@@ -5,23 +5,36 @@ import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 
-class AddGamesToPlaylist : AppCompatActivity() {
+class AddGamesToPlaylist : AppCompatActivity() , PlaylistGameActionListener {
     private var gameList: ArrayList<Games> = arrayListOf()
     private lateinit var gamesListView: RecyclerView
     private lateinit var adapter: SearchAdapter
     private lateinit var searchView: SearchView
+    private val playlistDataHelper = PlaylistDataHelper()
+    private lateinit var playlistDetails: Playlist
+
+    override fun onAddPlaylistGameAction(game: Games) {
+        addGameToPlaylist(game)
+    }
+
+    override fun onDeletePlaylistGameAction(game: Games) {
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.search)
 
+        playlistDetails = (intent.getBundleExtra("playlistDetails")?.getSerializable("playlistDetails") as? Playlist)!!
+
         val data = intent.getStringExtra("key")
 
         if (gameList.isEmpty()) {
-            gameList = DataHelper.initializeData()
+            gameList = DataHelper().initializeData()
         }
 
         gamesListView = findViewById(R.id.list_recycler_view)
@@ -66,6 +79,8 @@ class AddGamesToPlaylist : AppCompatActivity() {
 
         dialogView.findViewById<Button>(R.id.btnConfirmYes).setOnClickListener {
             // Handle "Yes" action
+            val game = DataHelper().findGamebyName(itemTitle)
+
             alertDialog.dismiss()
         }
 
@@ -74,5 +89,11 @@ class AddGamesToPlaylist : AppCompatActivity() {
         }
 
         alertDialog.show()
+    }
+
+    private fun addGameToPlaylist(game: Games) {
+        lifecycleScope.launch {
+            playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
+        }
     }
 }

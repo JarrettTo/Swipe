@@ -1,6 +1,8 @@
 package com.swipe.application
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -23,6 +25,18 @@ interface PlaylistActionListener {
 class LibraryFragment : Fragment() , PlaylistActionListener{
     override fun onDeletePlaylistAction(name: String) {
         deletePlaylist(name)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::adapter.isInitialized) {
+            lifecycleScope.launch {
+                val playlists = userSession.playlist
+                playlistList = playlistDataHelper.retrievePlaylists(playlists)
+                adapter.updateData(playlistList)
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     private lateinit var userSession: UserSession
@@ -106,8 +120,8 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
             var playlist = playlistDataHelper.insertPlaylist(name, userSession.userName!!)
             Log.d("CODE", "CODE: ${playlist}")
             userSession.addPlaylistId(playlist)
-            val newPlaylist = Playlist(playlist, name, userSession.userName!!, R.drawable.games, null)
-            adapter.addGroup(newPlaylist)
+            val newPlaylist = Playlist(playlist, name, userSession.userName!!, R.drawable.games, "", null)
+            adapter.addPlaylist(newPlaylist)
             adapter?.notifyDataSetChanged()
         }
     }
@@ -120,7 +134,7 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
             if (playlistID != null) {
                 playlistDataHelper.removePlaylist(playlistID, userSession.userName!!)
                 userSession.removePlaylistId(playlistID)
-                adapter.delGroup(playlist)
+                adapter.delPlaylist(playlist)
                 adapter?.notifyDataSetChanged()
             } else {
                 Log.d("del playlist", "Not found.")

@@ -22,10 +22,10 @@ class PlaylistDataHelper {
                     val playlistName = snapshot.child("playlistName").getValue(String::class.java) ?: ""
                     val username = snapshot.child("username").getValue(String::class.java) ?: ""
                     val imageId = snapshot.child("imageId").getValue(Int::class.java)
-                    val imageURL = snapshot.child("imageURL").getValue(String::class.java)
+                    val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
                     val games = snapshot.child("games").getValue(ArrayList<Games>()::class.java) ?: arrayListOf()
 
-                    val playlist = Playlist(id, playlistName, username, imageId, games)
+                    val playlist = Playlist(id, playlistName, username, imageId, imageURL, games)
                     playlists.add(playlist)
                 }
             } catch (e: Exception) {
@@ -42,10 +42,11 @@ class PlaylistDataHelper {
             if (snapshot.exists()) {
                 val playlistName = snapshot.child("playlistName").getValue(String::class.java) ?: ""
                 val username = snapshot.child("username").getValue(String::class.java) ?: ""
+                val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
                 val imageId = snapshot.child("imageId").getValue(Int::class.java)
                 val games = snapshot.child("games").getValue(ArrayList<Games>()::class.java) ?: arrayListOf()
 
-                val playlist = Playlist(id, playlistName, username, imageId, games)
+                val playlist = Playlist(id, playlistName, username, imageId, imageURL, games)
                 return@withContext playlist
             }
         } catch (e: Exception) {
@@ -66,6 +67,7 @@ class PlaylistDataHelper {
             newPlaylistRef.child("playlistName").setValue(name)
             newPlaylistRef.child("username").setValue(user)
             newPlaylistRef.child("imageId").setValue(R.drawable.games)
+            newPlaylistRef.child("imageURL").setValue(null)
             newPlaylistRef.child("games").setValue(null)
 
             // Update user's playlist data
@@ -115,4 +117,76 @@ class PlaylistDataHelper {
             return@withContext false
         }
     }
+
+    suspend fun updatePlaylistImage(playlistId: String, newImageId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistRef = dbRef.child("playlists").child(playlistId)
+
+        try {
+            playlistRef.child("imageURL").setValue(newImageId).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating playlist image", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun updatePlaylistName(playlistId: String, newPlaylistName: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistRef = dbRef.child("playlists").child(playlistId)
+
+        try {
+            // Update the playlistName for the playlist
+            playlistRef.child("playlistName").setValue(newPlaylistName).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating playlist name", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun addGameToPlaylist(playlistId: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistRef = dbRef.child("playlists").child(playlistId).child("games")
+
+        try {
+            val gameRef = playlistRef.push()
+            gameRef.setValue(game)
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error adding game to playlist", e)
+        }
+    }
+
+    suspend fun removeGameFromPlaylist(playlistId: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistGamesRef = dbRef.child("playlists").child(playlistId).child("games")
+
+        try {
+            playlistGamesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        // Create a new list to hold the updated games
+                        val updatedGames = ArrayList<Games>()
+
+                        for (gameSnapshot in snapshot.children) {
+                            val getGame = gameSnapshot.getValue(Games::class.java)
+                            if (getGame != null && getGame != game) {
+                                updatedGames.add(getGame)
+                            }
+                        }
+
+                        // Update the games in Firebase
+                        playlistGamesRef.setValue(updatedGames)
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("FirebaseError", "Error removing game from playlist", databaseError.toException())
+                }
+            })
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error removing game from playlist", e)
+        }
+    }
+
 }

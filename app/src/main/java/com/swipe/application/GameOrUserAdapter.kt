@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class GameOrUserAdapter(private val items: List<Any>, private val clickListener: (() -> Unit)? = null) : RecyclerView.Adapter<GameOrUserHolder>() {
+class GameOrUserAdapter(private val items: MutableList<Any>, private val clickListener: (() -> Unit)? = null, private val listener: PlaylistGameActionListener) : RecyclerView.Adapter<GameOrUserHolder>() {
     var isNotDeleteMode = false
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameOrUserHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.game_or_user, parent, false)
-        return GameOrUserHolder(view, clickListener)
+        return GameOrUserHolder(view, clickListener, listener)
     }
 
     override fun onBindViewHolder(holder: GameOrUserHolder, position: Int) {
@@ -36,5 +36,22 @@ class GameOrUserAdapter(private val items: List<Any>, private val clickListener:
             this.toFloat(),
             context.resources.displayMetrics
         ).toInt()
+    }
+
+    fun addGameToPlaylist(game: Games) {
+        items.add(game)
+        notifyItemInserted(items.size - 1)
+    }
+
+    fun removeGameToPlaylist(game: Games) {
+        items?.let {
+            val index = it.indexOf(game)
+            if (index != -1) {
+                it.removeAt(index)
+
+                items.removeAt(index)
+                notifyItemRemoved(index)
+            }
+        }
     }
 }

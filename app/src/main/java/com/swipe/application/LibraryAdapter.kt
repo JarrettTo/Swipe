@@ -1,10 +1,11 @@
 package com.swipe.application
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class LibraryAdapter (private val data: ArrayList<Playlist>, private val listener: PlaylistActionListener): RecyclerView.Adapter<LibraryHolder>(){
+class LibraryAdapter (private var data: ArrayList<Playlist>, private val listener: PlaylistActionListener): RecyclerView.Adapter<LibraryHolder>(){
     var isNotDeleteMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryHolder {
@@ -19,11 +20,17 @@ class LibraryAdapter (private val data: ArrayList<Playlist>, private val listene
         holder.bindData(data[position], isNotDeleteMode)
     }
 
-    fun addGroup(playlist: Playlist) {
+    fun addPlaylist(playlist: Playlist) {
         data?.add(playlist)
     }
 
-    fun delGroup(playlist: Playlist) {
+    fun delPlaylist(playlist: Playlist) {
         data?.remove(playlist)
+    }
+
+    fun updateData(newData: ArrayList<Playlist>) {
+        Log.d("LibraryAdapter", "Updating data: $newData")
+        this.data.clear()
+        this.data.addAll(newData)
     }
 }

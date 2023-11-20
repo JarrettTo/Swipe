@@ -12,8 +12,6 @@ import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
-
-
     private var gameList: ArrayList<Games> = arrayListOf()
     private lateinit var swipeStack: SwipeStack
 
@@ -22,12 +20,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         if (gameList.isEmpty()) {
             try {
                 // Assuming fetchGamesFromSteamAPI is a suspend function, otherwise it should be called normally
-                DataHelper.fetchGamesFromSteamAPI()
-                gameList = ArrayList(DataHelper.retrieveGames(10)) // This is called from within a coroutine
+                GamesDataHelper.fetchGamesFromSteamAPI()
+                gameList = ArrayList(GamesDataHelper.retrieveGames(10)) // This is called from within a coroutine
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -40,6 +37,13 @@ class MainActivity : AppCompatActivity() {
         val mf = MainFragment()
         mf.arguments = bundle
         replaceFragment(mf)
+
+        val homeButton: Button = findViewById(R.id.home_button)
+        homeButton.setOnClickListener {
+            val mf = MainFragment()
+            mf.arguments=bundle
+            replaceFragment(mf)
+        }
 
         val searchButton: Button = findViewById(R.id.search_button)
         searchButton.setOnClickListener {
@@ -55,21 +59,16 @@ class MainActivity : AppCompatActivity() {
             replaceFragment(LibraryFragment())
         }
 
-
         val profileButton: Button = findViewById(R.id.user_button)
         profileButton.setOnClickListener {
             replaceFragment(UserProfileFragment())
         }
-
-
-
     }
-    private fun replaceFragment(fragment : Fragment){
 
+    private fun replaceFragment(fragment : Fragment){
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
-
     }
 }

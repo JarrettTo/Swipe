@@ -116,7 +116,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
             for (similarTitle in similarTitles) {
                 val similarTitleView = inflater.inflate(R.layout.game_or_user, similarTitlesContainer, false)
-                val gameOrUserHolder = GameOrUserHolder(similarTitleView)
+                val gameOrUserHolder = GameOrUserHolder(similarTitleView, null, null)
 
                 gameOrUserHolder.bindData(similarTitle, true)
 
@@ -139,7 +139,7 @@ class GameDetailsHolder(itemView: View, private val context: Context) : Recycler
 
             for (popularPlayer in popularPlayers) {
                 val popularPlayerView = inflater.inflate(R.layout.game_or_user, popularPlayersContainer, false)
-                val gameOrUserHolder = GameOrUserHolder(popularPlayerView)
+                val gameOrUserHolder = GameOrUserHolder(popularPlayerView, null, null)
 
                 gameOrUserHolder.bindData(popularPlayer)
 

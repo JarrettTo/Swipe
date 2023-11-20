@@ -4,32 +4,53 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import java.util.UUID
 
-class PlaylistDetailsActivity : AppCompatActivity() {
+interface PlaylistGameActionListener {
+    fun onAddPlaylistGameAction(games: Games)
+    fun onDeletePlaylistGameAction(games: Games)
+}
+
+class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
     companion object {
         const val PICK_IMAGE_REQUEST = 1
     }
 
+    override fun onAddPlaylistGameAction(game: Games) {
+    }
+
+    override fun onDeletePlaylistGameAction(game: Games) {
+        removeGameToPlaylist(game)
+    }
+
     private lateinit var recyclerView: RecyclerView
+    private val playlistDataHelper = PlaylistDataHelper()
+    private lateinit var userSession: UserSession
+    private lateinit var playlistDetails: Playlist
+    private lateinit var PlaylistNameOriginal: String
+    private lateinit var gameOrUserAdapter: GameOrUserAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.inside_playlist)
 
-        val playlistDetails = intent.getBundleExtra("playlistDetails")?.getSerializable("playlistDetails") as? Playlist
-        if (playlistDetails == null) {
-            // Handle the case where there are no playlist details
-            return
-        }
+        playlistDetails = (intent.getBundleExtra("playlistDetails")?.getSerializable("playlistDetails") as? Playlist)!!
 
         // Set the playlist details
         val image: ImageView = findViewById(R.id.icon)
@@ -40,16 +61,28 @@ class PlaylistDetailsActivity : AppCompatActivity() {
         val addButton: Button = findViewById(R.id.add_button)
         val delButton: Button = findViewById(R.id.del_button)
         val backButton: Button = findViewById(R.id.backButton)
+        val saveContainer: LinearLayout = findViewById(R.id.save_name_container)
+        val saveButton: Button = findViewById(R.id.save_btn)
+        val cancelButton: Button = findViewById(R.id.cancel_btn)
 
-        playlistDetails.imageId?.let { image.setImageResource(it) }
+        userSession = UserSession(this)
+
+        if (playlistDetails.imageURL != "") {
+            Glide.with(this)  // Use 'this' for context
+                .load(playlistDetails.imageURL)
+                .into(image)
+        } else {
+            playlistDetails.imageId?.let { image.setImageResource(R.drawable.games) }
+        }
 
         playlistName.text = playlistDetails.playlistName
+        PlaylistNameOriginal = playlistDetails.playlistName
         username.text = playlistDetails.username
         number.text = "${playlistDetails.games?.size ?: 0} games"
 
         recyclerView = findViewById(R.id.PlaylistRecycler)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
-        val gameOrUserAdapter = GameOrUserAdapter(playlistDetails.games ?: emptyList())
+        gameOrUserAdapter = GameOrUserAdapter(playlistDetails.games?.toMutableList() ?: mutableListOf(),  null,this)
         recyclerView.adapter = gameOrUserAdapter
         gameOrUserAdapter.isNotDeleteMode = true
 
@@ -59,6 +92,10 @@ class PlaylistDetailsActivity : AppCompatActivity() {
 
         addButton.setOnClickListener {
             val intent = Intent(this, AddGamesToPlaylist::class.java)
+            val playlistDetailsBundle = Bundle().apply {
+                putSerializable("playlistDetails", playlistDetails)
+            }
+            intent.putExtra("playlistDetails", playlistDetailsBundle)
             startActivity(intent)
         }
 
@@ -71,6 +108,36 @@ class PlaylistDetailsActivity : AppCompatActivity() {
         uploadPhotoButton.setOnClickListener {
             openGalleryForImage()
         }
+
+        playlistName.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(editable: Editable?) {
+                if (editable.toString() != PlaylistNameOriginal) {
+                    saveContainer.visibility = View.VISIBLE
+                } else {
+                    saveContainer.visibility = View.GONE
+                }
+            }
+        })
+
+        saveButton.setOnClickListener {
+            PlaylistNameOriginal = playlistName.text.toString().trim()
+            lifecycleScope.launch {
+                playlistDataHelper.updatePlaylistName(playlistDetails.playlistId, PlaylistNameOriginal)
+            }
+            saveContainer.visibility = View.INVISIBLE
+        }
+
+        cancelButton.setOnClickListener {
+            playlistName.text = PlaylistNameOriginal
+            saveContainer.visibility = View.INVISIBLE
+        }
+
     }
 
     private fun openGalleryForImage() {
@@ -81,15 +148,32 @@ class PlaylistDetailsActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
+        val storageReference = FirebaseStorage.getInstance().getReference()
+        
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
-            val imageUri = data?.data
-            // CALL DB
-
-            val imageView: ImageView = findViewById(R.id.icon)
-            imageUri?.let {
-                Glide.with(this).load(it).into(imageView)
+            data?.data?.let { uri ->
+                Log.d("URI", "$uri")
+                val imageRef = storageReference.child("images/${UUID.randomUUID()}") // Unique ID for the image
+                imageRef.putFile(uri)
+                    .addOnSuccessListener {
+                        imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                            lifecycleScope.launch {
+                                playlistDataHelper.updatePlaylistImage(playlistDetails.playlistId, downloadUri.toString().trim())
+                            }
+                        }
+                    }
+                    .addOnFailureListener {
+                        // Handle failure
+                    }
             }
+        }
+    }
+
+    private fun removeGameToPlaylist(game: Games) {
+        lifecycleScope.launch {
+            gameOrUserAdapter.removeGameToPlaylist(game)
+            gameOrUserAdapter?.notifyDataSetChanged()
+            playlistDataHelper.removeGameFromPlaylist(playlistDetails.playlistId, game)
         }
     }
 }

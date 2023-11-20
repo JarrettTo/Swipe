@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? = null) : RecyclerView.ViewHolder(itemView) {
+class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? = null, private val listener: PlaylistGameActionListener?) : RecyclerView.ViewHolder(itemView) {
     private val icon: ImageView = itemView.findViewById(R.id.icon)
     private val name: TextView = itemView.findViewById(R.id.name)
     private val deleteButton: Button = itemView.findViewById(R.id.del_button)
@@ -25,7 +25,7 @@ class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? 
         deleteButton.visibility = if (isNotDeleteMode) View.GONE else View.VISIBLE
 
         deleteButton.setOnClickListener {
-            showDeleteConfirmationDialog(name.text.toString().trim())
+            showDeleteConfirmationDialog(name.text.toString().trim(), game)
         }
 
         clickListener?.let { listener ->
@@ -38,7 +38,7 @@ class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? 
         }
     }
 
-    private fun showDeleteConfirmationDialog(itemTitle: String) {
+    private fun showDeleteConfirmationDialog(itemTitle: String, game: Games) {
         val dialogView = LayoutInflater.from(itemView.context).inflate(R.layout.remove_prompt, null)
         val tvConfirmMessage = dialogView.findViewById<TextView>(R.id.tvDeleteConfirm)
         tvConfirmMessage.text = "Are you sure you want to remove $itemTitle?"
@@ -49,7 +49,7 @@ class GameOrUserHolder(itemView: View, private val clickListener: (() -> Unit)? 
         val alertDialog = dialogBuilder.create()
 
         dialogView.findViewById<Button>(R.id.btnConfirmYes).setOnClickListener {
-            // Handle "Yes" action
+            listener?.onDeletePlaylistGameAction(game)
             alertDialog.dismiss()
         }
 
