@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import androidx.annotation.Nullable
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.coroutineScope
@@ -45,10 +46,11 @@ class SwipeStack @JvmOverloads constructor(
     private var mDataObserver : DataSetObserver?= null
     private lateinit var mListener: MySwipeStackListener
     private var mProgressListener: SwipeProgressListener ?= null
-
+    private lateinit var userSession: UserSession
     init {
         readAttributes(attrs)
         initialize()
+        userSession = UserSession(context!!)
     }
     fun setSaveGame(saveGame : (Games) -> Unit){
         this@SwipeStack.saveGame = saveGame
@@ -246,7 +248,7 @@ class SwipeStack @JvmOverloads constructor(
         if(mListener != null){
             mListener!!.onViewSwipedToLeft(0)
 
-            mAdapter!!.updateList()
+            mAdapter!!.updateList(userSession.likedGameIds!!)
         }
         removeTopView()
         mCurrentViewIndex--
@@ -259,7 +261,7 @@ class SwipeStack @JvmOverloads constructor(
 
             mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
 
-            mAdapter!!.updateList()
+            mAdapter!!.updateList(userSession.likedGameIds!!)
 
         }
         removeTopView()

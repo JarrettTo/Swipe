@@ -23,8 +23,8 @@ class UserSession(context: Context) {
         set(value) = prefs.edit().putStringSet("groups", value).apply()
 
     var playlist: MutableSet<String>?
-        get() = prefs.getStringSet("groups", mutableSetOf())
-        set(value) = prefs.edit().putStringSet("groups", value).apply()
+        get() = prefs.getStringSet("playlists", mutableSetOf())
+        set(value) = prefs.edit().putStringSet("playlists", value).apply()
 
     fun addLikedGameId(gameId: String) {
 

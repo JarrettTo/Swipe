@@ -25,13 +25,13 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
     fun removeItem(p0: Int) {
         mData.removeAt(p0)
     }
-    fun updateList() {
+    fun updateList(likedGames : MutableSet<String>) {
         //remove item at the top of the stack
         swipeCount+=1
         if(mData.size < 7){
 
             try {
-                val games = GamesDataHelper.retrieveGames(10)
+                val games = GamesDataHelper.retrieveGames(10, likedGames)
                 // Now update your adapter's data set with these games
                 // Make sure to update the adapter on the main thread if needed
 
