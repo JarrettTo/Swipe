@@ -2,6 +2,7 @@ package com.swipe.application
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.*
 class GroupFragment : Fragment() {
     private lateinit var groupView: RecyclerView
@@ -24,6 +26,7 @@ class GroupFragment : Fragment() {
     private lateinit var groupList: ArrayList<Groups>
     private lateinit var adapter: GroupAdapter
     private val groupDataHelper = GroupDataHelper()
+    private lateinit var dialogView : View
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,7 +63,7 @@ class GroupFragment : Fragment() {
         return view
     }
     private fun showAddGroupDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.create_group, null)
+        dialogView = layoutInflater.inflate(R.layout.create_group, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setCancelable(true)
@@ -128,20 +131,19 @@ class GroupFragment : Fragment() {
 
         alertDialog.show()
     }
-    private fun openGalleryForImage() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, 1)
-    }
+
     private fun createGroup(name:String, desc:String, uri: String){
 
         lifecycleScope.launch {
-            var groupCode = groupDataHelper.insertGroup(name, desc, uri, userSession.userName!!)
-            Log.d("CODE", "CODE: ${groupCode}")
-            userSession.addGroupId(groupCode)
-            val newGroup = Groups(groupCode, name, 1, desc, uri,arrayListOf())
-            adapter.addGroup(newGroup)
+            var group= groupDataHelper.insertGroup(name, desc, selectedImageUri!!, userSession.userName!!)
+            Log.d("CODE", "CODE: ${group?.id}")
+            userSession.addGroupId(group?.id!!)
+
+            Log.d("URI:", "${selectedImageUri}")
+
+            adapter.addGroup(group)
             adapter?.notifyDataSetChanged()
+
             // Now 'groupsList' contains your data
             // Update your UI here, e.g., set the data to an adapter
         }
@@ -164,6 +166,7 @@ class GroupFragment : Fragment() {
                 }
                 else{
                     groupDataHelper.joinGroup(code, userSession.userName!!)
+                    group.count=group.count+1
                     adapter.addGroup(group)
                     adapter?.notifyDataSetChanged()
                     callback.onResult(true)
@@ -181,14 +184,25 @@ class GroupFragment : Fragment() {
 
 
     }
+    private fun openGalleryForImage() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, 1)
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             selectedImageUri = data?.data
-            val userPhoto: ImageView = view?.findViewById(R.id.icon) ?: return
-            userPhoto.setImageURI(selectedImageUri)
+            Log.d("URI", "${selectedImageUri}")
+            val userPhoto: ImageView? = dialogView.findViewById(R.id.bannerImage)
+            Glide.with(this)
+                .load(selectedImageUri)
+                .into(userPhoto!!)
+
+
 
         }
     }
+
 
 }

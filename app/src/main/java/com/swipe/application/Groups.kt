@@ -5,7 +5,7 @@ import java.io.Serializable
 data class Groups(
     val id: String,
     val name: String,
-    val count: Int,
+    var count: Int,
     val desc: String,
     val image: String,
     val likes: ArrayList<String>
