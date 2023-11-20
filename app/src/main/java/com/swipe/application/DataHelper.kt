@@ -28,25 +28,29 @@ class DataHelper {
         users.add(
             Users(
                 "Faker",
-                R.drawable.faker
+                R.drawable.faker,
+                ""
             )
         )
         users.add(
             Users(
                 "bjergsen",
-                R.drawable.bjergsen
+                R.drawable.bjergsen,
+                ""
             )
         )
         users.add(
             Users(
                 "karltzy",
-                R.drawable.karltzy
+                R.drawable.karltzy,
+                ""
             )
         )
         users.add(
             Users(
                 "Serral",
-                R.drawable.serral
+                R.drawable.serral,
+                ""
             )
         )
 

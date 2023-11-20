@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 
 fun Int.dpToPx(context: Context): Int {
@@ -32,17 +33,25 @@ class LibraryHolder(itemView: View, private val context: Context, private val li
     private val deleteButton: Button = itemView.findViewById(R.id.del_button)
 
     fun bindData(playlist: Playlist, isNotDeleteMode: Boolean) {
-        playlist.imageId?.let { playlistLogo.setImageResource(it) }
+        if(playlist.imageURL != ""){
+            Glide.with(itemView.context)
+                .load(playlist.imageURL)
+                .into(playlistLogo);
+        } else{
+            playlist.imageId?.let { playlistLogo.setImageResource(it) }
+        }
+
         playlistName.text = playlist.playlistName
         user.text = playlist.username
 
-        if (playlistName.text.toString().trim() != "Liked Games"){
+        if (playlistName.text.toString().trim() != "Liked Games") {
             deleteButton.visibility = if (isNotDeleteMode) View.GONE else View.VISIBLE
+        } else {
+            deleteButton.visibility = View.GONE
         }
         
         deleteButton.setOnClickListener {
             showDeleteConfirmationDialog(playlistName.text.toString().trim())
-            listener.onDeletePlaylistAction(playlistName.text.toString().trim())
         }
 
         val marginTop = 20.dpToPx(context)
@@ -78,7 +87,7 @@ class LibraryHolder(itemView: View, private val context: Context, private val li
         val alertDialog = dialogBuilder.create()
 
         dialogView.findViewById<Button>(R.id.btnConfirmYes).setOnClickListener {
-            // Handle "Yes" action
+            listener.onDeletePlaylistAction(playlistName.text.toString().trim())
             alertDialog.dismiss()
         }
 

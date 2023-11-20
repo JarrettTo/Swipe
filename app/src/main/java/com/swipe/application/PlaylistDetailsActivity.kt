@@ -64,11 +64,18 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         val saveContainer: LinearLayout = findViewById(R.id.save_name_container)
         val saveButton: Button = findViewById(R.id.save_btn)
         val cancelButton: Button = findViewById(R.id.cancel_btn)
+        val gameItemClickListener: (Games) -> Unit = { game ->
+            val intent = Intent(this, GameDetailsActivity::class.java).apply {
+                putExtra("gameDetails", game)
+            }
+            startActivity(intent)
+        }
+
 
         userSession = UserSession(this)
 
         if (playlistDetails.imageURL != "") {
-            Glide.with(this)  // Use 'this' for context
+            Glide.with(this)
                 .load(playlistDetails.imageURL)
                 .into(image)
         } else {
@@ -82,7 +89,7 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
         recyclerView = findViewById(R.id.PlaylistRecycler)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
-        gameOrUserAdapter = GameOrUserAdapter(playlistDetails.games?.toMutableList() ?: mutableListOf(),  null,this)
+        gameOrUserAdapter = GameOrUserAdapter(playlistDetails.games?.toMutableList() ?: mutableListOf(),  gameItemClickListener,this)
         recyclerView.adapter = gameOrUserAdapter
         gameOrUserAdapter.isNotDeleteMode = true
 
@@ -109,21 +116,23 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
             openGalleryForImage()
         }
 
-        playlistName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+        if (playlistName.text.toString().trim() == "Liked Games") {
+            playlistName.isEnabled = false
+        } else {
+            playlistName.isEnabled = true
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
-            override fun afterTextChanged(editable: Editable?) {
-                if (editable.toString() != PlaylistNameOriginal) {
-                    saveContainer.visibility = View.VISIBLE
-                } else {
-                    saveContainer.visibility = View.GONE
+            playlistName.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(editable: Editable?) {
+                    if (editable.toString() != PlaylistNameOriginal) {
+                        findViewById<LinearLayout>(R.id.save_name_container).visibility = View.VISIBLE
+                    } else {
+                        findViewById<LinearLayout>(R.id.save_name_container).visibility = View.GONE
+                    }
                 }
-            }
-        })
+            })
+        }
 
         saveButton.setOnClickListener {
             PlaylistNameOriginal = playlistName.text.toString().trim()
@@ -153,7 +162,7 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
             data?.data?.let { uri ->
                 Log.d("URI", "$uri")
-                val imageRef = storageReference.child("images/${UUID.randomUUID()}") // Unique ID for the image
+                val imageRef = storageReference.child("images/playlists/${UUID.randomUUID()}")
                 imageRef.putFile(uri)
                     .addOnSuccessListener {
                         imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
@@ -171,11 +180,16 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
     private fun removeGameToPlaylist(game: Games) {
         lifecycleScope.launch {
+            playlistDetails.games?.let {
+                it.remove(game)
+                findViewById<TextView>(R.id.num_games).text = "${it.size} games"
+            }
+
             gameOrUserAdapter.removeGameToPlaylist(game)
-            gameOrUserAdapter?.notifyDataSetChanged()
             playlistDataHelper.removeGameFromPlaylist(playlistDetails.playlistId, game)
         }
     }
+
 }
 class NonScrollableRecyclerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0

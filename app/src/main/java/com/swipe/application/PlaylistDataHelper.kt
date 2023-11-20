@@ -5,6 +5,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.GenericTypeIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -23,7 +24,14 @@ class PlaylistDataHelper {
                     val username = snapshot.child("username").getValue(String::class.java) ?: ""
                     val imageId = snapshot.child("imageId").getValue(Int::class.java)
                     val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
-                    val games = snapshot.child("games").getValue(ArrayList<Games>()::class.java) ?: arrayListOf()
+                    val games = ArrayList<Games>()
+
+                    // Iterate through each game in the snapshot
+                    val gamesSnapshot = snapshot.child("games")
+                    for (gameSnapshot in gamesSnapshot.children) {
+                        val game = gameSnapshot.getValue(Games::class.java)
+                        game?.let { games.add(it) }
+                    }
 
                     val playlist = Playlist(id, playlistName, username, imageId, imageURL, games)
                     playlists.add(playlist)
@@ -68,7 +76,7 @@ class PlaylistDataHelper {
             newPlaylistRef.child("username").setValue(user)
             newPlaylistRef.child("imageId").setValue(R.drawable.games)
             newPlaylistRef.child("imageURL").setValue(null)
-            newPlaylistRef.child("games").setValue(null)
+            newPlaylistRef.child("games").setValue(ArrayList<Games>())
 
             // Update user's playlist data
             userRef.child(user).child("playlists").orderByKey().limitToLast(1)
@@ -165,18 +173,14 @@ class PlaylistDataHelper {
             playlistGamesRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        // Create a new list to hold the updated games
-                        val updatedGames = ArrayList<Games>()
-
                         for (gameSnapshot in snapshot.children) {
                             val getGame = gameSnapshot.getValue(Games::class.java)
-                            if (getGame != null && getGame != game) {
-                                updatedGames.add(getGame)
+                            if (getGame != null && getGame.gameId == game.gameId) {
+                                // Remove the game with the matching ID
+                                gameSnapshot.ref.removeValue()
+                                break // Stop the loop once the game is found and removed
                             }
                         }
-
-                        // Update the games in Firebase
-                        playlistGamesRef.setValue(updatedGames)
                     }
                 }
 
@@ -188,5 +192,4 @@ class PlaylistDataHelper {
             Log.e("FirebaseError", "Error removing game from playlist", e)
         }
     }
-
 }

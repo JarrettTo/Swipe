@@ -16,7 +16,10 @@ class GameDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.see_more)
 
-        val gameDetails = intent.getBundleExtra("gameDetails")?.getSerializable("gameDetails") as? Games
+        var gameDetails = intent.getBundleExtra("gameDetails")?.getSerializable("gameDetails") as? Games
+        if (gameDetails == null) {
+            gameDetails = intent.getSerializableExtra("gameDetails") as? Games
+        }
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)

@@ -214,7 +214,7 @@
             android:id="@+id/playButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/orange"
+            android:background="@drawable/rounded_button"
             android:text="Play"
             android:textColor="@color/white"
             android:textStyle="bold"

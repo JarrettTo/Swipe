@@ -1,6 +1,8 @@
 package com.swipe.application
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
@@ -80,8 +82,17 @@ class AddGamesToPlaylist : AppCompatActivity() , PlaylistGameActionListener {
         dialogView.findViewById<Button>(R.id.btnConfirmYes).setOnClickListener {
             // Handle "Yes" action
             val game = DataHelper().findGamebyName(itemTitle)
-
+            if (game != null) {
+                addGameToPlaylist(game)
+            }
             alertDialog.dismiss()
+
+            val intent = Intent(this, PlaylistDetailsActivity::class.java)
+            val playlistDetailsBundle = Bundle().apply {
+                putSerializable("playlistDetails", playlistDetails)
+            }
+            intent.putExtra("playlistDetails", playlistDetailsBundle)
+            startActivity(intent)
         }
 
         dialogView.findViewById<Button>(R.id.btnConfirmNo).setOnClickListener {
@@ -92,8 +103,17 @@ class AddGamesToPlaylist : AppCompatActivity() , PlaylistGameActionListener {
     }
 
     private fun addGameToPlaylist(game: Games) {
-        lifecycleScope.launch {
-            playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
-        }
+        GamesDataHelper.fetchSingleGameInfoSteamAPI(game.gameId, object : GamesDataHelper.Companion.GameSingleInfoCallback {
+            override fun onResult(result: Games?) {
+                if (result != null) {
+                    Log.d("SteamAPI", "Fetched game info: ${result.gameName}")
+                    lifecycleScope.launch {
+                        playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, result)
+                    }
+                } else {
+                    Log.d("SteamAPI", "Could not fetch game info for game ID: ${game.gameId}")
+                }
+            }
+        })
     }
 }

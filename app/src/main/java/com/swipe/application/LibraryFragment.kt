@@ -115,16 +115,25 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         alertDialog.show()
     }
 
-    private fun createPlaylist(name:String){
+    private fun createPlaylist(name: String) {
         lifecycleScope.launch {
-            var playlist = playlistDataHelper.insertPlaylist(name, userSession.userName!!)
-            Log.d("CODE", "CODE: ${playlist}")
-            userSession.addPlaylistId(playlist)
-            val newPlaylist = Playlist(playlist, name, userSession.userName!!, R.drawable.games, "", null)
-            adapter.addPlaylist(newPlaylist)
-            adapter?.notifyDataSetChanged()
+            val existingPlaylists = playlistDataHelper.retrievePlaylists(userSession.playlist)
+            val playlistExists = existingPlaylists.any { it.playlistName == name }
+
+            if (!playlistExists) {
+                val playlistId = playlistDataHelper.insertPlaylist(name, userSession.userName!!)
+                Log.d("CODE", "CODE: $playlistId")
+
+                userSession.addPlaylistId(playlistId)
+                val newPlaylist = Playlist(playlistId, name, userSession.userName!!, R.drawable.games, "", null)
+                adapter.addPlaylist(newPlaylist)
+                adapter.notifyDataSetChanged()
+            } else {
+                Log.d("CreatePlaylist", "Playlist with name $name already exists.")
+            }
         }
     }
+
 
     private fun deletePlaylist(name:String){
         lifecycleScope.launch {
