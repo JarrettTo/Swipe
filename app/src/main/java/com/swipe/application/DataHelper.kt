@@ -27,6 +27,7 @@ class DataHelper {
         val users = ArrayList<Users>()
         users.add(
             Users(
+                "1",
                 "Faker",
                 R.drawable.faker,
                 ""
@@ -34,6 +35,7 @@ class DataHelper {
         )
         users.add(
             Users(
+                "2",
                 "bjergsen",
                 R.drawable.bjergsen,
                 ""
@@ -41,6 +43,7 @@ class DataHelper {
         )
         users.add(
             Users(
+                "3",
                 "karltzy",
                 R.drawable.karltzy,
                 ""
@@ -48,6 +51,7 @@ class DataHelper {
         )
         users.add(
             Users(
+                "4",
                 "Serral",
                 R.drawable.serral,
                 ""
