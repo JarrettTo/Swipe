@@ -47,7 +47,7 @@ class ReviewDataHelper {
         return@withContext reviews
     }
 
-    suspend fun retrieveAllReviewsForUserAndGame(gameID: Int, userID: String): List<Reviews> = withContext(Dispatchers.IO) {
+    suspend fun retrieveAllReviewsForUserAndGame(gameID: Int, username: String): List<Reviews> = withContext(Dispatchers.IO) {
         val reviews = mutableListOf<Reviews>()
         val dbRef = FirebaseDatabase.getInstance().getReference("test")
         val reviewsRef = dbRef.child("reviews")
@@ -56,7 +56,7 @@ class ReviewDataHelper {
             val snapshot = reviewsRef.get().await()
             for (reviewSnapshot in snapshot.children) {
                 var review = reviewSnapshot.getValue<Reviews>()
-                if (review != null && review.gameId == gameID && review.user.userID == userID) {
+                if (review != null && review.gameId == gameID && review.user.username == username) {
                     review.reviewID = reviewSnapshot.key.toString()
                     reviews.add(review)
                 }

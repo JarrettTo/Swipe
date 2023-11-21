@@ -79,7 +79,7 @@ class GameDetailsHolder(
 
         lifecycleScope.launch {
             val generalReviews = reviewDataHelper.retrieveReviews(game.gameId)
-            val userSpecificReviews = reviewDataHelper.retrieveAllReviewsForUserAndGame(game.gameId, DataHelper().getUser().userID)
+            val userSpecificReviews = reviewDataHelper.retrieveAllReviewsForUserAndGame(game.gameId, DataHelper().getUser().username)
 
             val combinedReviews = (generalReviews + userSpecificReviews).distinctBy { it.reviewID }
             Log.d("reviews", "$combinedReviews")

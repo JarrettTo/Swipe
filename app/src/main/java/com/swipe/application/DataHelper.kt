@@ -28,7 +28,6 @@ class DataHelper {
         users = ArrayList<Users>()
         users.add(
             Users(
-                "1",
                 "Faker",
                 R.drawable.faker,
                 ""
@@ -36,7 +35,6 @@ class DataHelper {
         )
         users.add(
             Users(
-                "2",
                 "bjergsen",
                 R.drawable.bjergsen,
                 ""
@@ -44,7 +42,6 @@ class DataHelper {
         )
         users.add(
             Users(
-                "3",
                 "karltzy",
                 R.drawable.karltzy,
                 ""
@@ -52,7 +49,6 @@ class DataHelper {
         )
         users.add(
             Users(
-                "4",
                 "Serral",
                 R.drawable.serral,
                 ""
@@ -300,7 +296,6 @@ class DataHelper {
 
     fun getUser() : Users {
         var user = Users(
-            "12346",
             "heheWOW23",
             R.drawable.dp,
             ""
