@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class LibraryAdapter (private var data: ArrayList<Playlist>, private val listener: PlaylistActionListener): RecyclerView.Adapter<LibraryHolder>(){
+class LibraryAdapter (private var data: ArrayList<Playlist>, private val listener: PlaylistActionListener, private val clickListener: ((Playlist) -> Unit)? = null): RecyclerView.Adapter<LibraryHolder>(){
     var isNotDeleteMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.show_playlist, parent, false)
-        return LibraryHolder(view, parent.context, listener){}
+        return LibraryHolder(view, parent.context, listener, clickListener)
     }
     override fun getItemCount(): Int{
         return data!!.size

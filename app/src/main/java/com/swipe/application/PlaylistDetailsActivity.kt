@@ -21,11 +21,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
+import java.io.Serializable
 import java.util.UUID
 
 interface PlaylistGameActionListener {
     fun onAddPlaylistGameAction(games: Games)
     fun onDeletePlaylistGameAction(games: Games)
+
+    fun onAddPlaylistAction(playlist: Playlist)
+    fun onDeletePlaylistAction(playlist: Playlist)
 }
 
 class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
@@ -38,6 +42,12 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
     override fun onDeletePlaylistGameAction(game: Games) {
         removeGameToPlaylist(game)
+    }
+
+    override fun onAddPlaylistAction(playlist: Playlist) {
+    }
+
+    override fun onDeletePlaylistAction(playlist: Playlist) {
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -65,12 +75,17 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         val saveContainer: LinearLayout = findViewById(R.id.save_name_container)
         val saveButton: Button = findViewById(R.id.save_btn)
         val cancelButton: Button = findViewById(R.id.cancel_btn)
-        val gameItemClickListener: (Games) -> Unit = { game ->
-            val intent = Intent(this, GameDetailsActivity::class.java).apply {
-                putExtra("gameDetails", game)
+        val gameItemClickListener: (Any) -> Unit = { item ->
+            if (item is Games) {
+                val intent = Intent(this, GameDetailsActivity::class.java).apply {
+                    putExtra("gameDetails", item as Serializable)
+                }
+                startActivity(intent)
+            } else {
+                Log.e("GameItemClickListener", "Item is not of type Game")
             }
-            startActivity(intent)
         }
+
 
 
         userSession = UserSession(this)

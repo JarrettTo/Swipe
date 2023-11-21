@@ -25,7 +25,7 @@ fun Int.dpToPx(context: Context): Int {
     ).toInt()
 }
 
-class LibraryHolder(itemView: View, private val context: Context, private val listener: PlaylistActionListener, private val clickListener: (() -> Unit)? = null) :
+class LibraryHolder(itemView: View, private val context: Context, private val listener: PlaylistActionListener, private val clickListener: ((Playlist) -> Unit)? = null) :
     RecyclerView.ViewHolder(itemView) {
     private val playlistLogo: ImageView = itemView.findViewById(R.id.icon)
     private val playlistName: TextView = itemView.findViewById(R.id.playlist_name)
@@ -64,14 +64,7 @@ class LibraryHolder(itemView: View, private val context: Context, private val li
 
         clickListener?.let { listener ->
             itemView.setOnClickListener {
-                val intent = Intent(context, PlaylistDetailsActivity::class.java)
-                val playlistDetailsBundle = Bundle().apply {
-                    putSerializable("playlistDetails", playlist)
-                }
-                intent.putExtra("playlistDetails", playlistDetailsBundle)
-
-                context.startActivity(intent)
-                listener.invoke()
+                listener.invoke(playlist)
             }
         }
     }

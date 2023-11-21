@@ -27,6 +27,11 @@ class AddGamesToPlaylist : AppCompatActivity() , PlaylistGameActionListener {
     override fun onDeletePlaylistGameAction(game: Games) {
     }
 
+    override fun onAddPlaylistAction(playlist: Playlist) {
+    }
+    override fun onDeletePlaylistAction(playlist: Playlist) {
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.search)

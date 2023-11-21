@@ -106,7 +106,7 @@
             android:inputType="textMultiLine"
             android:background="@drawable/rounded_et_bg"
             android:padding="10dp"
-            android:textColor="#DDDDDD"
+            android:textColor="@color/black"
             android:textColorHint="#DDDDDD"
             android:textSize="16sp"
             android:gravity="top" />
@@ -131,7 +131,7 @@
             android:inputType="textPassword"
             android:background="@drawable/rounded_et_bg"
             android:padding="10dp"
-            android:textColor="#DDDDDD"
+            android:textColor="@color/black"
             android:textColorHint="#DDDDDD"
             android:textSize="16sp" />
 
@@ -144,7 +144,7 @@
             android:inputType="textPassword"
             android:background="@drawable/rounded_et_bg"
             android:padding="10dp"
-            android:textColor="#DDDDDD"
+            android:textColor="@color/black"
             android:textColorHint="#DDDDDD"
             android:textSize="16sp" />
 
@@ -157,7 +157,7 @@
             android:inputType="textPassword"
             android:background="@drawable/rounded_et_bg"
             android:padding="10dp"
-            android:textColor="#DDDDDD"
+            android:textColor="@color/black"
             android:textColorHint="#DDDDDD"
             android:textSize="16sp" />
 

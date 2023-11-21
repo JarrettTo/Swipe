@@ -37,5 +37,11 @@
         <activity
             android:name=".AddGamesToPlaylist">
         </activity>
+        <activity
+            android:name=".GroupDetailsActivity">
+        </activity>
+        <activity
+            android:name=".AddPlaylistToGroup">
+        </activity>
     </application>
 </manifest>

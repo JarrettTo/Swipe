@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
 interface PlaylistActionListener {
     fun onDeletePlaylistAction(name: String)
@@ -63,7 +64,16 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         lifecycleScope.launch {
             playlistList = playlistDataHelper.retrievePlaylists(playlists)
             Log.d("PLAYLIST:", "CHECK ${playlistList}")
-            adapter = LibraryAdapter(playlistList, this@LibraryFragment)
+            adapter = LibraryAdapter(playlistList, this@LibraryFragment) { clickedPlaylist ->
+                Log.d("CLICKED PLAYLIST", "$clickedPlaylist")
+                val intent = Intent(context, PlaylistDetailsActivity::class.java)
+                val playlistDetailsBundle = Bundle().apply {
+                    putSerializable("playlistDetails", clickedPlaylist)
+                }
+                intent.putExtra("playlistDetails", playlistDetailsBundle)
+
+                startActivity(intent)
+            }
             adapter.isNotDeleteMode = true
             groupView.adapter = adapter
         }

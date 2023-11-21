@@ -26,6 +26,8 @@ interface GroupDetailsListener {
     fun onGroupUpdated(groups: ArrayList<String>)
     fun onGroupDeleted(group: Groups)
 
+    fun onGroupClicked(group: Groups, isCreator: Boolean)
+
 }
 class GroupFragment : Fragment() , GroupDetailsListener {
     private lateinit var groupView: RecyclerView
@@ -45,6 +47,14 @@ class GroupFragment : Fragment() , GroupDetailsListener {
 
     override fun onGroupDeleted(group: Groups) {
         adapter.removeGroup(group)
+    }
+
+    override fun onGroupClicked(group: Groups, isCreator: Boolean) {
+        val intent = Intent(requireContext(), GroupDetailsActivity::class.java).apply {
+            putExtra("GroupDetails", group)
+            putExtra("isCreator", isCreator)
+        }
+        startActivity(intent)
     }
 
     override fun onCreateView(

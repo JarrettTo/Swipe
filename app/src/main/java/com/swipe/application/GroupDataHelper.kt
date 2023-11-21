@@ -302,4 +302,101 @@ class GroupDataHelper {
         }
         return@withContext deferredUri.await()
     }
+
+    suspend fun updateGroupName(gameId: String, newGroupName: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("name").setValue(newGroupName).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating group name", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun updateGroupDesc(gameId: String, newGroupDesc: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("desc").setValue(newGroupDesc).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating group description", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun updateGroupImage(gameId: String, newImageId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("uri").setValue(newImageId).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating playlist image", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun getCreator(groupID: String): String = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(groupID)
+
+        try {
+            val snapshot = groupRef.get().await()
+            val creatorUserId = snapshot.child("creator").getValue(String::class.java)
+
+            return@withContext creatorUserId.toString()
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error deleting group", e)
+            return@withContext ""
+        }
+    }
+
+    suspend fun insertPlaylist(code: String, playlistId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code)
+        try {
+            val playlistSnapshot = groupRef.child("playlists").get().await()
+            val playlistList = playlistSnapshot.getValue<ArrayList<String>>() ?: arrayListOf()
+
+            if (!playlistList.contains(playlistId)) {
+                playlistList.add(playlistId)
+                groupRef.child("playlists").setValue(playlistList).await()
+            }
+
+            return@withContext true
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error in adding playlist to group", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun removePlaylist(code: String, playlistId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code)
+        try {
+            val playlistSnapshot = groupRef.child("playlists").get().await()
+            val playlistList = playlistSnapshot.getValue<ArrayList<String>>() ?: arrayListOf()
+
+            if (playlistList.contains(playlistId)) {
+                playlistList.remove(playlistId)
+                groupRef.child("playlists").setValue(playlistList).await()
+                return@withContext true
+
+            } else {
+                return@withContext false
+            }
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error in removing playlist from group", e)
+            return@withContext false
+        }
+    }
+
 }
