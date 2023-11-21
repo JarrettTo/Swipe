@@ -18,7 +18,7 @@
         android:background="@drawable/rounded_icon_bg">>
 
         <androidx.cardview.widget.CardView
-            android:layout_width="200dp"
+            android:layout_width="300dp"
             android:layout_height="200dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp" >
@@ -27,8 +27,8 @@
                 android:id="@+id/bannerImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@color/background"
+                android:scaleType="fitXY"
+                android:src="@drawable/groups"
                 />
         </androidx.cardview.widget.CardView>
     </FrameLayout>

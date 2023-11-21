@@ -56,6 +56,16 @@ class UserSession(context: Context) {
         return true
     }
 
+    fun removeGroupId(groupId: String): Boolean {
+        val currentIds = groups?.toMutableSet()
+        if (currentIds != null && currentIds.contains(groupId)) {
+            currentIds.remove(groupId)
+            groups = currentIds
+            return true
+        }
+        return false
+    }
+
     fun addPlaylistId(playlistId: String) : Boolean {
         if(playlist?.contains(playlistId) == true){
             return false
