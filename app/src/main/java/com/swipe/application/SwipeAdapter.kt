@@ -35,7 +35,7 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
                 // Now update your adapter's data set with these games
                 // Make sure to update the adapter on the main thread if needed
 
-                    // Update your adapter's data and refresh the UI
+                // Update your adapter's data and refresh the UI
                 mData.addAll(games)
                 Log.d("REFRESH","NEW GROUPS: ${mData}")
 

@@ -27,6 +27,7 @@ class MainFragment : Fragment(){
     private val myRef = database.getReference("test")
     private val playlistDataHelper = PlaylistDataHelper()
     private lateinit var db : DatabaseHelper
+
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,10 +63,13 @@ class MainFragment : Fragment(){
         db =DatabaseHelper(requireContext())
         swipeStack.setSaveGame(this::saveGame)
         val spinner: Spinner = view.findViewById(R.id.spinner)
-        val choices = arrayOf("Personal Feed", "The Kittens")
+        val group = GroupDataHelper()
+        lifecycleScope.launch {
+            val choices = group.retrieveGroupsName(userSession.groups).toTypedArray()
+            val adapter = CustomSpinnerAdapter(requireContext(), choices)
+            spinner.adapter = adapter
+        }
 
-        val adapter = CustomSpinnerAdapter(requireContext(), choices)
-        spinner.adapter = adapter
         return view
     }
     fun saveGame(games: Games){

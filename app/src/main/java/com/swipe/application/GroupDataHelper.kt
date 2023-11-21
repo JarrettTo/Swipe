@@ -49,7 +49,29 @@ class GroupDataHelper {
         }
         return@withContext groups
     }
+    suspend fun retrieveGroupsName(groupsId: MutableSet<String>?): ArrayList<String> = withContext(Dispatchers.IO){
+        val groups = arrayListOf("Personal Feed")
+        val countDownLatch = CountDownLatch(groupsId!!.size)
+        for (id in groupsId) {
+            val groupRef = FirebaseDatabase.getInstance().getReference("test").child("groups").child(id)
+            try {
+                Log.d("TEST:", "CHECK ")
+                val snapshot = groupRef.get().await()
+                if (snapshot.exists()) {
+                    val groupName = snapshot.child("name").getValue(String::class.java) ?: ""
 
+
+                    groups.add(groupName)
+
+
+                }
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("FirebaseError", "Error fetching data", e)
+            }
+        }
+        return@withContext groups
+    }
     suspend fun retrieveGroup(id: String): Groups? = withContext(Dispatchers.IO){
         val groupRef =   FirebaseDatabase.getInstance().getReference("test").child("groups").child(id)
         try {
@@ -207,6 +229,8 @@ class GroupDataHelper {
         }
         return@withContext null
     }
+
+
 
     suspend fun leaveGroup(groupId: String, userName: String): Boolean = withContext(Dispatchers.IO) {
         val dbRef = FirebaseDatabase.getInstance().getReference("test")
