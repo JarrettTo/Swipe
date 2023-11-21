@@ -16,14 +16,15 @@ class SearchFragment : Fragment() {
     private lateinit var gamesListView: RecyclerView
     private lateinit var adapter: SearchAdapter
     private lateinit var searchView: SearchView
-
+    private lateinit var db : DatabaseHelper
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.search, container, false)
+        db = DatabaseHelper(requireContext())
         if (gameList.isEmpty()) {
-            gameList = DataHelper().initializeData()
+            gameList = db.getGames()!!
         }
 
         Log.d("SearchActivity", "All Games: $gameList")
@@ -58,17 +59,14 @@ class SearchFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrEmpty()) {
-                    adapter.filterList(gamesNamesList.orEmpty().filterNotNull())
-                } else {
-                    val filteredList = gamesNamesList.orEmpty().filter {
-                        it?.startsWith(newText, ignoreCase = true) == true
-                    }.mapNotNull { it }
+                newText?.let {
+                    val dbHelper = DatabaseHelper(requireContext())
+                    val filteredGames = dbHelper.searchGamesByName(it)
 
-                    Log.d("SearchActivity", "Filtered List: $filteredList")
-
-                    adapter.filterList(filteredList)
-                }
+                    // Assuming you have a way to convert filteredGames to a list of game names
+                    val gameNames = filteredGames.map { game -> game.gameName.orEmpty() }
+                    adapter.filterList(gameNames)
+                } ?: adapter.filterList(emptyList())
                 return false
             }
         })

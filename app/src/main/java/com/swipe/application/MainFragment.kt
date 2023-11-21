@@ -26,7 +26,7 @@ class MainFragment : Fragment(){
     private val database = FirebaseDatabase.getInstance()
     private val myRef = database.getReference("test")
     private val playlistDataHelper = PlaylistDataHelper()
-
+    private lateinit var db : DatabaseHelper
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +37,7 @@ class MainFragment : Fragment(){
         val userName = userSession.userName
         val userId = userSession.userId
         val likedMessageIds = userSession.likedGameIds
+
         val usernameTextView: TextView = view.findViewById(R.id.home_username)
         if(userName !=""){
             usernameTextView.text = userName
@@ -58,7 +59,7 @@ class MainFragment : Fragment(){
         }
 
         swipeStack.adapter = swipeAdapter
-
+        db =DatabaseHelper(requireContext())
         swipeStack.setSaveGame(this::saveGame)
         val spinner: Spinner = view.findViewById(R.id.spinner)
         val choices = arrayOf("Personal Feed", "The Kittens")
@@ -76,8 +77,10 @@ class MainFragment : Fragment(){
         myRef.child("users").child(userSession.userName!!).child("likes").setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
             Log.d("TEST:", "SUCCESS!")
         }
-
+        db.saveGame(games)
+        Log.d("TEST GAME DB:", "${db.getGame(games.gameId)}")
         addGameToPlaylist(games)
+
     }
 
     private fun addGameToPlaylist(game: Games) {

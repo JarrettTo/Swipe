@@ -10,7 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 
-
+interface GameSingleInfoCallback {
+    fun onResult(result: Games?)
+}
 class MainActivity : AppCompatActivity() {
     private var gameList: ArrayList<Games> = arrayListOf()
     private lateinit var swipeStack: SwipeStack
@@ -41,8 +43,18 @@ class MainActivity : AppCompatActivity() {
         if(userSession.userName == ""){
             //TODO: Insert logic that redirects them to login page
         }
+        val db = DatabaseHelper(this)
+        for(i in 0 until userSession.likedGameIds!!.size){
+            GamesDataHelper.fetchSingleGameInfoSteamAPI(userSession.likedGameIds!!.elementAtOrNull(i)?.toInt()!!, object : GamesDataHelper.Companion.GameSingleInfoCallback {
+                override fun onResult(result: Games?) {
+                    if (result!=null) {
+                        db.saveGame(result)
+                    }
+                }
+            })
 
 
+        }
 
 
 
