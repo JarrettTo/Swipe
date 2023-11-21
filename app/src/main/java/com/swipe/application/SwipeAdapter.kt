@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick: (Games) -> Unit): BaseAdapter() {
+class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick: (Games) -> Unit ): BaseAdapter() {
     var swipeCount = 0
     var onDataChanged: (() -> Unit)? = null
     override fun getCount(): Int {
@@ -25,13 +25,13 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
     fun removeItem(p0: Int) {
         mData.removeAt(p0)
     }
-    fun updateList(likedGames : MutableSet<String>) {
+    /*fun updateList(likedGames : MutableSet<String>) {
         //remove item at the top of the stack
         swipeCount+=1
         if(mData.size < 7){
 
             try {
-                val games = GamesDataHelper.retrieveGames(10, likedGames)
+                val games
                 // Now update your adapter's data set with these games
                 // Make sure to update the adapter on the main thread if needed
 
@@ -47,6 +47,9 @@ class SwipeAdapter(private val mData: ArrayList<Games>, private var onItemClick:
 
 
 
+    }*/
+    fun addGames(games: List<Games>){
+        mData.addAll(games)
     }
 
 

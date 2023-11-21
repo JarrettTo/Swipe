@@ -42,6 +42,7 @@ class SwipeStack @JvmOverloads constructor(
     var topView : View? = null
         private set
     private lateinit var saveGame : (Games) -> Unit
+    private lateinit var onSwipe : (Int, MutableSet<String>) -> Unit
     private var mSwipeHelper: SwipeHelper?= null
     private var mDataObserver : DataSetObserver?= null
     private lateinit var mListener: MySwipeStackListener
@@ -55,6 +56,10 @@ class SwipeStack @JvmOverloads constructor(
     fun setSaveGame(saveGame : (Games) -> Unit){
         this@SwipeStack.saveGame = saveGame
         mListener= MySwipeStackListener(saveGame)
+    }
+    fun setOnSwipe(onSwipe : (Int, MutableSet<String>) -> Unit){
+        this@SwipeStack.onSwipe = onSwipe
+
     }
 
 
@@ -248,10 +253,12 @@ class SwipeStack @JvmOverloads constructor(
         if(mListener != null){
             mListener!!.onViewSwipedToLeft(0)
 
-            mAdapter!!.updateList(userSession.likedGameIds!!)
+            onSwipe(20, userSession.likedGameIds!!)
         }
         removeTopView()
-        mCurrentViewIndex--
+        if(mCurrentViewIndex>0){
+            mCurrentViewIndex--
+        }
         mAdapter!!.removeItem(currentPosition)
 
     }
@@ -261,11 +268,14 @@ class SwipeStack @JvmOverloads constructor(
 
             mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
 
-            mAdapter!!.updateList(userSession.likedGameIds!!)
+            onSwipe(20, userSession.likedGameIds!!)
 
         }
         removeTopView()
-        mCurrentViewIndex--
+        if(mCurrentViewIndex>0){
+            mCurrentViewIndex--
+        }
+
         mAdapter!!.removeItem(currentPosition)
 
     }
@@ -306,6 +316,10 @@ class SwipeStack @JvmOverloads constructor(
         mCurrentViewIndex = 0
         removeAllViewsInLayout()
         requestLayout()
+    }
+
+    fun addGames(retrieveGames: List<Games>) {
+        mAdapter?.addGames(retrieveGames)
     }
 
     interface SwipeStackListener {

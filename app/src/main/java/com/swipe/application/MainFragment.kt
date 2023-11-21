@@ -62,6 +62,7 @@ class MainFragment : Fragment(){
         swipeStack.adapter = swipeAdapter
         db =DatabaseHelper(requireContext())
         swipeStack.setSaveGame(this::saveGame)
+        swipeStack.setOnSwipe(this::onSwipe)
         val spinner: Spinner = view.findViewById(R.id.spinner)
         val group = GroupDataHelper()
         lifecycleScope.launch {
@@ -86,7 +87,12 @@ class MainFragment : Fragment(){
         addGameToPlaylist(games)
 
     }
+    fun onSwipe(count: Int, likedGames: MutableSet<String>)  {
+        lifecycleScope.launch {
 
+            swipeStack.addGames(GamesDataHelper.retrieveGames(count, likedGames))
+        }
+    }
     private fun addGameToPlaylist(game: Games) {
         lifecycleScope.launch {
             val existingPlaylists = playlistDataHelper.retrievePlaylists(userSession.playlist)
