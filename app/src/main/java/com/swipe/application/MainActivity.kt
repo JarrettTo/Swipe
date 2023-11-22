@@ -65,10 +65,8 @@ class MainActivity : AppCompatActivity() {
                     e.printStackTrace()
                 } finally {
                     // Hide the ProgressBar once the data is loaded or an error occurs
-                    progressBar.visibility = View.GONE
-                    if(!gameList.isEmpty()){
-                        setupUI()
-                    }
+
+
 
                 }
             }
@@ -104,7 +102,14 @@ class MainActivity : AppCompatActivity() {
 
                 errorLayout.visibility = View.VISIBLE
             } finally {
-                progressBar.visibility = View.GONE
+
+                if(gameList.isEmpty()){
+                    errorLayout.visibility = View.VISIBLE
+                }else{
+
+                    progressBar.visibility = View.GONE
+                    setupUI()
+                }
             }
         }
     }
@@ -150,4 +155,5 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
     }
+
 }

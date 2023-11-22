@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 class MainFragment : Fragment(){
@@ -30,7 +31,7 @@ class MainFragment : Fragment(){
     private val groupDataHelper = GroupDataHelper()
     private lateinit var db : DatabaseHelper
     private lateinit var feed: String
-
+    private val isNavigatingToMain = AtomicBoolean(false)
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -127,10 +128,10 @@ class MainFragment : Fragment(){
     }
 
     private fun goToMainActivity() {
-        val intent = Intent(context, MainActivity::class.java)
-        // Optionally add flags if needed. For example:
-        // intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
+        if (isNavigatingToMain.compareAndSet(false, true)) {
+            val intent = Intent(context, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 
