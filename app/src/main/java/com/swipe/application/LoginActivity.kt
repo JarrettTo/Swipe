@@ -21,13 +21,14 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginBtn: Button
     private lateinit var signUpTextView: TextView
     private lateinit var databaseReference: DatabaseReference
+    private lateinit var userDataHelper: UserDataHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
-        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 
-        val usersBranch: DatabaseReference = database.getReference("test")
-        val userIn = usersBranch.child("users")
+        userDataHelper = UserDataHelper()
+
          usernameEditText = findViewById(R.id.username_log)
          passwordEditText = findViewById(R.id.password_log)
          loginBtn = findViewById(R.id.LoginBtn)
@@ -44,36 +45,17 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString().trim()
             Log.d("LOL", "$username $password")
             if (username.isNotEmpty() && password.isNotEmpty()) {
-                //DB CHECKER
-//                performLogin()
-//                val intent = Intent(this, MainActivity::class.java)
-//                startActivity(intent)
-
-                userIn.equalTo(username)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                for (userSnapshot in dataSnapshot.children) {
-                                    val user = userSnapshot.getValue(Users::class.java)
-                                    if (user != null && user.password == password) {
-                                        // Username and password match
-                                        Log.d("LOL", "$user")
-                                        performLogin()
-                                        goToMainActivity()
-                                    }
-                                }
-                            } else {
-                                // Username does not exist
-                                Toast.makeText(this@LoginActivity, "This user does not exist", Toast.LENGTH_LONG).show()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // Handle errors, if any
-                        }
-                    })
+                userDataHelper.authenticateUser(username, password,
+                    onSuccess = {
+                        performLogin()
+                        goToMainActivity()
+                    },
+                    onFailure = { message ->
+                        showCustomToast("$message")
+                    }
+                )
             } else {
-                Toast.makeText(this, "Username and password cannot be empty", Toast.LENGTH_LONG).show()
+                showCustomToast("Username and password cannot be empty")
             }
         }
 
@@ -107,5 +89,19 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun showCustomToast(message: String) {
+        val inflater = layoutInflater
+        val layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.toast_container))
+
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with (Toast(this)) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
+        }
     }
 }

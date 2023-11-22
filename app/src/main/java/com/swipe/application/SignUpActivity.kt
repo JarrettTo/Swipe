@@ -24,15 +24,14 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var confirmPasswordEditText: EditText
     private lateinit var signUpButton: Button
     private lateinit var loginTextView: TextView
-    private lateinit var databaseReference: DatabaseReference
     private lateinit var userSession: UserSession
+    private lateinit var userDataHelper: UserDataHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.signup)
-        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 
-        val usersBranch: DatabaseReference = database.getReference("test")
-        val userIn = usersBranch.child("users")
+        userDataHelper = UserDataHelper()
 
         usernameEditText = findViewById(R.id.username_signup)
         passwordEditText = findViewById(R.id.password_signup)
@@ -46,42 +45,27 @@ class SignUpActivity : AppCompatActivity() {
             val confirm = confirmPasswordEditText.text.toString().trim()
 
             if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                Toast.makeText(this, "Username and password cannot be empty", Toast.LENGTH_LONG)
-                    .show()
+                    showCustomToast("Username and password cannot be empty")
             } else {
                 if (password != confirm) {
-                    Toast.makeText(this, "Password does not match", Toast.LENGTH_LONG).show()
+                    showCustomToast("Password does not match")
                 } else {
-                    //Compares existing usernames with inputted username
-                    userIn.equalTo(username)
-                        .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    for (userSnapshot in dataSnapshot.children) {
-                                        val user = userSnapshot.getValue(Users::class.java)
-                                        if (user != null && user.password == password) {
-                                            // Username and password match
-                                            Toast.makeText(this@SignUpActivity, "This username already exists", Toast.LENGTH_LONG).show()
-                                        }
-                                    }
-                                } else {
-                                    // Username does not exist: make new entry
-                                    userIn.child(username).child("password").setValue(password)
-                                    performLogin()
-                                    goToMainActivity()
-                                }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                // Handle errors, if any
-                            }
-                        })
-
+                    userDataHelper.createUser(username, password,
+                        onSuccess = {
+                            performLogin()
+                            goToMainActivity()
+                        },
+                        onFailure = {
+                            // Handle failure
+                        },
+                        onUserExists = {
+                            Toast.makeText(this@SignUpActivity, "This username already exists", Toast.LENGTH_LONG).show()
+                        }
+                    )
                 }
 
             }
         }
-
 
         loginTextView.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
@@ -107,6 +91,20 @@ class SignUpActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun showCustomToast(message: String) {
+        val inflater = layoutInflater
+        val layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.toast_container))
+
+        val textView: TextView = layout.findViewById(R.id.toast_text)
+        textView.text = message
+
+        with (Toast(this)) {
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
+        }
     }
 
 }
