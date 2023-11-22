@@ -492,4 +492,24 @@ class GroupDataHelper {
         return@withContext false
     }
 
+    suspend fun isPlaylistAlreadyInGroup(groupId: String, playlist: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupPlaylistRef = dbRef.child("groups").child(groupId).child("playlists")
+
+        try {
+            val snapshot = groupPlaylistRef.get().await()
+            if (snapshot.exists()) {
+                for (playlistSnapshot in snapshot.children) {
+                    val existingPlaylist = playlistSnapshot.getValue(String::class.java)
+                    if (existingPlaylist != null && existingPlaylist == playlist) {
+                        return@withContext true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error checking if playlist is in group", e)
+        }
+        return@withContext false
+    }
+
 }
