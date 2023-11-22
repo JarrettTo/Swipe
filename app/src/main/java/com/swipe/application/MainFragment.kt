@@ -114,9 +114,23 @@ class MainFragment : Fragment(){
 
     fun onSwipe(count: Int, likedGames: MutableSet<String>)  {
         lifecycleScope.launch {
+            try{
+                val games= GamesDataHelper.fetchGames(count, likedGames.toList())!!
+                swipeStack.addGames(games)
+            } catch (e: Exception) {
+                if(swipeStack.adapter?.count==0){
+                    goToMainActivity()
+                }
+            }
 
-            swipeStack.addGames(GamesDataHelper.fetchGames(count, likedGames.toList()))
         }
+    }
+
+    private fun goToMainActivity() {
+        val intent = Intent(context, MainActivity::class.java)
+        // Optionally add flags if needed. For example:
+        // intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
 

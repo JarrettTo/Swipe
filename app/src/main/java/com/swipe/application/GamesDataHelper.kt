@@ -22,6 +22,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.InputStreamReader
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.Semaphore
 import java.util.concurrent.Callable
@@ -140,7 +141,7 @@ class GamesDataHelper : ViewModel() {
 
 
 
-        suspend fun fetchGames(count: Int, likedGameIds: List<String>): List<Games> = withContext(Dispatchers.IO) {
+        suspend fun fetchGames(count: Int, likedGameIds: List<String>): List<Games>? = withContext(Dispatchers.IO) {
             var httpURLConnection: HttpURLConnection? = null
             val gamesList = mutableListOf<Games>()
 
@@ -148,6 +149,8 @@ class GamesDataHelper : ViewModel() {
                 val url = URL("http://10.0.2.2:5000/get_games?count=$count&likedGameIds=$likedGameIds") // Replace with your actual API URL
                 httpURLConnection = url.openConnection() as HttpURLConnection
                 httpURLConnection.requestMethod = "GET"
+                httpURLConnection.connectTimeout = 80000 // 15 seconds
+                httpURLConnection.readTimeout = 80000 // 15 seconds
                 httpURLConnection.connect()
 
                 val responseCode = httpURLConnection.responseCode
@@ -182,6 +185,9 @@ class GamesDataHelper : ViewModel() {
                         gamesList.add(game)
                     }
                 }
+            }catch (e: SocketTimeoutException) {
+                throw e
+                // Handle timeout exception
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
