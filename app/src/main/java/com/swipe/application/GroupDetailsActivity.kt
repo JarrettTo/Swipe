@@ -48,8 +48,12 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
 
     override fun onAddPlaylistGameAction(game: Games) {
         lifecycleScope.launch {
-            groupDataHelper.addGameToGroup(group.id, game)
-            gameAdapter.addGameToPlaylist(game)
+            if (groupDataHelper.isGameAlreadyInGroup(group.id, game)){
+                showCustomToast("Game is already in group")
+            } else {
+                groupDataHelper.addGameToGroup(group.id, game)
+                gameAdapter.addGameToPlaylist(game)
+            }
         }
     }
 
@@ -150,7 +154,8 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
             var gameList = groupDataHelper.returnGames(group.id)
             gameAdapter = GameOrUserAdapter(gameList.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
 
-            userAdapter = GameOrUserAdapter(group.users?.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
+            var userList = UserDataHelper().getUsersByUsernames(group.users.toMutableSet())
+            userAdapter = GameOrUserAdapter(userList.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
 
             var playlistList = PlaylistDataHelper().retrievePlaylists(group.playlists.toSet())
             playlistAdapter = GameOrUserAdapter(playlistList.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)

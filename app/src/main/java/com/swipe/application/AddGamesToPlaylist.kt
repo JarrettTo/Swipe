@@ -125,19 +125,4 @@ class AddGamesToPlaylist : AppCompatActivity() , PlaylistGameActionListener {
             }
         })
     }
-
-    private fun addGameToGroup(game: Games) {
-        GamesDataHelper.fetchSingleGameInfoSteamAPI(game.gameId, object : GamesDataHelper.Companion.GameSingleInfoCallback {
-            override fun onResult(result: Games?) {
-                if (result != null) {
-                    Log.d("SteamAPI", "Fetched game info: ${result.gameName}")
-                    lifecycleScope.launch {
-                        groupDetails?.let { groupDataHelper.addGameToGroup(it.id, result) }
-                    }
-                } else {
-                    Log.d("SteamAPI", "Could not fetch game info for game ID: ${game.gameId}")
-                }
-            }
-        })
-    }
 }

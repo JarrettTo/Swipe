@@ -135,7 +135,9 @@ class MainFragment : Fragment(){
                         playlistId = playlistExists.playlistId
                     }
 
-                    playlistDataHelper.addGameToPlaylist(playlistId, game)
+                    if (!playlistDataHelper.isGameAlreadyInPlaylist(playlistId, game)) {
+                        playlistDataHelper.addGameToPlaylist(playlistId, game)
+                    }
                 }
             } else {
                 lifecycleScope.launch {
@@ -146,7 +148,7 @@ class MainFragment : Fragment(){
                     var groupId = groupExists?.id
 
                     Log.d("existingGroupCode + existingGroups + groupExists + groupId", "$existingGroupCode + $existingGroups + $groupExists + $groupId")
-                    if (groupId != null) {
+                    if (groupId != null && !groupDataHelper.isGameAlreadyInGroup(groupId, game)) {
                         groupDataHelper.addGameToGroup(groupId, game)
                     }
                 }

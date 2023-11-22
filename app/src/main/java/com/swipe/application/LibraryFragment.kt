@@ -34,8 +34,15 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         super.onResume()
         if (::adapter.isInitialized) {
             lifecycleScope.launch {
-                val playlists = userSession.playlist
+                val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
                 playlistList = playlistDataHelper.retrievePlaylists(playlists)
+
+                val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+                if (likedGamesIndex != -1) {
+                    val likedGamesPlaylist = playlistList.removeAt(likedGamesIndex)
+                    playlistList.add(0, likedGamesPlaylist)
+                }
+
                 adapter.updateData(playlistList)
                 adapter.notifyDataSetChanged()
             }

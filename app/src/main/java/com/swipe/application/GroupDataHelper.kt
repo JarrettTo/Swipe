@@ -56,6 +56,7 @@ class GroupDataHelper {
         }
         return@withContext groups
     }
+
     suspend fun retrieveGroupsName(groupsId: MutableSet<String>?): ArrayList<String> = withContext(Dispatchers.IO){
         val groups = arrayListOf("Personal Feed")
         val countDownLatch = CountDownLatch(groupsId!!.size)
@@ -470,4 +471,25 @@ class GroupDataHelper {
 
         return@withContext gamesList
     }
+
+    suspend fun isGameAlreadyInGroup(groupId: String, game: Games): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupGamesRef = dbRef.child("groups").child(groupId).child("likes")
+
+        try {
+            val snapshot = groupGamesRef.get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { gameSnapshot ->
+                    val existingGame = gameSnapshot.getValue(Games::class.java)
+                    if (existingGame != null && existingGame.gameId == game.gameId) {
+                        return@withContext true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error checking if game is in group", e)
+        }
+        return@withContext false
+    }
+
 }

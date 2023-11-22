@@ -46,9 +46,14 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
     override fun onAddPlaylistGameAction(game: Games) {
         lifecycleScope.launch {
-            playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
-            gameOrUserAdapter.addGameToPlaylist(game)
-            findViewById<TextView>(R.id.num_games).text = "${(playlistDetails.games?.size ?: 0) + 1} games"
+            if (playlistDataHelper.isGameAlreadyInPlaylist(playlistDetails.playlistId, game)){
+                showCustomToast("Game is already in playlist")
+            } else {
+                playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
+                gameOrUserAdapter.addGameToPlaylist(game)
+                findViewById<TextView>(R.id.num_games).text =
+                    "${(playlistDetails.games?.size ?: 0) + 1} games"
+            }
         }
     }
 
@@ -90,8 +95,6 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
                 Log.e("GameItemClickListener", "Item is not of type Game")
             }
         }
-
-
 
         userSession = UserSession(this)
 

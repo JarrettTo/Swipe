@@ -212,4 +212,25 @@ class PlaylistDataHelper {
         }
         return@withContext null
     }
+
+    suspend fun isGameAlreadyInPlaylist(playlistId: String, game: Games): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistGamesRef = dbRef.child("playlist").child(playlistId).child("games")
+
+        try {
+            val snapshot = playlistGamesRef.get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { gameSnapshot ->
+                    val existingGame = gameSnapshot.getValue(Games::class.java)
+                    if (existingGame != null && existingGame.gameId == game.gameId) {
+                        return@withContext true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error checking if game is in group", e)
+        }
+        return@withContext false
+    }
+
 }
