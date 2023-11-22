@@ -32,7 +32,14 @@ class GroupDataHelper {
                     val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
                     val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
                     val groupImage = snapshot.child("uri").getValue(String::class.java) ?: ""
-                    val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                    val groupLikedGames = ArrayList<Games>()
+                    val gamesSnapshot = snapshot.child("likes")
+                    for (gameSnapshot in gamesSnapshot.children) {
+                        val game = gameSnapshot.getValue(Games::class.java)
+                        game?.let { groupLikedGames.add(it) }
+                    }
+
                     val groupPlaylists = snapshot.child("playlists").getValue<ArrayList<String>>() ?: arrayListOf()
                     val groupUsers = snapshot.child("users").getValue<ArrayList<String>>() ?: arrayListOf()
 
@@ -83,7 +90,14 @@ class GroupDataHelper {
                 val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
                 val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
                 val groupImage = snapshot.child("uri").getValue(String::class.java) ?: ""
-                val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                val groupLikedGames = ArrayList<Games>()
+                val gamesSnapshot = snapshot.child("likes")
+                for (gameSnapshot in gamesSnapshot.children) {
+                    val game = gameSnapshot.getValue(Games::class.java)
+                    game?.let { groupLikedGames.add(it) }
+                }
+
                 val groupPlaylists = snapshot.child("playlists").getValue<ArrayList<String>>() ?: arrayListOf()
                 val groupUsers = snapshot.child("users").getValue<ArrayList<String>>() ?: arrayListOf()
 
@@ -399,4 +413,61 @@ class GroupDataHelper {
         }
     }
 
+    suspend fun addGameToGroup(code: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code).child("likes")
+
+        try {
+            val gameRef = groupRef.push()
+            gameRef.setValue(game)
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error adding game to group", e)
+        }
+    }
+
+    suspend fun removeGameFromGroup(code: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupGamesRef = dbRef.child("groups").child(code).child("likes")
+
+        try {
+            groupGamesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (gameSnapshot in snapshot.children) {
+                            val getGame = gameSnapshot.getValue(Games::class.java)
+                            if (getGame != null && getGame.gameId == game.gameId) {
+                                gameSnapshot.ref.removeValue()
+                                break
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("FirebaseError", "Error removing game from playlist", databaseError.toException())
+                }
+            })
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error removing game from playlist", e)
+        }
+    }
+
+    suspend fun returnGames(groupId: String): ArrayList<Games> = withContext(Dispatchers.IO) {
+        val gamesList = ArrayList<Games>()
+        val groupRef = FirebaseDatabase.getInstance().getReference("test").child("groups").child(groupId)
+
+        try {
+            val snapshot = groupRef.child("likes").get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { childSnapshot ->
+                    val game = childSnapshot.getValue(Games::class.java)
+                    game?.let { gamesList.add(it) }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error fetching liked games", e)
+        }
+
+        return@withContext gamesList
+    }
 }

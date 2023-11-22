@@ -37,7 +37,19 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         const val PICK_IMAGE_REQUEST = 1
     }
 
+    private lateinit var recyclerView: RecyclerView
+    private val playlistDataHelper = PlaylistDataHelper()
+    private lateinit var userSession: UserSession
+    private lateinit var playlistDetails: Playlist
+    private lateinit var PlaylistNameOriginal: String
+    private lateinit var gameOrUserAdapter: GameOrUserAdapter
+
     override fun onAddPlaylistGameAction(game: Games) {
+        lifecycleScope.launch {
+            playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
+            gameOrUserAdapter.addGameToPlaylist(game)
+            findViewById<TextView>(R.id.num_games).text = "${(playlistDetails.games?.size ?: 0) + 1} games"
+        }
     }
 
     override fun onDeletePlaylistGameAction(game: Games) {
@@ -49,13 +61,6 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
     override fun onDeletePlaylistAction(playlist: Playlist) {
     }
-
-    private lateinit var recyclerView: RecyclerView
-    private val playlistDataHelper = PlaylistDataHelper()
-    private lateinit var userSession: UserSession
-    private lateinit var playlistDetails: Playlist
-    private lateinit var PlaylistNameOriginal: String
-    private lateinit var gameOrUserAdapter: GameOrUserAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +95,13 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
         userSession = UserSession(this)
 
+        if (playlistDetails.username != userSession.userName){
+            uploadPhotoButton.visibility = View.INVISIBLE
+            addButton.visibility = View.INVISIBLE
+            delButton.visibility = View.INVISIBLE
+            playlistName.isEnabled = false
+        }
+
         if (playlistDetails.imageURL != "") {
             Glide.with(this)
                 .load(playlistDetails.imageURL)
@@ -119,7 +131,7 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
                 putSerializable("playlistDetails", playlistDetails)
             }
             intent.putExtra("playlistDetails", playlistDetailsBundle)
-            startActivity(intent)
+            startActivityForResult(intent, 3)
         }
 
         delButton.setOnClickListener {
@@ -189,12 +201,20 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
                         imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                             lifecycleScope.launch {
                                 playlistDataHelper.updatePlaylistImage(playlistDetails.playlistId, downloadUri.toString().trim())
+
+                                Glide.with(this@PlaylistDetailsActivity)
+                                    .load(downloadUri.toString().trim())
+                                    .into(findViewById(R.id.icon))
                             }
                         }
                     }
                     .addOnFailureListener {
-                        // Handle failure
                     }
+            }
+        } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
+            val returnedGame = data?.getSerializableExtra("returnedGame") as? Games
+            if (returnedGame != null) {
+                onAddPlaylistGameAction(returnedGame)
             }
         }
     }

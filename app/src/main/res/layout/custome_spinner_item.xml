@@ -3,9 +3,11 @@
     android:id="@+id/spinner_item_text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/inverted_rounded_button"
     android:textSize="21sp"
     android:textColor="#9190A8"
     android:textStyle="bold"
+    android:textAlignment="center"
     android:fontFamily="sans-serif">
 
 </TextView>

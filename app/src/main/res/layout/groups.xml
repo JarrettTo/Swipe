@@ -8,23 +8,25 @@
     android:background="#13122B"
     android:backgroundTint="#13122B">
 
-    <SearchView
-        android:id="@+id/editTextText"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/Group_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="20dp"
-        android:iconifiedByDefault="false"
-        android:padding="4dp"
-        android:background="@color/white"
-        android:queryHint="Search for a group..." />
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="32dp"
+        android:text="Group"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Group" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatButton

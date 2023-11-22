@@ -46,4 +46,18 @@ class GroupAdapter(private var data: ArrayList<Groups>?, private val listener: G
         }
     }
 
+    fun updateGroup(updatedGroup: Groups) {
+        val iterator = data?.iterator()
+        while (iterator?.hasNext() == true) {
+            val currentItem = iterator.next()
+            if (currentItem.id == updatedGroup.id) {
+                val index = data?.indexOf(currentItem)
+                if (index != null && index != -1) {
+                    data?.set(index, updatedGroup)
+                    notifyItemChanged(index)
+                }
+                break
+            }
+        }
+    }
 }

@@ -73,7 +73,7 @@ class GroupHolder(itemView: View, private val context: Context, private val list
         }
 
         container.setOnClickListener {
-            listener.onGroupClicked(group, isCreator)
+            listener.onGroupClicked(group)
         }
     }
 

@@ -24,8 +24,8 @@ class PlaylistDataHelper {
                     val username = snapshot.child("username").getValue(String::class.java) ?: ""
                     val imageId = snapshot.child("imageId").getValue(Int::class.java)
                     val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
-                    val games = ArrayList<Games>()
 
+                    val games = ArrayList<Games>()
                     val gamesSnapshot = snapshot.child("games")
                     for (gameSnapshot in gamesSnapshot.children) {
                         val game = gameSnapshot.getValue(Games::class.java)

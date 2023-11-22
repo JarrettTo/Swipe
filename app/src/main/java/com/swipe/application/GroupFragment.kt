@@ -26,7 +26,7 @@ interface GroupDetailsListener {
     fun onGroupUpdated(groups: ArrayList<String>)
     fun onGroupDeleted(group: Groups)
 
-    fun onGroupClicked(group: Groups, isCreator: Boolean)
+    fun onGroupClicked(group: Groups)
 
 }
 class GroupFragment : Fragment() , GroupDetailsListener {
@@ -49,12 +49,11 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         adapter.removeGroup(group)
     }
 
-    override fun onGroupClicked(group: Groups, isCreator: Boolean) {
+    override fun onGroupClicked(group: Groups) {
         val intent = Intent(requireContext(), GroupDetailsActivity::class.java).apply {
             putExtra("GroupDetails", group)
-            putExtra("isCreator", isCreator)
         }
-        startActivity(intent)
+        startActivityForResult(intent, 2)
     }
 
     override fun onCreateView(
@@ -63,19 +62,21 @@ class GroupFragment : Fragment() , GroupDetailsListener {
     ): View? {
         val view = inflater.inflate(R.layout.groups, container, false)
         userSession = UserSession(requireContext())
-        val groups = userSession.groups
         groupView = view.findViewById(R.id.recycleGroup)
         val layoutManager = LinearLayoutManager(requireContext())
         groupView.layoutManager = layoutManager
-        Log.d("GROUPIDS:", "CHECK ${groups}")
+
         lifecycleScope.launch {
-            val groupList = groupDataHelper.retrieveGroups(groups)
+            val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+            Log.d("GROUPIDS:", "CHECK ${groups}")
+
+            groupList = groupDataHelper.retrieveGroups(groups)
             Log.d("GROUP:", "CHECK ${groupList}")
+
             adapter = GroupAdapter(groupList, this@GroupFragment, lifecycleScope)
             groupView.adapter = adapter
-            // Now 'groupsList' contains your data
-            // Update your UI here, e.g., set the data to an adapter
         }
+
         val newButton: Button = view.findViewById(R.id.button)
         val joinButton: Button = view.findViewById(R.id.button2)
         newButton.setOnClickListener {
@@ -202,9 +203,6 @@ class GroupFragment : Fragment() , GroupDetailsListener {
                 showCustomToast("Invalid Group Code!")
                 callback.onResult(false)
             }
-
-            // Now 'groupsList' contains your data
-            // Update your UI here, e.g., set the data to an adapter
         }
 
 
@@ -223,6 +221,11 @@ class GroupFragment : Fragment() , GroupDetailsListener {
             Glide.with(this)
                 .load(selectedImageUri)
                 .into(userPhoto!!)
+        } else if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            val returnedGroup = data?.getSerializableExtra("returnedGroup") as? Groups
+            if (returnedGroup != null) {
+                adapter.updateGroup(returnedGroup)
+            }
         }
     }
 

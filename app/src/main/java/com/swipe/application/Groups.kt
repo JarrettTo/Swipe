@@ -9,7 +9,7 @@ data class Groups(
     var count: Int,
     val desc: String,
     val image: String,
-    val likes: ArrayList<String>,
+    val likes: ArrayList<Games>,
     val playlists: ArrayList<String>,
     val users: ArrayList<String>
 ) : Serializable

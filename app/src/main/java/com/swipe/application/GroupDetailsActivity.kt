@@ -1,6 +1,8 @@
 package com.swipe.application
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -45,9 +47,17 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
     private lateinit var playlistAdapter: GameOrUserAdapter
 
     override fun onAddPlaylistGameAction(game: Games) {
+        lifecycleScope.launch {
+            groupDataHelper.addGameToGroup(group.id, game)
+            gameAdapter.addGameToPlaylist(game)
+        }
     }
 
     override fun onDeletePlaylistGameAction(game: Games) {
+        lifecycleScope.launch {
+            groupDataHelper.removeGameFromGroup(group.id, game)
+            gameAdapter.removeGameToPlaylist(game)
+        }
     }
 
     override fun onAddPlaylistAction(playlist: Playlist) {
@@ -84,18 +94,59 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
                     }
                     intent.putExtra("playlistDetails", playlistDetailsBundle)
                 }
-
                 startActivity(intent)
             } else {
                 Log.e("GameItemClickListener", "Item is not of type Game")
             }
         }
 
+        val image: ImageView = findViewById(R.id.icon)
+        val uploadPhotoButton: Button = findViewById(R.id.upload_photo_btn)
+
+        val groupName: TextView = findViewById(R.id.group_text)
+        val saveNameContainer: LinearLayout = findViewById(R.id.save_name_container)
+        val saveTitle: Button = findViewById(R.id.save_btn1)
+        val cancelTitle: Button = findViewById(R.id.cancel_btn1)
+
+        val username: TextView = findViewById(R.id.username_text)
+        val number: TextView = findViewById(R.id.num_users)
+        val code: TextView = findViewById(R.id.code_text)
+
+        val desc: TextView = findViewById(R.id.description)
+        val saveDescContainer: LinearLayout = findViewById(R.id.save_name_container)
+        val saveDesc: Button = findViewById(R.id.save_btn2)
+        val cancelDesc: Button = findViewById(R.id.cancel_btn2)
+
+        val addGame: Button = findViewById(R.id.add_button1)
+        val delGame: Button = findViewById(R.id.del_button1)
+        val addPlaylist: Button = findViewById(R.id.add_button2)
+        val delPlaylist: Button = findViewById(R.id.del_button2)
+
+        val backButton: Button = findViewById(R.id.backButton)
+
+        userRecyclerView = findViewById(R.id.GroupRecycler1)
+        gameRecyclerView = findViewById(R.id.GroupRecycler2)
+        playlistRecyclerView = findViewById(R.id.GroupRecycler3)
+
+        GroupNameOriginal = group.name.trim()
+        GroupDescOriginal = group.desc
+
+        groupName.text = group.name
+        desc.text = group.desc
+        number.text = "${group.count} users"
+        username.text = group.creator
+        code.text = group.id
+
+        saveNameContainer.visibility = View.INVISIBLE
+        saveTitle.visibility = View.INVISIBLE
+        cancelTitle.visibility = View.INVISIBLE
+
         lifecycleScope.launch {
-            var creator = groupDataHelper.getCreator(group.id)
+            val creator = groupDataHelper.getCreator(group.id)
             isCreator = creator == UserSession(this@GroupDetailsActivity).userName
 
-            gameAdapter = GameOrUserAdapter(group.likes?.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
+            var gameList = groupDataHelper.returnGames(group.id)
+            gameAdapter = GameOrUserAdapter(gameList.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
 
             userAdapter = GameOrUserAdapter(group.users?.toMutableList() ?: mutableListOf(),  gameItemClickListener,this@GroupDetailsActivity)
 
@@ -106,10 +157,6 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
             userAdapter.isNotDeleteMode = true
             playlistAdapter.isNotDeleteMode = true
 
-            userRecyclerView = findViewById(R.id.GroupRecycler1)
-            gameRecyclerView = findViewById(R.id.GroupRecycler2)
-            playlistRecyclerView = findViewById(R.id.GroupRecycler3)
-
             userRecyclerView.layoutManager = GridLayoutManager(this@GroupDetailsActivity, 3)
             gameRecyclerView.layoutManager = GridLayoutManager(this@GroupDetailsActivity, 3)
             playlistRecyclerView.layoutManager = GridLayoutManager(this@GroupDetailsActivity, 3)
@@ -117,38 +164,6 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
             userRecyclerView.adapter = userAdapter
             gameRecyclerView.adapter = gameAdapter
             playlistRecyclerView.adapter = playlistAdapter
-
-            val image: ImageView = findViewById(R.id.icon)
-            val uploadPhotoButton: Button = findViewById(R.id.upload_photo_btn)
-
-            val groupName: TextView = findViewById(R.id.group_text)
-            val saveNameContainer: LinearLayout = findViewById(R.id.save_name_container)
-            val saveTitle: Button = findViewById(R.id.save_btn1)
-            val cancelTitle: Button = findViewById(R.id.cancel_btn1)
-
-            val username: TextView = findViewById(R.id.username_text)
-            val number: TextView = findViewById(R.id.num_users)
-
-            val desc: TextView = findViewById(R.id.description)
-            val saveDescContainer: LinearLayout = findViewById(R.id.save_name_container)
-            val saveDesc: Button = findViewById(R.id.save_btn2)
-            val cancelDesc: Button = findViewById(R.id.cancel_btn2)
-
-            val addGame: Button = findViewById(R.id.add_button1)
-            val delGame: Button = findViewById(R.id.del_button1)
-            val addPlaylist: Button = findViewById(R.id.add_button2)
-            val delPlaylist: Button = findViewById(R.id.del_button2)
-
-            val backButton: Button = findViewById(R.id.backButton)
-
-            GroupNameOriginal = group.name.trim()
-            GroupDescOriginal = group.desc
-
-            groupName.text = group.name
-            desc.text = group.desc
-            number.text = "${group.count} users"
-            username.text = group.creator
-            saveNameContainer.visibility = View.INVISIBLE
 
             addPlaylist.setOnClickListener {
                 val intent = Intent(this@GroupDetailsActivity, AddPlaylistToGroup::class.java)
@@ -165,22 +180,36 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
                 playlistAdapter.notifyDataSetChanged()
             }
 
-//            addGame.setOnClickListener {
-//                val intent = Intent(this@GroupDetailsActivity, AddPlaylistToGroup::class.java)
-//                val groupDetailsBundle = Bundle().apply {
-//                    putSerializable("groupDetails", group)
-//                }
-//                intent.putExtra("groupDetails", groupDetailsBundle)
-//                startActivityForResult(intent, 1)
-//            }
-//
-//            delGame.setOnClickListener {
-//                delGame.isSelected = !delGame.isSelected
-//                playlistAdapter.isNotDeleteMode = !delGame.isSelected
-//                playlistAdapter.notifyDataSetChanged()
-//            }
+            code.setOnClickListener {
+                val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("label", group.id)
+                clipboard.setPrimaryClip(clip)
+                showCustomToast("Text copied to clipboard")
+            }
 
-            backButton.setOnClickListener { finish() }
+            addGame.setOnClickListener {
+                val intent = Intent(this@GroupDetailsActivity, AddGamesToPlaylist::class.java)
+                val groupDetailsBundle = Bundle().apply {
+                    putSerializable("groupDetails", group)
+                }
+                intent.putExtra("groupDetails", groupDetailsBundle)
+                startActivityForResult(intent, 3)
+            }
+
+            delGame.setOnClickListener {
+                delGame.isSelected = !delGame.isSelected
+                gameAdapter.isNotDeleteMode = !delGame.isSelected
+                gameAdapter.notifyDataSetChanged()
+            }
+
+            backButton.setOnClickListener {
+                val returnIntent = Intent().apply {
+                    putExtra("returnedGroup", group)
+                }
+
+                setResult(Activity.RESULT_OK, returnIntent)
+                finish()
+            }
 
             if (group.image != "") {
                 Glide.with(this@GroupDetailsActivity)
@@ -285,11 +314,14 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
                         imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                             lifecycleScope.launch {
                                 groupDataHelper.updateGroupImage(group.id, downloadUri.toString().trim())
+
+                                Glide.with(this@GroupDetailsActivity)
+                                    .load(downloadUri.toString().trim())
+                                    .into(findViewById(R.id.icon))
                             }
                         }
                     }
                     .addOnFailureListener {
-                        // Handle failure
                     }
             }
         } else if (requestCode == ADD_PLAYLIST_REQUEST && resultCode == Activity.RESULT_OK) {
@@ -297,7 +329,11 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
             if (returnedPlaylist != null) {
                 onAddPlaylistAction(returnedPlaylist)
             }
-            Log.d("CHECK", "rawr")
+        } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
+            val returnedGame = data?.getSerializableExtra("returnedGame") as? Games
+            if (returnedGame != null) {
+                onAddPlaylistGameAction(returnedGame)
+            }
         }
     }
 
