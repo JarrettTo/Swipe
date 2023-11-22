@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     // Assuming fetchGamesFromSteamAPI is a suspend function, otherwise it should be called normally
                     gamesDataHelper.fetchGamesFromSteamAPI()
-                    gameList = ArrayList(GamesDataHelper.retrieveGames(20, userSession.likedGameIds!!)) // This is called from within a coroutine
+                    gameList = ArrayList(GamesDataHelper.fetchGames(10, userSession.likedGameIds!!.toList())) // This is called from within a coroutine
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {

@@ -90,7 +90,7 @@ class MainFragment : Fragment(){
     fun onSwipe(count: Int, likedGames: MutableSet<String>)  {
         lifecycleScope.launch {
 
-            swipeStack.addGames(GamesDataHelper.retrieveGames(count, likedGames))
+            swipeStack.addGames(GamesDataHelper.fetchGames(count, likedGames.toList()))
         }
     }
     private fun addGameToPlaylist(game: Games) {

@@ -253,7 +253,7 @@ class SwipeStack @JvmOverloads constructor(
         if(mListener != null){
             mListener!!.onViewSwipedToLeft(0)
 
-            onSwipe(20, userSession.likedGameIds!!)
+            onSwipe(6, userSession.likedGameIds!!)
         }
         removeTopView()
         if(mCurrentViewIndex>0){
@@ -268,7 +268,7 @@ class SwipeStack @JvmOverloads constructor(
 
             mListener!!.onViewSwipedToRight(mAdapter?.getItem(currentPosition) as Games)
 
-            onSwipe(20, userSession.likedGameIds!!)
+            onSwipe(6, userSession.likedGameIds!!)
 
         }
         removeTopView()

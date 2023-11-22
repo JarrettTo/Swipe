@@ -16,12 +16,14 @@ import java.net.HttpURLConnection
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.google.gson.stream.JsonReader
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.InputStreamReader
 import java.net.URL
+import java.util.concurrent.Semaphore
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -96,18 +98,25 @@ class GamesDataHelper : ViewModel() {
             fun onResult(result: Games?)
         }
 
-        suspend fun retrieveGames(end: Int, likedGames: MutableSet<String>): List<Games> {
+        /*suspend fun retrieveGames(end: Int, likedGames: MutableSet<String>): List<Games> {
             val gameArray: MutableList<Games> = mutableListOf()
             val deferredGames: MutableList<Deferred<Games?>> = mutableListOf()
+            val semaphore = Semaphore(5) // Semaphore with 10 permits
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-            coroutineScope {
+            coroutineScope.launch {
                 var currentIndex = index
                 while (gameArray.size < end && currentIndex < gameIds.size) {
                     val gameId = gameIds[currentIndex++]
 
                     if (!likedGames.contains(gameId.toString())) {
-                        val deferred = async(Dispatchers.IO) {
-                            fetchGameInfoSteamAPI(gameId)
+                        semaphore.acquire() // Acquire a permit before launching the async task
+                        val deferred = async {
+                            try {
+                                fetchGameInfoSteamAPI(gameId)
+                            } finally {
+                                semaphore.release() // Release the permit after the task is completed
+                            }
                         }
                         deferredGames.add(deferred)
                     }
@@ -123,233 +132,65 @@ class GamesDataHelper : ViewModel() {
                         deferredGames.clear() // Clear the processed deferreds
                     }
                 }
-            }
+            }.join() // Wait for the coroutine to complete
 
             return gameArray
-        }
+        }*/
 
 
-        fun fetchSingleGameInfoSteamAPI(
-            id: Int,
 
-            callback: GameSingleInfoCallback
-        ) {
-            val thread2 = Thread {
-                var httpURLConnection: HttpURLConnection? = null
-                try {
-                    val url =
-                        URL("https://store.steampowered.com/api/appdetails?appids=${id}&fbclid=IwAR3JLhpqp1zVApoAyYn9ldO5kYA0LVI7B2Ut3tImAyfkZYupUqqzotHJdt4")
-                    httpURLConnection = url.openConnection() as HttpURLConnection
-                    httpURLConnection.requestMethod = "GET"
-                    httpURLConnection.connect()
 
-                    val responseCode = httpURLConnection.responseCode
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        val response =
-                            httpURLConnection.inputStream.bufferedReader().use { it.readText() }
-                        val jsonResponse = JSONObject(response)
-                        val data = jsonResponse.getJSONObject(id.toString()).getJSONObject("data")
-                        val name = data.getString("name")
-                        val type = data.getString("type")
-                        if (type != "game") {
-                            callback.onResult(null)
-                            return@Thread
-                        }
-                        Log.d("TEST:", "Game Type ${type}")
-                        val description = data.getString("detailed_description")
-
-                        val genres = data.getJSONArray("genres")
-                        val genreString = ArrayList<String>()
-                        for (i in 0 until genres.length()) {
-                            val genreJson = genres.getJSONObject(i)
-                            val name = genreJson.getString("description")
-
-                            genreString.add(name)
-                            // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-
-                        }
-                        val platforms = data.getJSONObject("platforms")
-                        val platformString = ArrayList<String>()
-                        val windows = platforms.getBoolean("windows")
-                        val mac = platforms.getBoolean("mac")
-                        val linux = platforms.getBoolean("linux")
-                        if (windows) {
-                            platformString.add("windows")
-
-                        }
-                        if (mac) {
-                            platformString.add("mac")
-
-                        }
-                        if (linux) {
-                            platformString.add("linux")
-
-                        }
-
-                        val price = data.getJSONObject("price_overview")
-                        val formatted = price.getString("final_formatted")
-                        // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-
-                        val headerImage = data.getString("header_image")
-                        val movies = data.getJSONArray("movies")
-                        val videoIndex = movies.getJSONObject(0)
-                        val videoJson = videoIndex.getJSONObject("mp4")
-                        var video = videoJson.getString("480")
-                        video = video.replace("http", "https")
-                        // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                        val newGame = Games(
-                            id,
-                            0,
-                            headerImage,
-                            name,
-                            description,
-                            genreString,
-                            platformString,
-                            formatted,
-                            0,
-                            video,
-                            null,
-                            null,
-                            null
-                        )
-
-                        if (type == "game") {
-                            callback.onResult(newGame)
-                            return@Thread
-                        }
-                        // Now 'data' contains all the games fetched from the API
-                        // You might want to update the UI on the main thread, for example:
-
-                    } else {
-
-                        callback.onResult(null)
-                        return@Thread
-
-                        // Handle error response...
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    callback.onResult(null)
-                    return@Thread
-                    // Handle the exception...
-                } finally {
-                    httpURLConnection?.disconnect() // Ensure the connection is closed in the finally block
-                }
-            }
-            thread2.start()
-            thread2.join()
-
-        }
-        suspend fun fetchGameInfoSteamAPI(
-            id: Int,
-
-        ) : Games? = withContext(Dispatchers.IO){
-
+        suspend fun fetchGames(count: Int, likedGameIds: List<String>): List<Games> = withContext(Dispatchers.IO) {
             var httpURLConnection: HttpURLConnection? = null
+            val gamesList = mutableListOf<Games>()
+
             try {
-                val url =
-                    URL("https://store.steampowered.com/api/appdetails?appids=${id}&fbclid=IwAR3JLhpqp1zVApoAyYn9ldO5kYA0LVI7B2Ut3tImAyfkZYupUqqzotHJdt4")
+                val url = URL("http://10.0.2.2:5000/get_games?count=$count&likedGameIds=$likedGameIds") // Replace with your actual API URL
                 httpURLConnection = url.openConnection() as HttpURLConnection
                 httpURLConnection.requestMethod = "GET"
                 httpURLConnection.connect()
 
                 val responseCode = httpURLConnection.responseCode
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    val response =
-                        httpURLConnection.inputStream.bufferedReader().use { it.readText() }
+                    val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
                     val jsonResponse = JSONObject(response)
-                    val data = jsonResponse.getJSONObject(id.toString()).getJSONObject("data")
-                    val name = data.getString("name")
-                    val type = data.getString("type")
-                    if (type != "game") {
+                    val gamesArray = jsonResponse.getJSONArray("output")
 
-                        return@withContext null
+                    for (i in 0 until gamesArray.length()) {
+                        val gameJson = gamesArray.getJSONObject(i)
+                        val name = gameJson.getString("name")
+                        val description = gameJson.getString("description")
+                        val genres = gameJson.getString("genres").split(", ").toList()
+                        val headerImage = gameJson.getString("header_image")
+                        val id = gameJson.getInt("id")
+                        val platforms = gameJson.getString("platforms").split(", ").toList()
+                        val price = gameJson.getString("price")
+                        val videoUrl = gameJson.getString("video_url")
+
+                        val game = Games(
+                            id,
+                            0,// other properties as per your Games class definition
+                            headerImage,
+                            name,
+                            description,
+                            ArrayList(genres),
+                            ArrayList(platforms),
+                            price,
+                            0,// ... any other properties that need to be set
+                            videoUrl
+                        )
+                        gamesList.add(game)
                     }
-                    Log.d("TEST:", "Game Type ${type}")
-                    val description = data.getString("detailed_description")
-
-                    val genres = data.getJSONArray("genres")
-                    val genreString = ArrayList<String>()
-                    for (i in 0 until genres.length()) {
-                        val genreJson = genres.getJSONObject(i)
-                        val name = genreJson.getString("description")
-
-                        genreString.add(name)
-                        // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-
-                    }
-                    val platforms = data.getJSONObject("platforms")
-                    val platformString = ArrayList<String>()
-                    val windows = platforms.getBoolean("windows")
-                    val mac = platforms.getBoolean("mac")
-                    val linux = platforms.getBoolean("linux")
-                    if (windows) {
-                        platformString.add("windows")
-
-                    }
-                    if (mac) {
-                        platformString.add("mac")
-
-                    }
-                    if (linux) {
-                        platformString.add("linux")
-
-                    }
-
-                    val price = data.getJSONObject("price_overview")
-                    val formatted = price.getString("final_formatted")
-                    // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-
-                    val headerImage = data.getString("header_image")
-                    val movies = data.getJSONArray("movies")
-                    val videoIndex = movies.getJSONObject(0)
-                    val videoJson = videoIndex.getJSONObject("mp4")
-                    var video = videoJson.getString("480")
-                    video = video.replace("http", "https")
-                    // Create a Games object. You'll need to fill in the details according to your Games class constructor.
-                    val newGame = Games(
-                        id,
-                        0,
-                        headerImage,
-                        name,
-                        description,
-                        genreString,
-                        platformString,
-                        formatted,
-                        0,
-                        video,
-                        null,
-                        null,
-                        null
-                    )
-
-                    if (type == "game") {
-                        index++
-                        return@withContext newGame
-                    } else {
-                        return@withContext null
-                    }
-                    // Now 'data' contains all the games fetched from the API
-                    // You might want to update the UI on the main thread, for example:
-
-                } else {
-
-                    return@withContext null
-
-                    // Handle error response...
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                return@withContext null
-                // Handle the exception...
             } finally {
-                httpURLConnection?.disconnect() // Ensure the connection is closed in the finally block
+                httpURLConnection?.disconnect()
             }
 
-
-
-
+            return@withContext gamesList
         }
+
 
 
         suspend fun retrieveUserGames(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
