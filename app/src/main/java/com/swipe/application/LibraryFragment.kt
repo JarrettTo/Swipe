@@ -128,8 +128,25 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         createButton.setOnClickListener {
             val playlistName = playlistNameEditText.text.toString().trim()
             if (playlistName != "") {
-                createPlaylist(playlistName)
-                alertDialog.dismiss()
+                lifecycleScope.launch {
+                    val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
+                    val existingPlaylists = playlistDataHelper.retrievePlaylists(playlists)
+                    val playlistExists = existingPlaylists.any { it.playlistName == playlistName }
+
+                    if (!playlistExists) {
+                        val playlistId = playlistDataHelper.insertPlaylist(playlistName, userSession.userName!!)
+                        Log.d("CODE", "CODE: $playlistId")
+
+                        userSession.addPlaylistId(playlistId)
+                        val newPlaylist = Playlist(playlistId, playlistName, userSession.userName!!, R.drawable.games, "", null)
+                        adapter.addPlaylist(newPlaylist)
+                        adapter.notifyDataSetChanged()
+
+                        alertDialog.dismiss()
+                    } else {
+                        showCustomToast("Playlist with name $playlistName already exists.")
+                    }
+                }
             } else {
                 showCustomToast("Playlist Name should not be empty")
             }
@@ -137,26 +154,6 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
 
         alertDialog.show()
     }
-
-    private fun createPlaylist(name: String) {
-        lifecycleScope.launch {
-            val existingPlaylists = playlistDataHelper.retrievePlaylists(userSession.playlist)
-            val playlistExists = existingPlaylists.any { it.playlistName == name }
-
-            if (!playlistExists) {
-                val playlistId = playlistDataHelper.insertPlaylist(name, userSession.userName!!)
-                Log.d("CODE", "CODE: $playlistId")
-
-                userSession.addPlaylistId(playlistId)
-                val newPlaylist = Playlist(playlistId, name, userSession.userName!!, R.drawable.games, "", null)
-                adapter.addPlaylist(newPlaylist)
-                adapter.notifyDataSetChanged()
-            } else {
-                Log.d("CreatePlaylist", "Playlist with name $name already exists.")
-            }
-        }
-    }
-
 
     private fun deletePlaylist(name:String){
         lifecycleScope.launch {

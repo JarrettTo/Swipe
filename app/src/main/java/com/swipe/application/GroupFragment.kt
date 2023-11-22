@@ -117,12 +117,46 @@ class GroupFragment : Fragment() , GroupDetailsListener {
 
         createButton.setOnClickListener {
             if (groupNameEditText.text.toString() != "") {
-                createGroup(
-                    groupNameEditText.text.toString(),
-                    groupDescEditText.text.toString(),
-                    "WOW"
-                )
-                alertDialog.dismiss()
+                val name = groupNameEditText.text.toString().trim()
+                val desc = groupDescEditText.text.toString()
+                val uri = selectedImageUri
+
+                lifecycleScope.launch {
+                    val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+                    val existingGroups = groupDataHelper.retrieveGroups(groups)
+                    val groupIndex = existingGroups.indexOfFirst { it.name.trim() == name }
+                    val isGroupExistingAndNotCreatedByUser = groupIndex != -1 && groupDataHelper.getCreator(existingGroups[groupIndex].id) != userSession.userName
+
+                    Log.d(
+                        "groups",
+                        "Groups: $groups"
+                    )
+                    Log.d(
+                        "existingGroups",
+                        "Existing Groups: $existingGroups"
+                    )
+                    Log.d(
+                        "groupIndex",
+                        "Group Index: $groupIndex"
+                    )
+                    Log.d(
+                        "isGroupExistingAndNotCreatedByUser",
+                        "Is Group Existing and Not Created by User: $isGroupExistingAndNotCreatedByUser"
+                    )
+
+                    if (isGroupExistingAndNotCreatedByUser) {
+                        val newGroup = groupDataHelper.insertGroup(name, desc, uri, userSession.userName!!)
+                        Log.d("CODE", "CODE: ${newGroup?.id}")
+                        Log.d("URI:", "$uri")
+
+                        userSession.addGroupId(newGroup?.id!!)
+                        adapter.addGroup(newGroup)
+
+                        alertDialog.dismiss()
+                    } else {
+                        showCustomToast("You have already created a group with name $name")
+                    }
+                }
             } else {
                 showCustomToast("Group Name should not be empty")
             }
@@ -165,20 +199,6 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         alertDialog.show()
     }
 
-    private fun createGroup(name:String, desc:String, uri: String){
-
-        lifecycleScope.launch {
-            var group= groupDataHelper.insertGroup(name, desc, selectedImageUri, userSession.userName!!)
-            Log.d("CODE", "CODE: ${group?.id}")
-            userSession.addGroupId(group?.id!!)
-
-            Log.d("URI:", "${selectedImageUri}")
-
-            adapter.addGroup(group)
-        }
-
-
-    }
     interface JoinGroupCallback {
         fun onResult(success: Boolean)
     }
