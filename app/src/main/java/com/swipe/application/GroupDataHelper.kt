@@ -32,7 +32,14 @@ class GroupDataHelper {
                     val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
                     val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
                     val groupImage = snapshot.child("uri").getValue(String::class.java) ?: ""
-                    val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                    val groupLikedGames = ArrayList<Games>()
+                    val gamesSnapshot = snapshot.child("likes")
+                    for (gameSnapshot in gamesSnapshot.children) {
+                        val game = gameSnapshot.getValue(Games::class.java)
+                        game?.let { groupLikedGames.add(it) }
+                    }
+
                     val groupPlaylists = snapshot.child("playlists").getValue<ArrayList<String>>() ?: arrayListOf()
                     val groupUsers = snapshot.child("users").getValue<ArrayList<String>>() ?: arrayListOf()
 
@@ -49,6 +56,7 @@ class GroupDataHelper {
         }
         return@withContext groups
     }
+
     suspend fun retrieveGroupsName(groupsId: MutableSet<String>?): ArrayList<String> = withContext(Dispatchers.IO){
         val groups = arrayListOf("Personal Feed")
         val countDownLatch = CountDownLatch(groupsId!!.size)
@@ -83,7 +91,14 @@ class GroupDataHelper {
                 val groupCount = snapshot.child("count").getValue(Int::class.java) ?: 0
                 val groupDesc = snapshot.child("desc").getValue(String::class.java) ?: ""
                 val groupImage = snapshot.child("uri").getValue(String::class.java) ?: ""
-                val groupLikedGames = snapshot.child("likes").getValue<ArrayList<String>>() ?: arrayListOf()
+
+                val groupLikedGames = ArrayList<Games>()
+                val gamesSnapshot = snapshot.child("likes")
+                for (gameSnapshot in gamesSnapshot.children) {
+                    val game = gameSnapshot.getValue(Games::class.java)
+                    game?.let { groupLikedGames.add(it) }
+                }
+
                 val groupPlaylists = snapshot.child("playlists").getValue<ArrayList<String>>() ?: arrayListOf()
                 val groupUsers = snapshot.child("users").getValue<ArrayList<String>>() ?: arrayListOf()
 
@@ -302,4 +317,179 @@ class GroupDataHelper {
         }
         return@withContext deferredUri.await()
     }
+
+    suspend fun updateGroupName(gameId: String, newGroupName: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("name").setValue(newGroupName).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating group name", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun updateGroupDesc(gameId: String, newGroupDesc: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("desc").setValue(newGroupDesc).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating group description", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun updateGroupImage(gameId: String, newImageId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(gameId)
+
+        try {
+            groupRef.child("uri").setValue(newImageId).await()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating playlist image", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun getCreator(groupID: String): String = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(groupID)
+
+        try {
+            val snapshot = groupRef.get().await()
+            val creatorUserId = snapshot.child("creator").getValue(String::class.java)
+
+            return@withContext creatorUserId.toString()
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error deleting group", e)
+            return@withContext ""
+        }
+    }
+
+    suspend fun insertPlaylist(code: String, playlistId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code)
+        try {
+            val playlistSnapshot = groupRef.child("playlists").get().await()
+            val playlistList = playlistSnapshot.getValue<ArrayList<String>>() ?: arrayListOf()
+
+            if (!playlistList.contains(playlistId)) {
+                playlistList.add(playlistId)
+                groupRef.child("playlists").setValue(playlistList).await()
+            }
+
+            return@withContext true
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error in adding playlist to group", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun removePlaylist(code: String, playlistId: String): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code)
+        try {
+            val playlistSnapshot = groupRef.child("playlists").get().await()
+            val playlistList = playlistSnapshot.getValue<ArrayList<String>>() ?: arrayListOf()
+
+            if (playlistList.contains(playlistId)) {
+                playlistList.remove(playlistId)
+                groupRef.child("playlists").setValue(playlistList).await()
+                return@withContext true
+
+            } else {
+                return@withContext false
+            }
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error in removing playlist from group", e)
+            return@withContext false
+        }
+    }
+
+    suspend fun addGameToGroup(code: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupRef = dbRef.child("groups").child(code).child("likes")
+
+        try {
+            val gameRef = groupRef.push()
+            gameRef.setValue(game)
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error adding game to group", e)
+        }
+    }
+
+    suspend fun removeGameFromGroup(code: String, game: Games) = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupGamesRef = dbRef.child("groups").child(code).child("likes")
+
+        try {
+            groupGamesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (gameSnapshot in snapshot.children) {
+                            val getGame = gameSnapshot.getValue(Games::class.java)
+                            if (getGame != null && getGame.gameId == game.gameId) {
+                                gameSnapshot.ref.removeValue()
+                                break
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("FirebaseError", "Error removing game from playlist", databaseError.toException())
+                }
+            })
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error removing game from playlist", e)
+        }
+    }
+
+    suspend fun returnGames(groupId: String): ArrayList<Games> = withContext(Dispatchers.IO) {
+        val gamesList = ArrayList<Games>()
+        val groupRef = FirebaseDatabase.getInstance().getReference("test").child("groups").child(groupId)
+
+        try {
+            val snapshot = groupRef.child("likes").get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { childSnapshot ->
+                    val game = childSnapshot.getValue(Games::class.java)
+                    game?.let { gamesList.add(it) }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error fetching liked games", e)
+        }
+
+        return@withContext gamesList
+    }
+
+    suspend fun isGameAlreadyInGroup(groupId: String, game: Games): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val groupGamesRef = dbRef.child("groups").child(groupId).child("likes")
+
+        try {
+            val snapshot = groupGamesRef.get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { gameSnapshot ->
+                    val existingGame = gameSnapshot.getValue(Games::class.java)
+                    if (existingGame != null && existingGame.gameId == game.gameId) {
+                        return@withContext true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error checking if game is in group", e)
+        }
+        return@withContext false
+    }
+
 }

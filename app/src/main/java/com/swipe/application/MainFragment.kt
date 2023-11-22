@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.Button
 import android.widget.TextView
@@ -26,7 +27,9 @@ class MainFragment : Fragment(){
     private val database = FirebaseDatabase.getInstance()
     private val myRef = database.getReference("test")
     private val playlistDataHelper = PlaylistDataHelper()
+    private val groupDataHelper = GroupDataHelper()
     private lateinit var db : DatabaseHelper
+    private lateinit var feed: String
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
@@ -40,14 +43,14 @@ class MainFragment : Fragment(){
         val likedMessageIds = userSession.likedGameIds
 
         val usernameTextView: TextView = view.findViewById(R.id.home_username)
-        if(userName !=""){
+        if (userName != "") {
             usernameTextView.text = userName
         }
         Log.d("DEBUG", "Arguments: ${arguments}")
-        gameList = arguments?.getSerializable("gameList") as? ArrayList<Games>  ?: arrayListOf()
+        gameList = arguments?.getSerializable("gameList") as? ArrayList<Games> ?: arrayListOf()
         Log.d("DEBUG", "gameList in Fragment: $gameList")
         swipeStack = view.findViewById(R.id.swipeStack)
-  
+
         val swipeAdapter = SwipeAdapter(gameList) { clickedGame ->
             val intent = Intent(requireContext(), GameDetailsActivity::class.java)
             val index = gameList.indexOfFirst { it.gameId == clickedGame.gameId }
@@ -60,7 +63,7 @@ class MainFragment : Fragment(){
         }
 
         swipeStack.adapter = swipeAdapter
-        db =DatabaseHelper(requireContext())
+        db = DatabaseHelper(requireContext())
         swipeStack.setSaveGame(this::saveGame)
         swipeStack.setOnSwipe(this::onSwipe)
         val spinner: Spinner = view.findViewById(R.id.spinner)
@@ -69,55 +72,89 @@ class MainFragment : Fragment(){
             val choices = group.retrieveGroupsName(userSession.groups).toTypedArray()
             val adapter = CustomSpinnerAdapter(requireContext(), choices)
             spinner.adapter = adapter
+
+            feed = spinner.selectedItem.toString()
+
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    feed = parent.getItemAtPosition(position).toString()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                }
+            }
         }
 
         return view
     }
-    fun saveGame(games: Games){
+
+    fun saveGame(games: Games) {
         val likedMessageIds = userSession.likedGameIds
         Log.d("TEST:", "Game Name ${games.gameName}")
         Log.d("TEST:", "Game Id ${games.gameId}")
         userSession.addLikedGameId(games.gameId.toString())
         Log.d("TEST:", "New User Liked ${likedMessageIds}")
-        myRef.child("users").child(userSession.userName!!).child("likes").setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
-            Log.d("TEST:", "SUCCESS!")
-        }
+        myRef.child("users").child(userSession.userName!!).child("likes")
+            .setValue(userSession.likedGameIds?.toList()).addOnCompleteListener {
+                Log.d("TEST:", "SUCCESS!")
+            }
         db.saveGame(games)
         Log.d("TEST GAME DB:", "${db.getGame(games.gameId)}")
-        addGameToPlaylist(games)
+        var gameDetails = db.getGame(games.gameId)
+        if (gameDetails != null) {
+            addGameToPlaylist(gameDetails, feed)
+        }
 
     }
+
     fun onSwipe(count: Int, likedGames: MutableSet<String>)  {
         lifecycleScope.launch {
 
             swipeStack.addGames(GamesDataHelper.fetchGames(count, likedGames.toList()))
         }
     }
-    private fun addGameToPlaylist(game: Games) {
-        lifecycleScope.launch {
-            val existingPlaylists = playlistDataHelper.retrievePlaylists(userSession.playlist)
-            val playlistExists = existingPlaylists.find { it.playlistName == "Liked Games" }
-            var playlistId = ""
 
-            if (playlistExists == null) {
-                playlistId = playlistDataHelper.insertPlaylist("Liked Games", userSession.userName!!)
-                userSession.addPlaylistId(playlistId)
-            } else {
-                playlistId = playlistExists.playlistId
-            }
 
-            GamesDataHelper.fetchSingleGameInfoSteamAPI(game.gameId, object : GamesDataHelper.Companion.GameSingleInfoCallback {
-                override fun onResult(result: Games?) {
-                    if (result != null) {
-                        Log.d("SteamAPI", "Fetched game info: ${result.gameName}")
-                        lifecycleScope.launch {
-                            playlistDataHelper.addGameToPlaylist(playlistId, result)
-                        }
-                    } else {
-                        Log.d("SteamAPI", "Could not fetch game info for game ID: ${game.gameId}")
-                    }
+
+    private fun addGameToPlaylist(game: Games, name: String) {
+        Log.d("FEED NAME", "$name")
+        if (name == "Personal Feed") {
+            lifecycleScope.launch {
+                val existingPlaylists =
+                    playlistDataHelper.retrievePlaylists(userSession.playlist)
+                val playlistExists = existingPlaylists.find { it.playlistName == "Liked Games" }
+                var playlistId = ""
+
+                if (playlistExists == null) {
+                    playlistId =
+                        playlistDataHelper.insertPlaylist("Liked Games", userSession.userName!!)
+                    userSession.addPlaylistId(playlistId)
+                } else {
+                    playlistId = playlistExists.playlistId
                 }
-            })
+
+                if (!playlistDataHelper.isGameAlreadyInPlaylist(playlistId, game)) {
+                    playlistDataHelper.addGameToPlaylist(playlistId, game)
+                }
+            }
+        } else {
+            lifecycleScope.launch {
+                val existingGroupCode =
+                    groupDataHelper.retrieveUserGroups(userSession.userName)
+                val existingGroups = groupDataHelper.retrieveGroups(existingGroupCode)
+                val groupExists = existingGroups.find { it.name == name }
+                var groupId = groupExists?.id
+
+                Log.d("existingGroupCode + existingGroups + groupExists + groupId", "$existingGroupCode + $existingGroups + $groupExists + $groupId")
+                if (groupId != null && !groupDataHelper.isGameAlreadyInGroup(groupId, game)) {
+                    groupDataHelper.addGameToGroup(groupId, game)
+                }
+            }
         }
     }
 

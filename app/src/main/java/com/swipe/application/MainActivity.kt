@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
 interface GameSingleInfoCallback {
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_main)
         userSession = UserSession(this)
         progressBar = findViewById(R.id.progressBar)
@@ -53,6 +55,8 @@ class MainActivity : AppCompatActivity() {
 
         if(userSession.userName == ""){
             //TODO: Insert logic that redirects them to login page
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
         }
         val db = DatabaseHelper(this)
         for(i in 0 until userSession.likedGameIds!!.size){

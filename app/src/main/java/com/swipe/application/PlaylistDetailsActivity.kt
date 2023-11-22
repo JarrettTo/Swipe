@@ -21,23 +21,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
+import java.io.Serializable
 import java.util.UUID
 
 interface PlaylistGameActionListener {
     fun onAddPlaylistGameAction(games: Games)
     fun onDeletePlaylistGameAction(games: Games)
+
+    fun onAddPlaylistAction(playlist: Playlist)
+    fun onDeletePlaylistAction(playlist: Playlist)
 }
 
 class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
     companion object {
         const val PICK_IMAGE_REQUEST = 1
-    }
-
-    override fun onAddPlaylistGameAction(game: Games) {
-    }
-
-    override fun onDeletePlaylistGameAction(game: Games) {
-        removeGameToPlaylist(game)
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -46,6 +43,29 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
     private lateinit var playlistDetails: Playlist
     private lateinit var PlaylistNameOriginal: String
     private lateinit var gameOrUserAdapter: GameOrUserAdapter
+
+    override fun onAddPlaylistGameAction(game: Games) {
+        lifecycleScope.launch {
+            if (playlistDataHelper.isGameAlreadyInPlaylist(playlistDetails.playlistId, game)){
+                showCustomToast("Game is already in playlist")
+            } else {
+                playlistDataHelper.addGameToPlaylist(playlistDetails.playlistId, game)
+                gameOrUserAdapter.addGameToPlaylist(game)
+                findViewById<TextView>(R.id.num_games).text =
+                    "${(playlistDetails.games?.size ?: 0) + 1} games"
+            }
+        }
+    }
+
+    override fun onDeletePlaylistGameAction(game: Games) {
+        removeGameToPlaylist(game)
+    }
+
+    override fun onAddPlaylistAction(playlist: Playlist) {
+    }
+
+    override fun onDeletePlaylistAction(playlist: Playlist) {
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,15 +85,25 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         val saveContainer: LinearLayout = findViewById(R.id.save_name_container)
         val saveButton: Button = findViewById(R.id.save_btn)
         val cancelButton: Button = findViewById(R.id.cancel_btn)
-        val gameItemClickListener: (Games) -> Unit = { game ->
-            val intent = Intent(this, GameDetailsActivity::class.java).apply {
-                putExtra("gameDetails", game)
+        val gameItemClickListener: (Any) -> Unit = { item ->
+            if (item is Games) {
+                val intent = Intent(this, GameDetailsActivity::class.java).apply {
+                    putExtra("gameDetails", item as Serializable)
+                }
+                startActivity(intent)
+            } else {
+                Log.e("GameItemClickListener", "Item is not of type Game")
             }
-            startActivity(intent)
         }
 
-
         userSession = UserSession(this)
+
+        if (playlistDetails.username != userSession.userName){
+            uploadPhotoButton.visibility = View.INVISIBLE
+            addButton.visibility = View.INVISIBLE
+            delButton.visibility = View.INVISIBLE
+            playlistName.isEnabled = false
+        }
 
         if (playlistDetails.imageURL != "") {
             Glide.with(this)
@@ -104,7 +134,7 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
                 putSerializable("playlistDetails", playlistDetails)
             }
             intent.putExtra("playlistDetails", playlistDetailsBundle)
-            startActivity(intent)
+            startActivityForResult(intent, 3)
         }
 
         delButton.setOnClickListener {
@@ -174,12 +204,20 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
                         imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                             lifecycleScope.launch {
                                 playlistDataHelper.updatePlaylistImage(playlistDetails.playlistId, downloadUri.toString().trim())
+
+                                Glide.with(this@PlaylistDetailsActivity)
+                                    .load(downloadUri.toString().trim())
+                                    .into(findViewById(R.id.icon))
                             }
                         }
                     }
                     .addOnFailureListener {
-                        // Handle failure
                     }
+            }
+        } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
+            val returnedGame = data?.getSerializableExtra("returnedGame") as? Games
+            if (returnedGame != null) {
+                onAddPlaylistGameAction(returnedGame)
             }
         }
     }

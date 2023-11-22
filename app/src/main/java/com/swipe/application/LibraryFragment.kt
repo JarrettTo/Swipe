@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
 interface PlaylistActionListener {
     fun onDeletePlaylistAction(name: String)
@@ -33,8 +34,15 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         super.onResume()
         if (::adapter.isInitialized) {
             lifecycleScope.launch {
-                val playlists = userSession.playlist
+                val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
                 playlistList = playlistDataHelper.retrievePlaylists(playlists)
+
+                val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+                if (likedGamesIndex != -1) {
+                    val likedGamesPlaylist = playlistList.removeAt(likedGamesIndex)
+                    playlistList.add(0, likedGamesPlaylist)
+                }
+
                 adapter.updateData(playlistList)
                 adapter.notifyDataSetChanged()
             }
@@ -57,13 +65,30 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         groupView.layoutManager = LinearLayoutManager(requireContext())
 
         userSession = UserSession(requireContext())
-        val playlists = userSession.playlist
 
-        Log.d("PLAYLIST-IDS:", "CHECK ${playlists}")
         lifecycleScope.launch {
+            val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
+            Log.d("PLAYLIST-IDS:", "CHECK ${playlists}")
+
             playlistList = playlistDataHelper.retrievePlaylists(playlists)
             Log.d("PLAYLIST:", "CHECK ${playlistList}")
-            adapter = LibraryAdapter(playlistList, this@LibraryFragment)
+
+            val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+            if (likedGamesIndex != -1) {
+                val likedGamesPlaylist = playlistList.removeAt(likedGamesIndex)
+                playlistList.add(0, likedGamesPlaylist)
+            }
+
+            adapter = LibraryAdapter(playlistList, this@LibraryFragment) { clickedPlaylist ->
+                Log.d("CLICKED PLAYLIST", "$clickedPlaylist")
+                val intent = Intent(context, PlaylistDetailsActivity::class.java)
+                val playlistDetailsBundle = Bundle().apply {
+                    putSerializable("playlistDetails", clickedPlaylist)
+                }
+                intent.putExtra("playlistDetails", playlistDetailsBundle)
+
+                startActivity(intent)
+            }
             adapter.isNotDeleteMode = true
             groupView.adapter = adapter
         }
@@ -110,8 +135,25 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         createButton.setOnClickListener {
             val playlistName = playlistNameEditText.text.toString().trim()
             if (playlistName != "") {
-                createPlaylist(playlistName)
-                alertDialog.dismiss()
+                lifecycleScope.launch {
+                    val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
+                    val existingPlaylists = playlistDataHelper.retrievePlaylists(playlists)
+                    val playlistExists = existingPlaylists.any { it.playlistName == playlistName }
+
+                    if (!playlistExists) {
+                        val playlistId = playlistDataHelper.insertPlaylist(playlistName, userSession.userName!!)
+                        Log.d("CODE", "CODE: $playlistId")
+
+                        userSession.addPlaylistId(playlistId)
+                        val newPlaylist = Playlist(playlistId, playlistName, userSession.userName!!, R.drawable.games, "", null)
+                        adapter.addPlaylist(newPlaylist)
+                        adapter.notifyDataSetChanged()
+
+                        alertDialog.dismiss()
+                    } else {
+                        showCustomToast("Playlist with name $playlistName already exists.")
+                    }
+                }
             } else {
                 showCustomToast("Playlist Name should not be empty")
             }
@@ -119,26 +161,6 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
 
         alertDialog.show()
     }
-
-    private fun createPlaylist(name: String) {
-        lifecycleScope.launch {
-            val existingPlaylists = playlistDataHelper.retrievePlaylists(userSession.playlist)
-            val playlistExists = existingPlaylists.any { it.playlistName == name }
-
-            if (!playlistExists) {
-                val playlistId = playlistDataHelper.insertPlaylist(name, userSession.userName!!)
-                Log.d("CODE", "CODE: $playlistId")
-
-                userSession.addPlaylistId(playlistId)
-                val newPlaylist = Playlist(playlistId, name, userSession.userName!!, R.drawable.games, "", null)
-                adapter.addPlaylist(newPlaylist)
-                adapter.notifyDataSetChanged()
-            } else {
-                Log.d("CreatePlaylist", "Playlist with name $name already exists.")
-            }
-        }
-    }
-
 
     private fun deletePlaylist(name:String){
         lifecycleScope.launch {

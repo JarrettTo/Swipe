@@ -26,6 +26,8 @@ interface GroupDetailsListener {
     fun onGroupUpdated(groups: ArrayList<String>)
     fun onGroupDeleted(group: Groups)
 
+    fun onGroupClicked(group: Groups)
+
 }
 class GroupFragment : Fragment() , GroupDetailsListener {
     private lateinit var groupView: RecyclerView
@@ -47,36 +49,48 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         adapter.removeGroup(group)
     }
 
+    override fun onGroupClicked(group: Groups) {
+        val intent = Intent(requireContext(), GroupDetailsActivity::class.java).apply {
+            putExtra("GroupDetails", group)
+        }
+        startActivityForResult(intent, 2)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.groups, container, false)
+
         userSession = UserSession(requireContext())
-        val groups = userSession.groups
+
         groupView = view.findViewById(R.id.recycleGroup)
-        val layoutManager = LinearLayoutManager(requireContext())
-        groupView.layoutManager = layoutManager
-        Log.d("GROUPIDS:", "CHECK ${groups}")
-        lifecycleScope.launch {
-            val groupList = groupDataHelper.retrieveGroups(groups)
-            Log.d("GROUP:", "CHECK ${groupList}")
-            adapter = GroupAdapter(groupList, this@GroupFragment, lifecycleScope)
-            groupView.adapter = adapter
-            // Now 'groupsList' contains your data
-            // Update your UI here, e.g., set the data to an adapter
-        }
+        groupView.layoutManager = LinearLayoutManager(requireContext())
+
         val newButton: Button = view.findViewById(R.id.button)
         val joinButton: Button = view.findViewById(R.id.button2)
         newButton.setOnClickListener {
             showAddGroupDialog()
         }
-        joinButton.setOnClickListener{
+        joinButton.setOnClickListener {
             showJoinGroupDialog()
         }
 
         return view
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        adapter = GroupAdapter(arrayListOf(), this, lifecycleScope)
+        groupView.adapter = adapter
+
+        lifecycleScope.launch {
+            val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+            val groupDetails = groupDataHelper.retrieveGroups(groups)
+            adapter.updateGroups(groupDetails)
+        }
+    }
+
     private fun showAddGroupDialog() {
         dialogView = layoutInflater.inflate(R.layout.create_group, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -106,12 +120,46 @@ class GroupFragment : Fragment() , GroupDetailsListener {
 
         createButton.setOnClickListener {
             if (groupNameEditText.text.toString() != "") {
-                createGroup(
-                    groupNameEditText.text.toString(),
-                    groupDescEditText.text.toString(),
-                    "WOW"
-                )
-                alertDialog.dismiss()
+                val name = groupNameEditText.text.toString().trim()
+                val desc = groupDescEditText.text.toString()
+                val uri = selectedImageUri
+
+                lifecycleScope.launch {
+                    val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+                    val existingGroups = groupDataHelper.retrieveGroups(groups)
+                    val groupIndex = existingGroups.indexOfFirst { it.name.trim() == name }
+                    val isGroupExistingAndNotCreatedByUser = groupIndex != -1 && groupDataHelper.getCreator(existingGroups[groupIndex].id) != userSession.userName
+
+                    Log.d(
+                        "groups",
+                        "Groups: $groups"
+                    )
+                    Log.d(
+                        "existingGroups",
+                        "Existing Groups: $existingGroups"
+                    )
+                    Log.d(
+                        "groupIndex",
+                        "Group Index: $groupIndex"
+                    )
+                    Log.d(
+                        "isGroupExistingAndNotCreatedByUser",
+                        "Is Group Existing and Not Created by User: $isGroupExistingAndNotCreatedByUser"
+                    )
+
+                    if (isGroupExistingAndNotCreatedByUser) {
+                        val newGroup = groupDataHelper.insertGroup(name, desc, uri, userSession.userName!!)
+                        Log.d("CODE", "CODE: ${newGroup?.id}")
+                        Log.d("URI:", "$uri")
+
+                        userSession.addGroupId(newGroup?.id!!)
+                        adapter.addGroup(newGroup)
+
+                        alertDialog.dismiss()
+                    } else {
+                        showCustomToast("You have already created a group with name $name")
+                    }
+                }
             } else {
                 showCustomToast("Group Name should not be empty")
             }
@@ -154,56 +202,38 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         alertDialog.show()
     }
 
-    private fun createGroup(name:String, desc:String, uri: String){
-
-        lifecycleScope.launch {
-            var group= groupDataHelper.insertGroup(name, desc, selectedImageUri, userSession.userName!!)
-            Log.d("CODE", "CODE: ${group?.id}")
-            userSession.addGroupId(group?.id!!)
-
-            Log.d("URI:", "${selectedImageUri}")
-
-            adapter.addGroup(group)
-        }
-
-
-    }
     interface JoinGroupCallback {
         fun onResult(success: Boolean)
     }
     private fun joinGroup(code:String, callback: JoinGroupCallback) {
-
         lifecycleScope.launch {
             val group = groupDataHelper.retrieveGroup(code)
-            Log.d("group", "group: ${group}")
-            if(group != null){
-                if(!userSession.addGroupId(code)){
+            if (group != null) {
+                if (!userSession.addGroupId(code)) {
                     showCustomToast("You're already part of that group!")
                     callback.onResult(false)
-                }
-                else{
+                } else {
                     groupDataHelper.joinGroup(code, userSession.userName!!)
-                    group.count=group.count+1
-                    adapter.addGroup(group)
-                    adapter?.notifyDataSetChanged()
+                    group.count = group.count + 1
+                    withContext(Dispatchers.Main) {
+                        adapter.addGroup(group)
+                        adapter.notifyDataSetChanged()
+                    }
                     callback.onResult(true)
                 }
-            }else{
+            } else {
                 showCustomToast("Invalid Group Code!")
                 callback.onResult(false)
             }
-
-            // Now 'groupsList' contains your data
-            // Update your UI here, e.g., set the data to an adapter
         }
-
-
     }
+
     private fun openGalleryForImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, 1)
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
@@ -213,6 +243,11 @@ class GroupFragment : Fragment() , GroupDetailsListener {
             Glide.with(this)
                 .load(selectedImageUri)
                 .into(userPhoto!!)
+        } else if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            val returnedGroup = data?.getSerializableExtra("returnedGroup") as? Groups
+            if (returnedGroup != null) {
+                adapter.updateGroup(returnedGroup)
+            }
         }
     }
 

@@ -24,8 +24,8 @@ class PlaylistDataHelper {
                     val username = snapshot.child("username").getValue(String::class.java) ?: ""
                     val imageId = snapshot.child("imageId").getValue(Int::class.java)
                     val imageURL = snapshot.child("imageURL").getValue(String::class.java) ?: ""
-                    val games = ArrayList<Games>()
 
+                    val games = ArrayList<Games>()
                     val gamesSnapshot = snapshot.child("games")
                     for (gameSnapshot in gamesSnapshot.children) {
                         val game = gameSnapshot.getValue(Games::class.java)
@@ -190,4 +190,47 @@ class PlaylistDataHelper {
             Log.e("FirebaseError", "Error removing game from playlist", e)
         }
     }
+
+    suspend fun retrieveUserPlaylist(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val userRef = dbRef.child("users").child(userName!!).child("playlists")
+        val playlists = mutableSetOf<String>()
+        try {
+            Log.d("TEST:", "CHECK ")
+            val snapshot = userRef.get().await()
+            if (snapshot.exists()) {
+                for (groupSnapshot in snapshot.children) {
+                    groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                        playlists.add(groupId)
+                    }
+                }
+            }
+            return@withContext playlists
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error fetching data", e)
+        }
+        return@withContext null
+    }
+
+    suspend fun isGameAlreadyInPlaylist(playlistId: String, game: Games): Boolean = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val playlistGamesRef = dbRef.child("playlist").child(playlistId).child("games")
+
+        try {
+            val snapshot = playlistGamesRef.get().await()
+            if (snapshot.exists()) {
+                snapshot.children.forEach { gameSnapshot ->
+                    val existingGame = gameSnapshot.getValue(Games::class.java)
+                    if (existingGame != null && existingGame.gameId == game.gameId) {
+                        return@withContext true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error checking if game is in group", e)
+        }
+        return@withContext false
+    }
+
 }

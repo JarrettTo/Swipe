@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -22,6 +23,8 @@ class GroupHolder(itemView: View, private val context: Context, private val list
     private val name: TextView = itemView.findViewById(R.id.grpName)
     private val desc: TextView = itemView.findViewById(R.id.grpDesc)
     private val button: Button = itemView.findViewById(R.id.more)
+    private val container: CardView = itemView.findViewById(R.id.group_container)
+    private var isCreator = false
 
     fun bindData(group: Groups) {
         count.text = group.count.toString()
@@ -43,7 +46,6 @@ class GroupHolder(itemView: View, private val context: Context, private val list
             var text: TextView = popupView.findViewById(R.id.delete_text)
             var img: ImageView = popupView.findViewById(R.id.removeGroup)
             val username = UserSession(context).userName
-            var isCreator = false
 
             if (group.creator != username){
                 text.text = "Leave"
@@ -68,6 +70,10 @@ class GroupHolder(itemView: View, private val context: Context, private val list
             }
 
             popupWindow.showAsDropDown(anchorView)
+        }
+
+        container.setOnClickListener {
+            listener.onGroupClicked(group)
         }
     }
 

@@ -9,6 +9,7 @@
     android:foregroundTint="#FFFFFF"
     android:paddingBottom="150dp"
     app:cardCornerRadius="20dp"
+    android:id="@+id/group_container"
     app:cardElevation="@dimen/elevation_large">
 
     <androidx.constraintlayout.widget.ConstraintLayout
