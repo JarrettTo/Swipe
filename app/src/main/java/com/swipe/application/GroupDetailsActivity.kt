@@ -83,16 +83,18 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
         val gameItemClickListener: (Any) -> Unit = { item ->
             Log.d("ITEM CONTENTS", "$item")
             if (item is Games) {
+                Log.d("ITEM CONTENTS", "is Game")
                 val intent = Intent(this, GameDetailsActivity::class.java).apply {
-                    intent.putExtra("gameDetails", item as Serializable)
+                    putExtra("gameDetails", item as Serializable)
                 }
                 startActivity(intent)
             } else if (item is Playlist) {
+                Log.d("ITEM CONTENTS", "is Playlist")
                 val intent = Intent(this, PlaylistDetailsActivity::class.java).apply {
                     val playlistDetailsBundle = Bundle().apply {
                         putSerializable("playlistDetails", item)
                     }
-                    intent.putExtra("playlistDetails", playlistDetailsBundle)
+                    putExtra("playlistDetails", playlistDetailsBundle)
                 }
                 startActivity(intent)
             } else {
