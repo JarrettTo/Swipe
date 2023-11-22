@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
@@ -23,26 +24,35 @@ class AddReviewHolder(itemView: View, private val gameID: Int, private val lifec
     private val iconComment: ImageView = itemView.findViewById(R.id.iconComment)
     private var currentRating = 5
     private val reviewDataHelper = ReviewDataHelper()
+    private val userDataHelper = UserDataHelper()
+    private lateinit var userSession: UserSession
 
     fun bindData(){
         this.bindStars()
 
-        var profileURL = UserSession(itemView.context).profileURL
-        if(profileURL != ""){
-            Glide.with(itemView.context)
-                .load(profileURL)
-                .into(userIcon);
-        } else{
-            UserSession(itemView.context).profileID.let { userIcon.setImageResource(it) }
-        }
+        lifecycleScope.launch {
+            userSession = UserSession(itemView.context)
+            var user = userSession.userName?.let { userDataHelper.getUserByUsername(it) }!!
+            var profileURL = user.profileURL
 
-        userName.text = UserSession(itemView.context).userName
+            if (profileURL != "") {
+                Glide.with(itemView.context)
+                    .load(profileURL)
+                    .placeholder(R.drawable.dp)
+                    .error(R.drawable.dp)
+                    .into(userIcon);
+            } else {
+                userIcon.setImageResource(R.drawable.dp)
+            }
+
+            userName.text = UserSession(itemView.context).userName
+        }
 
         iconComment.setOnClickListener {
             val reviewText = review.text.toString()
             if (reviewText.isNotEmpty()) {
-                val user = DataHelper().getUser()
                 lifecycleScope.launch {
+                    val user = userSession.userName?.let { userDataHelper.getUserByUsername(it) }!!
                     reviewDataHelper.insertReview(gameID, user, currentRating, reviewText)
                     listener.onReviewUpdated()
                     review.setText("")

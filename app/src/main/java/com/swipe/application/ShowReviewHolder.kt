@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 
 class ShowReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val userIcon: ImageView = itemView.findViewById(R.id.icon)
@@ -16,7 +17,16 @@ class ShowReviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val reviewDescription: TextView = itemView.findViewById(R.id.review)
 
     fun bindData(review: Reviews) {
-        userIcon.setImageResource(review.user.profile)
+        if (review.user.profileURL != "") {
+            Glide.with(itemView.context)
+                .load(review.user.profileURL)
+                .placeholder(R.drawable.dp)
+                .error(R.drawable.dp)
+                .into(userIcon)
+        } else {
+            userIcon.setImageResource(R.drawable.dp)
+        }
+
         userName.text = review.user.username
         reviewDescription.text = review.description
 

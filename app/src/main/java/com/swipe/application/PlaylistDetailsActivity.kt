@@ -108,9 +108,11 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
         if (playlistDetails.imageURL != "") {
             Glide.with(this)
                 .load(playlistDetails.imageURL)
+                .placeholder(R.drawable.games)
+                .error(R.drawable.games)
                 .into(image)
         } else {
-            playlistDetails.imageId?.let { image.setImageResource(R.drawable.games) }
+            image.setImageResource(R.drawable.games)
         }
 
         playlistName.text = playlistDetails.playlistName

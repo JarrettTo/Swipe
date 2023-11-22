@@ -21,9 +21,11 @@ class GameOrUserHolder(itemView: View, private val clickListener: ((Any) -> Unit
         if(user.profileURL != ""){
             Glide.with(itemView.context)
                 .load(user.profileURL)
+                .placeholder(R.drawable.dp)
+                .error(R.drawable.dp)
                 .into(icon)
         } else{
-            icon.setImageResource(user.profile)
+            icon.setImageResource(R.drawable.dp)
         }
         name.text = user.username
     }
@@ -53,6 +55,8 @@ class GameOrUserHolder(itemView: View, private val clickListener: ((Any) -> Unit
         if(playlist.imageURL != ""){
             Glide.with(itemView.context)
                 .load(playlist.imageURL)
+                .placeholder(R.drawable.games)
+                .error(R.drawable.games)
                 .into(icon)
         } else{
             icon.setImageResource(R.drawable.games)

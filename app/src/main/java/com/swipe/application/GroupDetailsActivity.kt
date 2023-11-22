@@ -225,6 +225,8 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
             if (group.image != "") {
                 Glide.with(this@GroupDetailsActivity)
                     .load(group.image)
+                    .placeholder(R.drawable.dp)
+                    .error(R.drawable.dp)
                     .into(image)
             } else {
                 image.setImageResource(R.drawable.groups)

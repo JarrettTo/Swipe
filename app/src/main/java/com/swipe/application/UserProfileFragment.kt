@@ -17,6 +17,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class UserProfileFragment : Fragment() {
     companion object {
@@ -26,42 +31,52 @@ class UserProfileFragment : Fragment() {
     private var selectedImageUri: Uri? = null
     private var originalDrawable: Drawable? = null
 
+    private lateinit var userSession: UserSession
+    private lateinit var user: Users
+
     private lateinit var firstNameOriginal: String
     private lateinit var lastNameOriginal: String
     private lateinit var bioOriginal: String
+
+    private lateinit var confirmPassword: EditText
     private lateinit var uploadPhotoButton: Button
     private lateinit var firstNameText: EditText
     private lateinit var lastNameText: EditText
     private lateinit var bioText: EditText
     private lateinit var oldPassword: EditText
     private lateinit var newPassword: EditText
-    private lateinit var confirmPassword: EditText
+    private lateinit var usernameText: TextView
+    private lateinit var userPhoto: ImageView
+
+    private var isPhotoChanged: Boolean = false
+    private var isFirstNameChanged: Boolean = false
+    private var isLastNameChanged: Boolean = false
+    private var isBioChanged: Boolean = false
+    private var isPasswordNotEmpty: Boolean = false
+
+    private var userDataHelper = UserDataHelper()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.user, container, false)
+        userSession = UserSession(requireContext())
 
-        val userPhoto: ImageView = view.findViewById(R.id.icon)
+        usernameText = view.findViewById(R.id.username_text)
+        userPhoto = view.findViewById(R.id.icon)
         uploadPhotoButton = view.findViewById(R.id.upload_photo_btn)
         firstNameText = view.findViewById(R.id.first_name_text)
         lastNameText = view.findViewById(R.id.last_name_text)
         bioText = view.findViewById(R.id.bio_text)
-        oldPassword = view.findViewById(R.id.old_password_change)
-        newPassword = view.findViewById(R.id.new_password_change)
-        confirmPassword = view.findViewById(R.id.confirm_password_change)
-        val confirmChangeBtn: Button = view.findViewById(R.id.confirm_changes_btn)
-        val logoutBtn: Button = view.findViewById(R.id.logout_btn)
 
-        originalDrawable = userPhoto.drawable
-        firstNameOriginal = firstNameText.text.toString().trim()
-        lastNameOriginal = lastNameText.text.toString().trim()
-        bioOriginal = bioText.text.toString().trim()
+        val confirmChangeBtn: Button = view.findViewById(R.id.confirm_changes_btn)
+        val cancelChangeBtn: Button = view.findViewById(R.id.cancelButton)
+        val logoutBtn: Button = view.findViewById(R.id.logout_btn)
 
         uploadPhotoButton.setOnClickListener {
             val isCancelMode = uploadPhotoButton.text.toString() == "Cancel"
 
             uploadPhotoButton.isSelected = !isCancelMode
             if (uploadPhotoButton.text == "Cancel") {
-                revertToOriginalPhoto(userPhoto, uploadPhotoButton)
+                revertToOriginalPhoto()
             } else {
                 openGalleryForImage()
             }
@@ -69,40 +84,79 @@ class UserProfileFragment : Fragment() {
 
         confirmChangeBtn.setOnClickListener {
             if (hasUnsavedChanges()) {
-                var count = 0
-                if (oldPassword.text.isNotEmpty()) {
-                    count += 1
-                }
-                if (newPassword.text.isNotEmpty()) {
-                    count += 1
-                }
-                if (confirmPassword.text.isNotEmpty()) {
-                    count += 1
-                }
-                if (count != 0 && count < 3) {
-                    getActivity()?.let {
-                        showCustomToast("Please fill up old, new, and confirm password fields")
-                    }
-                } else if (newPassword.text.toString() != confirmPassword.text.toString()) {
-                    getActivity()?.let {
-                        showCustomToast("New and confirm password do not match")
-                    }
-                }
-
-                // DB CHANGE
+                if (isPasswordNotEmpty) updatePassword()
+                if (isPhotoChanged) updatePhoto()
+                if (isBioChanged) updateBio()
+                if (isFirstNameChanged) updateFirstName()
+                if (isLastNameChanged) updateLastName()
 
             } else {
                 getActivity()?.let {
                     showCustomToast("There are no unsaved changes")
                 }
             }
+
+            firstNameText.clearFocus()
+            lastNameText.clearFocus()
+            bioText.clearFocus()
+            oldPassword.clearFocus()
+            newPassword.clearFocus()
+            confirmPassword.clearFocus()
+        }
+
+        cancelChangeBtn.setOnClickListener {
+            revertBackChanges()
         }
 
         logoutBtn.setOnClickListener {
             logoutUser()
         }
 
+        uploadPhotoButton.setOnClickListener {
+            if (uploadPhotoButton.text == "Upload Photo") {
+                openGalleryForImage()
+            } else {
+                uploadPhotoButton.text = "Upload Photo"
+            }
+        }
+
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        oldPassword = view.findViewById(R.id.old_password_change)
+        newPassword = view.findViewById(R.id.new_password_change)
+        confirmPassword = view.findViewById(R.id.confirm_password_change)
+
+        userSession = UserSession(requireContext())
+        userDataHelper = UserDataHelper()
+
+        lifecycleScope.launch {
+            user = userSession.userName?.let { userDataHelper.getUserByUsername(it) }!!
+
+            usernameText.text = user.username
+            firstNameText.setText(user.firstname)
+            lastNameText.setText(user.lastname)
+            bioText.setText(user.bio)
+
+            Log.d("PROFILEURL", "${user.profileURL}")
+            if (user.profileURL != "") {
+                Glide.with(this@UserProfileFragment)
+                    .load(user.profileURL)
+                    .placeholder(R.drawable.dp)
+                    .error(R.drawable.dp)
+                    .into(userPhoto)
+            } else {
+                userPhoto.setImageResource(R.drawable.dp)
+            }
+
+            originalDrawable = userPhoto.drawable
+            firstNameOriginal = firstNameText.text.toString().trim()
+            lastNameOriginal = lastNameText.text.toString().trim()
+            bioOriginal = bioText.text.toString().trim()
+        }
     }
 
     private fun logoutUser() {
@@ -129,20 +183,134 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private fun revertToOriginalPhoto(userPhoto: ImageView, uploadPhotoButton: Button) {
+    private fun revertBackChanges() {
+        revertToOriginalPhoto()
+        bioText.setText(bioOriginal)
+        firstNameText.setText(firstNameOriginal)
+        lastNameText.setText(firstNameOriginal)
+        oldPassword.setText("")
+        newPassword.setText("")
+        confirmPassword.setText("")
+
+        firstNameText.clearFocus()
+        lastNameText.clearFocus()
+        bioText.clearFocus()
+        oldPassword.clearFocus()
+        newPassword.clearFocus()
+        confirmPassword.clearFocus()
+    }
+
+    private fun revertToOriginalPhoto() {
         userPhoto.setImageDrawable(originalDrawable)
         uploadPhotoButton.text = "Upload Photo"
         selectedImageUri = null
+        isPhotoChanged = false
     }
 
     private fun hasUnsavedChanges(): Boolean {
-        val isPhotoChanged = uploadPhotoButton.text == "Cancel"
-        val isFirstNameChanged = firstNameText.text.toString() != firstNameOriginal
-        val isLastNameChanged = lastNameText.text.toString() != lastNameOriginal
-        val isBioChanged = bioText.text.toString() != bioOriginal
-        val isPasswordNotEmpty = oldPassword.text.isNotEmpty() || newPassword.text.isNotEmpty() || confirmPassword.text.isNotEmpty()
+        isPhotoChanged = uploadPhotoButton.text == "Cancel"
+        isFirstNameChanged = firstNameText.text.toString().trim() != firstNameOriginal
+        isLastNameChanged = lastNameText.text.toString().trim() != lastNameOriginal
+        isBioChanged = bioText.text.toString().trim() != bioOriginal
+        isPasswordNotEmpty = oldPassword.text.isNotEmpty() || newPassword.text.isNotEmpty() || confirmPassword.text.isNotEmpty()
 
         return isPhotoChanged || isFirstNameChanged || isLastNameChanged || isBioChanged || isPasswordNotEmpty
+    }
+
+    private fun updatePassword() {
+        var count = 0
+
+        if (oldPassword.text.isNotEmpty()) count += 1
+        if (newPassword.text.isNotEmpty()) count += 1
+        if (confirmPassword.text.isNotEmpty()) count += 1
+
+        if (count != 0 && count < 3) {
+            showCustomToast("Failed to update password. Please fill up old, new, and confirm password fields")
+        } else if (newPassword.text.toString() != confirmPassword.text.toString()) {
+            showCustomToast("Failed to update password. New and confirm password do not match")
+        } else {
+            lifecycleScope.launch {
+                val checkOldPass = userDataHelper.isOldPasswordCorrect(user.username, oldPassword.text.toString())
+                if (checkOldPass) {
+                    val updateResult = userDataHelper.updatePassword(user.username, confirmPassword.text.toString())
+                    if (updateResult) {
+                        showCustomToast("Password updated successfully")
+                    } else {
+                        showCustomToast("Failed to update password. Please try again later.")
+                    }
+                } else {
+                    showCustomToast("Incorrect old password")
+                }
+
+                oldPassword.setText("")
+                newPassword.setText("")
+                confirmPassword.setText("")
+            }
+        }
+
+        isPasswordNotEmpty = false
+    }
+
+
+    private fun updatePhoto() {
+        val storageReference = FirebaseStorage.getInstance().getReference()
+        val imageRef = storageReference.child("images/users/${user.username}/${UUID.randomUUID()}")
+
+        selectedImageUri?.let { uri ->
+            imageRef.putFile(uri)
+                .addOnSuccessListener {
+                    imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        lifecycleScope.launch {
+                            val imageUrl = downloadUri.toString().trim()
+                            userDataHelper.updateUserImage(user.username, imageUrl)
+                            Glide.with(this@UserProfileFragment).load(imageUrl).into(userPhoto)
+
+                            uploadPhotoButton.text = "Upload Photo"
+                            isPhotoChanged = false
+
+                            showCustomToast("Photo updated successfully")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Log or show the error message
+                    Log.e("UserProfileFragment", "Error uploading image: ${exception.message}")
+                    showCustomToast("Failed to upload photo.")
+                }
+        } ?: run {
+            showCustomToast("No image selected.")
+        }
+    }
+
+
+    private fun updateBio() {
+        lifecycleScope.launch {
+            userDataHelper.updateUserBio(user.username, bioText.text.toString().trim())
+            bioOriginal = bioText.text.toString().trim()
+            isBioChanged = false
+
+            showCustomToast("Bio updated successfully.")
+        }
+    }
+
+    private fun updateFirstName() {
+        lifecycleScope.launch {
+            userDataHelper.updateFirstName(user.username, firstNameText.text.toString().trim())
+            firstNameOriginal = firstNameText.text.toString().trim()
+            isFirstNameChanged = false
+
+            showCustomToast("First Name updated successfully.")
+        }
+    }
+
+    private fun updateLastName() {
+        lifecycleScope.launch {
+            userDataHelper.updateLastName(user.username, lastNameText.text.toString().trim())
+            lastNameOriginal = lastNameText.text.toString().trim()
+            isLastNameChanged = false
+
+            showCustomToast("Last Name updated successfully.")
+        }
     }
 
     private fun showCustomToast(message: String) {

@@ -25,6 +25,7 @@ class GameDetailsHolder(
     private val lifecycleScope: LifecycleCoroutineScope,
     private val listener: GameDetailsListener
 ) : RecyclerView.ViewHolder(itemView) {
+
     private val image: ImageView = itemView.findViewById(R.id.game_photo)
     private val gameName: TextView = itemView.findViewById(R.id.game_name)
     private val description: TextView = itemView.findViewById(R.id.game_description)
@@ -40,6 +41,8 @@ class GameDetailsHolder(
     private val playButton: Button = itemView.findViewById(R.id.playButton)
     private val reviewDataHelper = ReviewDataHelper()
 
+    private lateinit var userSession: UserSession
+
     fun bindData(game: Games) {
         if(game.imageId!=0){
             image.setImageResource(game.imageId)
@@ -50,6 +53,7 @@ class GameDetailsHolder(
 
         }
 
+        userSession = UserSession(context)
         gameName.text = game.gameName
         description.text = game.description
         platformList.text = game.platform.toString()
@@ -78,13 +82,16 @@ class GameDetailsHolder(
         bindPopularPlayers(popularPlayersList)
 
         lifecycleScope.launch {
-            val generalReviews = reviewDataHelper.retrieveReviews(game.gameId)
-            val userSpecificReviews = reviewDataHelper.retrieveAllReviewsForUserAndGame(game.gameId, DataHelper().getUser().username)
+            val generalReviews = reviewDataHelper.retrieveReviews(game.gameId) ?: listOf()
+            val userSpecificReviews = userSession.userName?.let {
+                reviewDataHelper.retrieveAllReviewsForUserAndGame(game.gameId, it)
+            } ?: listOf()
 
             val combinedReviews = (generalReviews + userSpecificReviews).distinctBy { it.reviewID }
             Log.d("reviews", "$combinedReviews")
             bindReviews(combinedReviews)
         }
+
     }
 
 
@@ -185,15 +192,19 @@ class GameDetailsHolder(
                 layoutParams.bottomMargin = 10.dpToPx(itemView.context)
                 reviewsView.layoutParams = layoutParams
 
-                if (review.user == DataHelper().getUser()){
-                    val button = reviewsView.findViewById<Button>(R.id.deleteComment)
-                    button.visibility = View.VISIBLE
-                    button.setOnClickListener {
-                        showDeleteConfirmationDialog(review.reviewID)
-                    }
-                }
+                lifecycleScope.launch {
+                    val user = userSession.userName?.let { UserDataHelper().getUserByUsername(it) }!!
 
-                reviewsContainer.addView(reviewsView)
+                    if (review.user.username == user.username){
+                        val button = reviewsView.findViewById<Button>(R.id.deleteComment)
+                        button.visibility = View.VISIBLE
+                        button.setOnClickListener {
+                            showDeleteConfirmationDialog(review.reviewID)
+                        }
+                    }
+
+                    reviewsContainer.addView(reviewsView)
+                }
             }
         } else {
             reviewsContainer.visibility = View.GONE

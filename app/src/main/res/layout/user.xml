@@ -162,15 +162,31 @@
             android:textSize="16sp" />
 
         <!-- Confirm Password Change Button -->
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/confirm_changes_btn"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:text="  Confirm Changes  "
-            android:background="@drawable/rounded_button"
-            android:textColor="#FFFFFF" />
+            android:layout_marginTop="30dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/inverted_rounded_button"
+                android:text="Cancel"
+                android:textColor="#F5F5F5" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/confirm_changes_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button"
+                android:text="Save"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
 
         <!-- Logout Button -->
         <androidx.appcompat.widget.AppCompatButton
@@ -178,7 +194,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="30dp"
             android:text="Logout"
             android:background="@drawable/rounded_button"
             android:textColor="#FFFFFF" />
