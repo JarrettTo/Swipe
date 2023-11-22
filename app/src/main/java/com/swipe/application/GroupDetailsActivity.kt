@@ -66,8 +66,12 @@ class GroupDetailsActivity : AppCompatActivity(), PlaylistGameActionListener {
 
     override fun onAddPlaylistAction(playlist: Playlist) {
         lifecycleScope.launch {
-            groupDataHelper.insertPlaylist(group.id, playlist.playlistId)
-            playlistAdapter.addPlaylistfromGroup(playlist)
+            if (groupDataHelper.isPlaylistAlreadyInGroup(group.id, playlist.playlistId)){
+                showCustomToast("Playlist is already in group")
+            } else {
+                groupDataHelper.insertPlaylist(group.id, playlist.playlistId)
+                playlistAdapter.addPlaylistfromGroup(playlist)
+            }
         }
     }
 
