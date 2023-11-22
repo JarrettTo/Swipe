@@ -191,7 +191,56 @@ class GamesDataHelper : ViewModel() {
             return@withContext gamesList
         }
 
+        suspend fun fetchLikedGames(likedGameIds: List<String>): List<Games> = withContext(Dispatchers.IO) {
+            var httpURLConnection: HttpURLConnection? = null
+            val gamesList = mutableListOf<Games>()
 
+            try {
+                val url = URL("http://10.0.2.2:5000/get_games?likedGameIds=$likedGameIds") // Replace with your actual API URL
+                httpURLConnection = url.openConnection() as HttpURLConnection
+                httpURLConnection.requestMethod = "GET"
+                httpURLConnection.connect()
+
+                val responseCode = httpURLConnection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = httpURLConnection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonResponse = JSONObject(response)
+                    val gamesArray = jsonResponse.getJSONArray("output")
+
+                    for (i in 0 until gamesArray.length()) {
+                        val gameJson = gamesArray.getJSONObject(i)
+                        val name = gameJson.getString("name")
+                        val description = gameJson.getString("description")
+                        val genres = gameJson.getString("genres").split(", ").toList()
+                        val headerImage = gameJson.getString("header_image")
+                        val id = gameJson.getInt("id")
+                        val platforms = gameJson.getString("platforms").split(", ").toList()
+                        val price = gameJson.getString("price")
+                        val videoUrl = gameJson.getString("video_url")
+
+                        val game = Games(
+                            id,
+                            0,// other properties as per your Games class definition
+                            headerImage,
+                            name,
+                            description,
+                            ArrayList(genres),
+                            ArrayList(platforms),
+                            price,
+                            0,// ... any other properties that need to be set
+                            videoUrl
+                        )
+                        gamesList.add(game)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                httpURLConnection?.disconnect()
+            }
+
+            return@withContext gamesList
+        }
 
         suspend fun retrieveUserGames(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
             val dbRef = FirebaseDatabase.getInstance().getReference("test")

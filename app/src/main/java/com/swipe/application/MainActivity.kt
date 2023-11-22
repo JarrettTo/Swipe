@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_main)
+        val db = DatabaseHelper(this)
         userSession = UserSession(this)
         progressBar = findViewById(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
                     // Assuming fetchGamesFromSteamAPI is a suspend function, otherwise it should be called normally
                     gamesDataHelper.fetchGamesFromSteamAPI()
                     gameList = ArrayList(GamesDataHelper.fetchGames(10, userSession.likedGameIds!!.toList())) // This is called from within a coroutine
+                    db.saveGames(ArrayList(GamesDataHelper.fetchLikedGames(userSession.likedGameIds!!.toList())))
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
@@ -58,18 +60,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }
-        val db = DatabaseHelper(this)
-        for(i in 0 until userSession.likedGameIds!!.size){
-            GamesDataHelper.fetchSingleGameInfoSteamAPI(userSession.likedGameIds!!.elementAtOrNull(i)?.toInt()!!, object : GamesDataHelper.Companion.GameSingleInfoCallback {
-                override fun onResult(result: Games?) {
-                    if (result!=null) {
-                        db.saveGame(result)
-                    }
-                }
-            })
 
 
-        }
 
 
 

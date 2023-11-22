@@ -25,7 +25,7 @@ def call_api_at_startup():
                 game_list.append(game_info)
             game_ids.pop(0)
         
-        print("Games fetched successfully! : ", game_list)
+        print("Games fetched successfully!")
     else:
         print("Failed to fetch games from Steam API")
 def refill(count):
@@ -101,7 +101,17 @@ def get_games():
     thread.start()
     return jsonify({"output": output})
     
+@app.route('/get_liked_games', methods=['GET'])
+def get_liked_games():
 
+    liked_games = list(request.args.get('likedGameIds', []))
+    output = []
+    
+    for i in liked_games:
+        output.append(fetch_game_info_steam_api(i))
+    
+    return jsonify({"output": output})
+    
 
 if __name__ == "__main__":
     call_api_at_startup()

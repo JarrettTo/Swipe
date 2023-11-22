@@ -183,6 +183,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
         cursor.close()
         return gamesList
     }
+
+    fun saveGames(arrayList: ArrayList<Games>) {
+        for(i in arrayList){
+            saveGame(i)
+        }
+    }
     // ... Insert and retrieve methods ...
 
 }
