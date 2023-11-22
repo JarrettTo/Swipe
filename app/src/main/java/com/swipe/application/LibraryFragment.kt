@@ -58,12 +58,20 @@ class LibraryFragment : Fragment() , PlaylistActionListener{
         groupView.layoutManager = LinearLayoutManager(requireContext())
 
         userSession = UserSession(requireContext())
-        val playlists = userSession.playlist
 
-        Log.d("PLAYLIST-IDS:", "CHECK ${playlists}")
         lifecycleScope.launch {
+            val playlists = playlistDataHelper.retrieveUserPlaylist(userSession.userName)
+            Log.d("PLAYLIST-IDS:", "CHECK ${playlists}")
+
             playlistList = playlistDataHelper.retrievePlaylists(playlists)
             Log.d("PLAYLIST:", "CHECK ${playlistList}")
+
+            val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+            if (likedGamesIndex != -1) {
+                val likedGamesPlaylist = playlistList.removeAt(likedGamesIndex)
+                playlistList.add(0, likedGamesPlaylist)
+            }
+
             adapter = LibraryAdapter(playlistList, this@LibraryFragment) { clickedPlaylist ->
                 Log.d("CLICKED PLAYLIST", "$clickedPlaylist")
                 val intent = Intent(context, PlaylistDetailsActivity::class.java)

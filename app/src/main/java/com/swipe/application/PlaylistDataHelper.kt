@@ -190,4 +190,26 @@ class PlaylistDataHelper {
             Log.e("FirebaseError", "Error removing game from playlist", e)
         }
     }
+
+    suspend fun retrieveUserPlaylist(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val userRef = dbRef.child("users").child(userName!!).child("playlists")
+        val playlists = mutableSetOf<String>()
+        try {
+            Log.d("TEST:", "CHECK ")
+            val snapshot = userRef.get().await()
+            if (snapshot.exists()) {
+                for (groupSnapshot in snapshot.children) {
+                    groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                        playlists.add(groupId)
+                    }
+                }
+            }
+            return@withContext playlists
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error fetching data", e)
+        }
+        return@withContext null
+    }
 }
