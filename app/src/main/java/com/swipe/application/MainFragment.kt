@@ -164,7 +164,7 @@ class MainFragment : Fragment(){
                 val groupExists = existingGroups.find { it.name == name }
                 var groupId = groupExists?.id
 
-                Log.d("existingGroupCode + existingGroups + groupExists + groupId", "$existingGroupCode + $existingGroups + $groupExists + $groupId")
+                Log.d("code", "$existingGroupCode + $existingGroups + $groupExists + $groupId")
                 if (groupId != null && !groupDataHelper.isGameAlreadyInGroup(groupId, game)) {
                     groupDataHelper.addGameToGroup(groupId, game)
                 }

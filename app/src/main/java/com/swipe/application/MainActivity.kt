@@ -1,6 +1,7 @@
 package com.swipe.application
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -46,38 +47,48 @@ class MainActivity : AppCompatActivity() {
             progressBar.visibility = View.VISIBLE
             fetchData() // Refactor your data fetching logic into this function
         }
-        lifecycleScope.launch {
-            userSession.groups= userDataHelper.retrieveUserGroups(userSession.userName)
-            Log.d("GROUP FB", "DEBUG: ${userDataHelper.retrieveUserGroups(userSession.userName)}")
-            userSession.likedGameIds= userDataHelper.retrieveUserGames(userSession.userName)
-            Log.d("LIKES FB", "DEBUG: ${userDataHelper.retrieveUserGames(userSession.userName)}")
-            userSession.playlist= userDataHelper.retrieveUserPlaylists(userSession.userName)
-            Log.d("Playlists FB", "DEBUG: ${GamesDataHelper.retrieveUserPlaylists(userSession.userName)}")
+        if(userSession.user == null){
+            //TODO: Insert logic that redirects them to login page
+            Log.d("LOGIN","WHAT")
+            val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+            sharedPref?.edit()?.remove("userToken")?.apply()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            this?.finish()
+        }else{
+            lifecycleScope.launch {
+                if(userSession.userName !=null){
+                    userSession.groups= userDataHelper.retrieveUserGroups(userSession.userName)
+                    Log.d("GROUP FB", "DEBUG: ${userDataHelper.retrieveUserGroups(userSession.userName)}")
+                    userSession.likedGameIds= userDataHelper.retrieveUserGames(userSession.userName)
+                    Log.d("LIKES FB", "DEBUG: ${userDataHelper.retrieveUserGames(userSession.userName)}")
+                    userSession.playlist= userDataHelper.retrieveUserPlaylists(userSession.userName)
+                    Log.d("Playlists FB", "DEBUG: ${GamesDataHelper.retrieveUserPlaylists(userSession.userName)}")
 
-            if (gameList.isEmpty()) {
-                try {
-                    // Assuming fetchGamesFromSteamAPI is a suspend function, otherwise it should be called normally
-                    gamesDataHelper.fetchGamesFromSteamAPI()
+                }
 
-                    fetchData()
-                     // This is called from within a coroutine
-                    db.saveGames(ArrayList(GamesDataHelper.fetchLikedGames(userSession.likedGameIds!!.toList())))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    // Hide the ProgressBar once the data is loaded or an error occurs
+                if (gameList.isEmpty()) {
+                    try {
+                        // Assuming fetchGamesFromSteamAPI is a suspend function, otherwise it should be called normally
+                        gamesDataHelper.fetchGamesFromSteamAPI()
+
+                        fetchData()
+                        // This is called from within a coroutine
+                        db.saveGames(ArrayList(GamesDataHelper.fetchLikedGames(userSession.likedGameIds!!.toList())))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        // Hide the ProgressBar once the data is loaded or an error occurs
 
 
 
+                    }
                 }
             }
         }
 
-        if(userSession.userName == ""){
-            //TODO: Insert logic that redirects them to login page
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-        }
+
+
 
 
 
@@ -127,15 +138,9 @@ class MainActivity : AppCompatActivity() {
     }
     private fun setupButtons(bundle: Bundle) {
         findViewById<Button>(R.id.home_button).setOnClickListener {
-            if (this@MainActivity is MainActivity) {
-                // If in MainActivity, replace fragment
-                val mf = MainFragment().apply { arguments = bundle }
-                replaceFragment(mf)
-            } else {
-                // If not in MainActivity, start MainActivity
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-             }}
+            val mf = MainFragment().apply { arguments = bundle }
+            replaceFragment(mf)
+        }
         findViewById<Button>(R.id.search_button).setOnClickListener {
             replaceFragment(SearchFragment())
         }

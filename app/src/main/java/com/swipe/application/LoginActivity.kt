@@ -75,7 +75,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun isUserLoggedIn(): Boolean {
+
         val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+        Log.d("AM I LOG", "${sharedPref.getString("userToken", null)}")
         return sharedPref.getString("userToken", null) != null
     }
 
