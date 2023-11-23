@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class SearchFragment : Fragment() {
-    private var gameList: ArrayList<Games> = arrayListOf()
+    private var gameList: ArrayList<Games>? = arrayListOf()
     private lateinit var gamesListView: RecyclerView
     private lateinit var adapter: SearchAdapter
     private lateinit var searchView: SearchView
@@ -23,9 +23,12 @@ class SearchFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.search, container, false)
         db = DatabaseHelper(requireContext())
+
         val gamesFromDb = db.getGames() // Removed the safe call operator `?` because `db` is not nullable here
         if (gamesFromDb != null) {
             gameList = gamesFromDb
+
+
         }
 
         Log.d("SearchActivity", "All Games: $gameList")
