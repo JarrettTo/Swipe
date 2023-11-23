@@ -14,7 +14,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.tasks.await
 
 class SignUpActivity : AppCompatActivity() {
@@ -53,7 +52,10 @@ class SignUpActivity : AppCompatActivity() {
                     userDataHelper.createUser(username, password,
                         onSuccess = {
                             performLogin()
+                            storeUserName(username)
+                            storePassword(password)
                             goToMainActivity()
+
                         },
                         onFailure = {
                             // Handle failure
@@ -85,6 +87,26 @@ class SignUpActivity : AppCompatActivity() {
             apply()
         }
 
+    }
+
+    private fun storeUserName(username: String){
+        val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()){
+            putString("userName", username)
+            apply()
+        }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
+
+    private fun storePassword(password: String){
+        val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()){
+            putString("password", password)
+            apply()
+        }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     private fun goToMainActivity(){
