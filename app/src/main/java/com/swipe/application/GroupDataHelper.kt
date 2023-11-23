@@ -206,6 +206,11 @@ class GroupDataHelper {
             val userRef = dbRef.child("users")
 
             if (!usersList.contains(user)) {
+                //groups
+                usersList.add(user)
+                groupRef.child("users").setValue(usersList).await()
+
+                //users
                 userRef.child(user).child("groups").orderByKey().limitToLast(1)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
