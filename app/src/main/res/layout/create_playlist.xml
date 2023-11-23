@@ -27,7 +27,7 @@
         android:hint="Playlist Name"
         android:inputType="textPersonName"
         android:padding="10dp"
-        android:textColor="#DDDDDD"
+        android:textColor="@color/black"
         android:textColorHint="#DDDDDD"
         android:textSize="20sp"
         android:textAlignment="center" />

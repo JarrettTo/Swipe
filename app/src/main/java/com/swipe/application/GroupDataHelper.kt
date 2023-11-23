@@ -203,17 +203,27 @@ class GroupDataHelper {
 
             val usersSnapshot = groupRef.child("users").get().await()
             val usersList = usersSnapshot.getValue<ArrayList<String>>() ?: arrayListOf()
+            val userRef = dbRef.child("users")
 
             if (!usersList.contains(user)) {
-                usersList.add(user)
-                groupRef.child("users").setValue(usersList).await()
+                userRef.child(user).child("groups").orderByKey().limitToLast(1)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.hasChildren()) {
+                                val lastKey = snapshot.children.last().key?.toIntOrNull() ?: 0
+                                val newKey = lastKey + 1
+                                userRef.child(user).child("groups").child(newKey.toString())
+                                    .setValue(code)
+                            } else {
+                                userRef.child(user).child("groupd").child("1")
+                                    .setValue(code)
+                            }
+                        }
+                        override fun onCancelled(databaseError: DatabaseError) {
+                            // Handle error
+                        }
+                    })
             }
-
-            val userGroupsRef = dbRef.child("users").child(user).child("groups")
-            val userGroupSnapshot = userGroupsRef.get().await()
-            val userGroupsMap = userGroupSnapshot.value as? Map<String, String> ?: mapOf()
-            val newKey = (userGroupsMap.keys.maxOfOrNull { it.toIntOrNull() ?: 0 } ?: 0) + 1
-            userGroupsRef.child(newKey.toString()).setValue(code).await()
 
             return@withContext true
         } catch (e: Exception) {

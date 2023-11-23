@@ -31,7 +31,7 @@
         android:inputType="textPersonName"
         android:padding="10dp"
         android:textAlignment="center"
-        android:textColor="#DDDDDD"
+        android:textColor="@color/black"
         android:textColorHint="#DDDDDD"
         android:textSize="20sp" />
 
