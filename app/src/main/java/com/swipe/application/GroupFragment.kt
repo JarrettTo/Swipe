@@ -121,7 +121,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         }
 
         createButton.setOnClickListener {
-            if (groupNameEditText.text.toString() != "") {
+            if (groupNameEditText.text.toString().trim() != "") {
                 val name = groupNameEditText.text.toString().trim()
                 val desc = groupDescEditText.text.toString()
                 val uri = selectedImageUri
@@ -189,16 +189,19 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         }
 
         createButton.setOnClickListener {
-            joinGroup(groupCodeEditText.text.toString(), object : JoinGroupCallback {
-                override fun onResult(success: Boolean) {
-                    if (success) {
-                        alertDialog.dismiss()
-                    } else {
-                        groupCodeEditText.setText("")
+            if (groupCodeEditText.text.toString().trim() != "") {
+                joinGroup(groupCodeEditText.text.toString(), object : JoinGroupCallback {
+                    override fun onResult(success: Boolean) {
+                        if (success) {
+                            alertDialog.dismiss()
+                        } else {
+                            groupCodeEditText.setText("")
+                        }
                     }
-                }
-            })
-
+                })
+            } else {
+                showCustomToast("Code cannot be empty")
+            }
         }
 
         alertDialog.show()

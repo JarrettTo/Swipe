@@ -62,6 +62,12 @@ class AddPlaylistToGroup : AppCompatActivity(), PlaylistActionListener {
             var playlists = userDataHelper.retrieveUserPlaylists(userSession.userName)
 
             playlistList = playlistDataHelper.retrievePlaylists(playlists)
+            val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+            if (likedGamesIndex != -1) {
+                // Don't include "Liked Games" for adding to groups
+                playlistList.removeAt(likedGamesIndex)
+            }
+
             adapter = LibraryAdapter(playlistList, this@AddPlaylistToGroup) { clickedPlaylist ->
                 Log.d("CLICKED PLAYLIST", "$clickedPlaylist")
                 showAddConfirmationDialog(clickedPlaylist)
