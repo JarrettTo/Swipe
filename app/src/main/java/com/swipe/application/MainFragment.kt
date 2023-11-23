@@ -117,7 +117,10 @@ class MainFragment : Fragment(){
             try{
                 val games= GamesDataHelper.fetchGames(count, likedGames.toList())!!
                 swipeStack.addGames(games)
-                
+                if(swipeStack.adapter?.count==0){
+                    goToMainActivity()
+                }
+
             } catch (e: Exception) {
                 if(swipeStack.adapter?.count==0){
                     goToMainActivity()
@@ -129,8 +132,13 @@ class MainFragment : Fragment(){
 
     private fun goToMainActivity() {
         if (isNavigatingToMain.compareAndSet(false, true)) {
-            val intent = Intent(context, MainActivity::class.java)
-            startActivity(intent)
+            if (isAdded) { // Check if the fragment is currently added to an activity.
+                val intent = Intent(requireContext(), MainActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Optionally, reset isNavigatingToMain because the navigation didn't occur.
+                isNavigatingToMain.set(false)
+            }
         }
     }
 

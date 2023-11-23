@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         userSession = UserSession(this)
         progressBar = findViewById(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
+        setupOtherButtons()
         retryButton.setOnClickListener {
             errorLayout.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
@@ -141,6 +142,27 @@ class MainActivity : AppCompatActivity() {
             val mf = MainFragment().apply { arguments = bundle }
             replaceFragment(mf)
         }
+        findViewById<Button>(R.id.search_button).setOnClickListener {
+            replaceFragment(SearchFragment())
+        }
+        val groupsButton: Button = findViewById(R.id.groups_button)
+        groupsButton.setOnClickListener {
+            replaceFragment(GroupFragment())
+        }
+
+        val libraryButton: Button = findViewById(R.id.library_button)
+        libraryButton.setOnClickListener {
+            replaceFragment(LibraryFragment())
+        }
+
+        val profileButton: Button = findViewById(R.id.user_button)
+        profileButton.setOnClickListener {
+            replaceFragment(UserProfileFragment())
+        }
+        //... Other button setups
+    }
+    private fun setupOtherButtons() {
+
         findViewById<Button>(R.id.search_button).setOnClickListener {
             replaceFragment(SearchFragment())
         }
