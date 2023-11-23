@@ -40,6 +40,7 @@ class GameDetailsHolder(
     private val reviewsContainer: LinearLayout = itemView.findViewById(R.id.reviews_container)
     private val playButton: Button = itemView.findViewById(R.id.playButton)
     private val reviewDataHelper = ReviewDataHelper()
+    private val userDataHelper = UserDataHelper()
 
     private lateinit var userSession: UserSession
 
@@ -180,26 +181,35 @@ class GameDetailsHolder(
             val inflater = LayoutInflater.from(itemView.context)
 
             for (review in reviews) {
-                val reviewsView = inflater.inflate(R.layout.show_review, reviewsContainer, false)
-                val reviewHolder = ShowReviewHolder(reviewsView)
-
-                reviewHolder.bindData(review)
-
-                val layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.bottomMargin = 10.dpToPx(itemView.context)
-                reviewsView.layoutParams = layoutParams
-
                 lifecycleScope.launch {
-                    val user = userSession.userName?.let { UserDataHelper().getUserByUsername(it) }!!
+                    val reviewsView = inflater.inflate(R.layout.show_review, reviewsContainer, false)
+                    val reviewHolder = ShowReviewHolder(reviewsView)
+                    val userReview = userDataHelper.getUserByUsername(review.user.username)
+                    var updatedReview: Reviews
 
-                    if (review.user.username == user.username){
+                    if (review.user.profileURL != userReview.profileURL) {
+                        updatedReview =
+                            reviewDataHelper.updateUserInReview(review.reviewID, userReview)!!
+                    } else {
+                        updatedReview = review
+                    }
+
+                    reviewHolder.bindData(updatedReview)
+
+                    val layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    layoutParams.bottomMargin = 10.dpToPx(itemView.context)
+                    reviewsView.layoutParams = layoutParams
+
+                    val user = userSession.userName?.let { userDataHelper.getUserByUsername(it) }!!
+
+                    if (updatedReview.user.username == user.username){
                         val button = reviewsView.findViewById<Button>(R.id.deleteComment)
                         button.visibility = View.VISIBLE
                         button.setOnClickListener {
-                            showDeleteConfirmationDialog(review.reviewID)
+                            showDeleteConfirmationDialog(updatedReview.reviewID)
                         }
                     }
 

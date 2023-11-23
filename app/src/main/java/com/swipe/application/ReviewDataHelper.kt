@@ -81,4 +81,21 @@ class ReviewDataHelper {
         }
     }
 
+    suspend fun updateUserInReview(reviewID: String, updatedUser: Users): Reviews? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val reviewRef = dbRef.child("reviews").child(reviewID)
+
+        try {
+            reviewRef.child("user").setValue(updatedUser).await()
+
+            // Retrieve and return the updated review
+            val updatedReviewSnapshot = reviewRef.get().await()
+            val updatedReview = updatedReviewSnapshot.getValue<Reviews>()
+            updatedReview?.reviewID = reviewID
+            return@withContext updatedReview
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating user in review", e)
+            return@withContext null
+        }
+    }
 }
