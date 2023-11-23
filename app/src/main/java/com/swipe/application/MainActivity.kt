@@ -12,6 +12,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
@@ -162,7 +163,11 @@ class MainActivity : AppCompatActivity() {
         //... Other button setups
     }
     private fun setupOtherButtons() {
+        findViewById<Button>(R.id.home_button).setOnClickListener {
 
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
         findViewById<Button>(R.id.search_button).setOnClickListener {
             replaceFragment(SearchFragment())
         }
