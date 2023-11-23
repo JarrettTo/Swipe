@@ -190,7 +190,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
 
         createButton.setOnClickListener {
             if (groupCodeEditText.text.toString().trim() != "") {
-                joinGroup(groupCodeEditText.text.toString(), object : JoinGroupCallback {
+                joinGroup(groupCodeEditText.text.toString().trim(), object : JoinGroupCallback {
                     override fun onResult(success: Boolean) {
                         if (success) {
                             alertDialog.dismiss()
