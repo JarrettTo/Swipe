@@ -10,13 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class SignUpActivity : AppCompatActivity() {
 
@@ -52,25 +46,15 @@ class SignUpActivity : AppCompatActivity() {
                 if (password != confirm) {
                     showCustomToast("Password does not match")
                 } else {
-
-                    userDataHelper.createUser(username, password,
-                        onSuccess = {
-                            lifecycleScope.launch {
-                                var user = userDataHelper.getUserByUsername(username)
-                                userSession.user = user
-
-                                storeUserSession(username)
-                            }
-                        },
-                        onFailure = {
-                            // Handle failure
-                        },
-                        onUserExists = {
-                            Toast.makeText(this@SignUpActivity, "This username already exists", Toast.LENGTH_LONG).show()
+                    lifecycleScope.launch{
+                        if (userDataHelper.getUserByUsername(username) == null) {
+                            userDataHelper.createUser(username, password)
+                            storeUserSession(username)
+                        } else {
+                            showCustomToast("User already exists. Try another one")
                         }
-                    )
+                    }
                 }
-
             }
         }
 
