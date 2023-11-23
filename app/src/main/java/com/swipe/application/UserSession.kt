@@ -2,22 +2,28 @@ package com.swipe.application
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
 
 class UserSession(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     val sample : MutableSet<String> = mutableSetOf("1")
+    private val gson = Gson()
 
-    var userName: String?
-        get() = prefs.getString("user_name", "heheWOW23")
-        set(value) = prefs.edit().putString("user_name", value).apply()
+    var user: Users?
+        get() {
+            val userJson = prefs.getString("user", null)
+            return if (userJson.isNullOrEmpty()) null else gson.fromJson(userJson, Users::class.java)
+        }
+        set(value) {
+            val userJson = gson.toJson(value)
+            prefs.edit().putString("user", userJson).apply()
+        }
+
+    var userName = prefs.getString("user_name", user?.username)
 
     var userId: String?
         get() = prefs.getString("user_id", "12346")
         set(value) = prefs.edit().putString("user_id", value).apply()
-
-    var profileID: Int
-        get() = prefs.getInt("profile_id", R.drawable.dp)
-        set(value) = prefs.edit().putInt("user_id", value).apply()
 
     var profileURL: String?
         get() = prefs.getString("user_id", "")
@@ -80,9 +86,5 @@ class UserSession(context: Context) {
         val currentIds = playlist?.toMutableSet() ?: mutableSetOf()
         currentIds.remove(playlistId)
         playlist = currentIds
-    }
-
-    fun updateProfileURL(newURL: String) {
-        profileURL = newURL
     }
 }

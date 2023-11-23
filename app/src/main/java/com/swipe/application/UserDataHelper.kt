@@ -207,4 +207,70 @@ class UserDataHelper {
             return@withContext false
         }
     }
+
+    suspend fun retrieveUserPlaylists(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val userRef = dbRef.child("users").child(userName!!).child("playlists")
+        val playlists = mutableSetOf<String>()
+        try {
+            Log.d("TEST:", "CHECK ")
+            val snapshot = userRef.get().await()
+            if (snapshot.exists()) {
+                for (playlistSnapshot in snapshot.children) {
+                    playlistSnapshot.getValue(String::class.java)?.let { playlistId ->
+                        playlists.add(playlistId)
+                    }
+                }
+            }
+            return@withContext playlists
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error fetching data", e)
+        }
+        return@withContext null
+    }
+
+    suspend fun retrieveUserGames(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val userRef = dbRef.child("users").child(userName!!).child("likes")
+        val likes = mutableSetOf<String>()
+        try {
+            Log.d("TEST:", "CHECK ")
+            val snapshot = userRef.get().await()
+            if (snapshot.exists()) {
+                for (likeSnapshot in snapshot.children) {
+                    likeSnapshot.getValue(String::class.java)?.let { likeId ->
+                        likes.add(likeId)
+                    }
+                }
+            }
+            return@withContext likes
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error fetching data", e)
+        }
+        return@withContext null
+    }
+
+    suspend fun retrieveUserGroups(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("test")
+        val userRef = dbRef.child("users").child(userName!!).child("groups")
+        val groups = mutableSetOf<String>()
+        try {
+            Log.d("TEST:", "CHECK ")
+            val snapshot = userRef.get().await()
+            if (snapshot.exists()) {
+                for (groupSnapshot in snapshot.children) {
+                    groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                        groups.add(groupId)
+                    }
+                }
+            }
+            return@withContext groups
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("FirebaseError", "Error fetching data", e)
+        }
+        return@withContext null
+    }
 }

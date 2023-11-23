@@ -248,32 +248,6 @@ class GamesDataHelper : ViewModel() {
             return@withContext gamesList
         }
 
-        suspend fun retrieveUserGames(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
-            val dbRef = FirebaseDatabase.getInstance().getReference("test")
-            val userRef = dbRef.child("users").child(userName!!).child("likes")
-            val likes = mutableSetOf<String>()
-            try {
-                Log.d("TEST:", "CHECK ")
-                val snapshot = userRef.get().await()
-                if (snapshot.exists()) {
-                    for (likeSnapshot in snapshot.children) {
-                        likeSnapshot.getValue(String::class.java)?.let { likeId ->
-                            likes.add(likeId)
-                        }
-                    }
-                }
-                return@withContext likes
-            } catch (e: Exception) {
-                // Handle exceptions
-                Log.e("FirebaseError", "Error fetching data", e)
-            }
-            return@withContext null
-
-
-
-
-
-        }
         suspend fun retrieveUserPlaylists(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
             val dbRef = FirebaseDatabase.getInstance().getReference("test")
             val userRef = dbRef.child("users").child(userName!!).child("playlists")

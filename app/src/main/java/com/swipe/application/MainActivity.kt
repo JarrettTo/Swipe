@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeStack: SwipeStack
     private lateinit var userSession: UserSession
     private val groupDataHelper = GroupDataHelper()
+    private val userDataHelper = UserDataHelper()
     private val gamesDataHelper = GamesDataHelper()
     private lateinit var progressBar: ProgressBar
     private lateinit var errorLayout: LinearLayout
@@ -46,11 +47,11 @@ class MainActivity : AppCompatActivity() {
             fetchData() // Refactor your data fetching logic into this function
         }
         lifecycleScope.launch {
-            userSession.groups= groupDataHelper.retrieveUserGroups(userSession.userName)
-            Log.d("GROUP FB", "DEBUG: ${groupDataHelper.retrieveUserGroups(userSession.userName)}")
-            userSession.likedGameIds= GamesDataHelper.retrieveUserGames(userSession.userName)
-            Log.d("LIKES FB", "DEBUG: ${GamesDataHelper.retrieveUserGames(userSession.userName)}")
-            userSession.playlist= GamesDataHelper.retrieveUserPlaylists(userSession.userName)
+            userSession.groups= userDataHelper.retrieveUserGroups(userSession.userName)
+            Log.d("GROUP FB", "DEBUG: ${userDataHelper.retrieveUserGroups(userSession.userName)}")
+            userSession.likedGameIds= userDataHelper.retrieveUserGames(userSession.userName)
+            Log.d("LIKES FB", "DEBUG: ${userDataHelper.retrieveUserGames(userSession.userName)}")
+            userSession.playlist= userDataHelper.retrieveUserPlaylists(userSession.userName)
             Log.d("Playlists FB", "DEBUG: ${GamesDataHelper.retrieveUserPlaylists(userSession.userName)}")
 
             if (gameList.isEmpty()) {

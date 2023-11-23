@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -25,7 +26,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var signUpTextView: TextView
     private lateinit var user: Users
     private lateinit var userSession: UserSession
-    private lateinit var databaseReference: DatabaseReference
     private lateinit var userDataHelper: UserDataHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,10 +34,11 @@ class LoginActivity : AppCompatActivity() {
 
         userDataHelper = UserDataHelper()
 
-         usernameEditText = findViewById(R.id.username_log)
-         passwordEditText = findViewById(R.id.password_log)
-         loginBtn = findViewById(R.id.LoginBtn)
-         signUpTextView = findViewById(R.id.signUpText)
+        usernameEditText = findViewById(R.id.username_log)
+        passwordEditText = findViewById(R.id.password_log)
+        loginBtn = findViewById(R.id.LoginBtn)
+        signUpTextView = findViewById(R.id.signUpText)
+        userSession = UserSession(this)
 
         if (isUserLoggedIn()) {
             startActivity(Intent(this, MainActivity::class.java))
@@ -50,30 +51,18 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString().trim()
             Log.d("LOL", "$username $password")
             if (username.isNotEmpty() && password.isNotEmpty()) {
-
-//                userDataHelper.authenticateUser(username, password,
-//                    onSuccess = {
-//                        performLogin()
-//                        goToMainActivity()
-//                    },
-//                    onFailure = { message ->
-//                        showCustomToast("$message")
-//                    }
-//                )
-                
                 lifecycleScope.launch{
                     val passMatch = userDataHelper.isOldPasswordCorrect(username, password)
 
                     if(passMatch){
-                        //val userClass = userDataHelper.getUserByUsername(username)
-                        storeUserName(username)
+                        user = userDataHelper.getUserByUsername(username)
+                        userSession.user = user
 
-
+                        storeUserSession(username)
                     }else{
                         showCustomToast("User not found")
                     }
                 }
-
             } else {
                 showCustomToast("Username and password cannot be empty")
             }
@@ -90,10 +79,6 @@ class LoginActivity : AppCompatActivity() {
         return sharedPref.getString("userToken", null) != null
     }
 
-    private fun performLogin() {
-        storeUserSession("user_token_or_identifier")
-    }
-
     private fun storeUserSession(token: String) {
         val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
@@ -102,23 +87,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-    private fun storeUserName(username: String){
-        val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
-            putString("userName", username)
-            apply()
-        }
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-
-    private fun goToMainActivity(){
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
         finish()
     }
 
@@ -134,27 +102,5 @@ class LoginActivity : AppCompatActivity() {
             view = layout
             show()
         }
-    }
-
-    inline fun SharedPreferences.getString(key: String, defaultValue: String): String {
-        return getString(key, defaultValue) ?: defaultValue
-    }
-
-    inline fun SharedPreferences.Editor.putString(key: String, value: String) {
-        putString(key, value)
-    }
-
-    fun SharedPreferences.getUser(): Users {
-        return Users(
-            username = getString("username", "") ?: "",
-            password = getString("password", "") ?: ""
-        )
-    }
-
-    fun SharedPreferences.Editor.putUser(user: Users) {
-        putString("userName", user.username)
-        putString("password", user.password)
-
-
     }
 }

@@ -29,6 +29,7 @@ class MainFragment : Fragment(){
     private val myRef = database.getReference("test")
     private val playlistDataHelper = PlaylistDataHelper()
     private val groupDataHelper = GroupDataHelper()
+    private val userDataHelper = UserDataHelper()
     private lateinit var db : DatabaseHelper
     private lateinit var feed: String
     private val isNavigatingToMain = AtomicBoolean(false)
@@ -160,7 +161,7 @@ class MainFragment : Fragment(){
         } else {
             lifecycleScope.launch {
                 val existingGroupCode =
-                    groupDataHelper.retrieveUserGroups(userSession.userName)
+                    userDataHelper.retrieveUserGroups(userSession.userName)
                 val existingGroups = groupDataHelper.retrieveGroups(existingGroupCode)
                 val groupExists = existingGroups.find { it.name == name }
                 var groupId = groupExists?.id

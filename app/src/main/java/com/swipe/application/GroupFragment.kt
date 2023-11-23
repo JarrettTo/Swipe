@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.service.autofill.UserData
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -36,6 +37,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
     private lateinit var groupList: ArrayList<Groups>
     private lateinit var adapter: GroupAdapter
     private val groupDataHelper = GroupDataHelper()
+    private val userDataHelper = UserDataHelper()
     private lateinit var dialogView : View
 
     override fun onGroupUpdated(groups: ArrayList<String>) {
@@ -85,7 +87,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
         groupView.adapter = adapter
 
         lifecycleScope.launch {
-            val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+            val groups = userDataHelper.retrieveUserGroups(userSession.userName)
             val groupDetails = groupDataHelper.retrieveGroups(groups)
             adapter.updateGroups(groupDetails)
         }
@@ -125,7 +127,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
                 val uri = selectedImageUri
 
                 lifecycleScope.launch {
-                    val groups = groupDataHelper.retrieveUserGroups(userSession.userName)
+                    val groups = userDataHelper.retrieveUserGroups(userSession.userName)
                     val existingGroups = groupDataHelper.retrieveGroups(groups)
                     val groupIndex = existingGroups.indexOfFirst { it.name.trim() == name }
                     val isGroupExistingAndNotCreatedByUser = groupIndex != -1 && groupDataHelper.getCreator(existingGroups[groupIndex].id) != userSession.userName
@@ -208,8 +210,12 @@ class GroupFragment : Fragment() , GroupDetailsListener {
     private fun joinGroup(code:String, callback: JoinGroupCallback) {
         lifecycleScope.launch {
             val group = groupDataHelper.retrieveGroup(code)
+
+            val UserGroupList = userDataHelper.retrieveUserGroups(userSession.userName)
+            val isPartOfGroup = UserGroupList?.any { checkGroup -> checkGroup == code }
+
             if (group != null) {
-                if (!userSession.addGroupId(code)) {
+                if (isPartOfGroup == true) {
                     showCustomToast("You're already part of that group!")
                     callback.onResult(false)
                 } else {

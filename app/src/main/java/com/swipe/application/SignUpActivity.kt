@@ -9,11 +9,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class SignUpActivity : AppCompatActivity() {
@@ -31,6 +33,7 @@ class SignUpActivity : AppCompatActivity() {
         setContentView(R.layout.signup)
 
         userDataHelper = UserDataHelper()
+        userSession = UserSession(this)
 
         usernameEditText = findViewById(R.id.username_signup)
         passwordEditText = findViewById(R.id.password_signup)
@@ -49,13 +52,15 @@ class SignUpActivity : AppCompatActivity() {
                 if (password != confirm) {
                     showCustomToast("Password does not match")
                 } else {
+
                     userDataHelper.createUser(username, password,
                         onSuccess = {
-                            performLogin()
-                            storeUserName(username)
-                            storePassword(password)
-                            goToMainActivity()
+                            lifecycleScope.launch {
+                                var user = userDataHelper.getUserByUsername(username)
+                                userSession.user = user
 
+                                storeUserSession(username)
+                            }
                         },
                         onFailure = {
                             // Handle failure
@@ -76,10 +81,6 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    private fun performLogin() {
-        storeUserSession("user_token_or_identifier")
-    }
-
     private fun storeUserSession(token: String) {
         val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
@@ -87,31 +88,7 @@ class SignUpActivity : AppCompatActivity() {
             apply()
         }
 
-    }
-
-    private fun storeUserName(username: String){
-        val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
-            putString("userName", username)
-            apply()
-        }
         startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-    private fun storePassword(password: String){
-        val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
-            putString("password", password)
-            apply()
-        }
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-    private fun goToMainActivity(){
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
         finish()
     }
 
