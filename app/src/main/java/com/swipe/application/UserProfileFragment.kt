@@ -47,7 +47,7 @@ class UserProfileFragment : Fragment() {
     private lateinit var newPassword: EditText
     private lateinit var usernameText: TextView
     private lateinit var userPhoto: ImageView
-
+    private lateinit var db : DatabaseHelper
     private var isPhotoChanged: Boolean = false
     private var isFirstNameChanged: Boolean = false
     private var isLastNameChanged: Boolean = false
@@ -66,7 +66,7 @@ class UserProfileFragment : Fragment() {
         firstNameText = view.findViewById(R.id.first_name_text)
         lastNameText = view.findViewById(R.id.last_name_text)
         bioText = view.findViewById(R.id.bio_text)
-
+        db = DatabaseHelper(requireContext())
         val confirmChangeBtn: Button = view.findViewById(R.id.confirm_changes_btn)
         val cancelChangeBtn: Button = view.findViewById(R.id.cancelButton)
         val logoutBtn: Button = view.findViewById(R.id.logout_btn)
@@ -160,6 +160,7 @@ class UserProfileFragment : Fragment() {
     }
 
     private fun logoutUser() {
+        db.clearDatabase()
         val sharedPref = activity?.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         sharedPref?.edit()?.remove("userToken")?.apply()
         val intent = Intent(activity, LoginActivity::class.java)

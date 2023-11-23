@@ -183,7 +183,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
         cursor.close()
         return gamesList
     }
+    fun clearDatabase() {
+        val db = this.writableDatabase
+        // Assuming you have a list of all your table names
 
+        db.execSQL("DELETE FROM $TABLE_GAMES") // Clears all data
+        // Optional: if you want to reset the auto-increment primary key
+
+        db.close()
+    }
     fun saveGames(arrayList: ArrayList<Games>) {
         for(i in arrayList){
             saveGame(i)
