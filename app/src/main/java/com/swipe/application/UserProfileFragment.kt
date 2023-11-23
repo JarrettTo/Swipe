@@ -71,17 +71,6 @@ class UserProfileFragment : Fragment() {
         val cancelChangeBtn: Button = view.findViewById(R.id.cancelButton)
         val logoutBtn: Button = view.findViewById(R.id.logout_btn)
 
-        uploadPhotoButton.setOnClickListener {
-            val isCancelMode = uploadPhotoButton.text.toString() == "Cancel"
-
-            uploadPhotoButton.isSelected = !isCancelMode
-            if (uploadPhotoButton.text == "Cancel") {
-                revertToOriginalPhoto()
-            } else {
-                openGalleryForImage()
-            }
-        }
-
         confirmChangeBtn.setOnClickListener {
             if (hasUnsavedChanges()) {
                 if (isPasswordNotEmpty) updatePassword()
@@ -113,10 +102,13 @@ class UserProfileFragment : Fragment() {
         }
 
         uploadPhotoButton.setOnClickListener {
+            Log.d("UserProfileFragment", "Upload Photo Button Clicked. Current Text: ${uploadPhotoButton.text}")
             if (uploadPhotoButton.text == "Upload Photo") {
+                Log.d("UserProfileFragment", "Opening Gallery for Image")
                 openGalleryForImage()
             } else {
-                uploadPhotoButton.text = "Upload Photo"
+                Log.d("UserProfileFragment", "Reverting to Original Photo")
+                revertToOriginalPhoto()
             }
         }
 
