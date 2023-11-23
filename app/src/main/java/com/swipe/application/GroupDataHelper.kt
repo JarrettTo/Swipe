@@ -223,30 +223,6 @@ class GroupDataHelper {
         }
     }
 
-    suspend fun retrieveUserGroups(userName: String?) : MutableSet<String>? = withContext(Dispatchers.IO) {
-        val dbRef = FirebaseDatabase.getInstance().getReference("test")
-        val userRef = dbRef.child("users").child(userName!!).child("groups")
-        val groups = mutableSetOf<String>()
-        try {
-            Log.d("TEST:", "CHECK ")
-            val snapshot = userRef.get().await()
-            if (snapshot.exists()) {
-                for (groupSnapshot in snapshot.children) {
-                    groupSnapshot.getValue(String::class.java)?.let { groupId ->
-                        groups.add(groupId)
-                    }
-                }
-            }
-            return@withContext groups
-        } catch (e: Exception) {
-            // Handle exceptions
-            Log.e("FirebaseError", "Error fetching data", e)
-        }
-        return@withContext null
-    }
-
-
-
     suspend fun leaveGroup(groupId: String, userName: String): Boolean = withContext(Dispatchers.IO) {
         val dbRef = FirebaseDatabase.getInstance().getReference("test")
         val userGroupRef = dbRef.child("users").child(userName).child("groups")

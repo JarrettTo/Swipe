@@ -18,6 +18,7 @@ import androidx.constraintlayout.widget.Group
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.*
 import java.io.Serializable
 
@@ -33,6 +34,7 @@ class AddPlaylistToGroup : AppCompatActivity(), PlaylistActionListener {
     private lateinit var playlistList: ArrayList<Playlist>
     private val playlistDataHelper = PlaylistDataHelper()
     private val groupDataHelper = GroupDataHelper()
+    private val userDataHelper = UserDataHelper()
     private var isCreator = false
     private lateinit var groupDetails: Groups
     private lateinit var listener: PlaylistGameActionListener
@@ -51,15 +53,21 @@ class AddPlaylistToGroup : AppCompatActivity(), PlaylistActionListener {
         groupView.layoutManager = LinearLayoutManager(this)
 
         userSession = UserSession(this)
-        val playlists = userSession.playlist
 
         groupDetails = (intent.getBundleExtra("groupDetails")?.getSerializable("groupDetails") as? Groups)!!
         lifecycleScope.launch {
             var creator = groupDataHelper.getCreator(groupDetails.id)
             isCreator = creator == UserSession(this@AddPlaylistToGroup).userName
-        }
-        CoroutineScope(Dispatchers.Main).launch {
+
+            var playlists = userDataHelper.retrieveUserPlaylists(userSession.userName)
+
             playlistList = playlistDataHelper.retrievePlaylists(playlists)
+            val likedGamesIndex = playlistList.indexOfFirst { it.playlistName == "Liked Games" }
+            if (likedGamesIndex != -1) {
+                // Don't include "Liked Games" for adding to groups
+                playlistList.removeAt(likedGamesIndex)
+            }
+
             adapter = LibraryAdapter(playlistList, this@AddPlaylistToGroup) { clickedPlaylist ->
                 Log.d("CLICKED PLAYLIST", "$clickedPlaylist")
                 showAddConfirmationDialog(clickedPlaylist)
