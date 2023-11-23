@@ -23,8 +23,9 @@ class SearchFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.search, container, false)
         db = DatabaseHelper(requireContext())
-        if (gameList.isEmpty()) {
-            gameList = db.getGames()!!
+        val gamesFromDb = db.getGames() // Removed the safe call operator `?` because `db` is not nullable here
+        if (gamesFromDb != null) {
+            gameList = gamesFromDb
         }
 
         Log.d("SearchActivity", "All Games: $gameList")

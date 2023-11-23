@@ -224,6 +224,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
                 } else {
                     groupDataHelper.joinGroup(code, userSession.userName!!)
                     group.count = group.count + 1
+                    group.users.add(userSession.userName!!)
                     withContext(Dispatchers.Main) {
                         adapter.addGroup(group)
                         adapter.notifyDataSetChanged()

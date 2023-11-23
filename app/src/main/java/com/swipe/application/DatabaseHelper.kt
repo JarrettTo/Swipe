@@ -14,17 +14,17 @@ const val COLUMN_GAME_ID = "gameId"
 const val COLUMN_IMAGE_ID = "imageId"
 const val COLUMN_IMAGE_URL = "imageURL"
 const val COLUMN_GAME_NAME = "gameName"
-//... Other columns ...
 const val COLUMN_DESC = "description"
 const val COLUMN_GENRE = "genre"
+const val COLUMN_PLATFORM= "platform"
 const val COLUMN_PRICE = "price"
 const val COLUMN_VIDEOID = "videoId"
 const val COLUMN_VIDEOURL = "videoUrl"
 const val COLUMN_SIMILARGAMES = "similarGames"
 const val COLUMN_POPULARPLAYERS = "popularPlayers"
 const val COLUMN_REVIEWS = "reviews"
-// This will be stored as a JSON string
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES", null, 1) {
+
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "NEW_LIKED_GAMES", null, 1) {
 
     override fun onCreate(db: SQLiteDatabase) {
         val createGamesTable = ("CREATE TABLE " + TABLE_GAMES + "("
@@ -34,6 +34,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
                 + COLUMN_GAME_NAME + " TEXT,"
                 + COLUMN_DESC + " TEXT,"
                 + COLUMN_GENRE + " TEXT,"
+                + COLUMN_PLATFORM + " TEXT,"
                 + COLUMN_PRICE + " TEXT,"
                 + COLUMN_VIDEOID + " TEXT,"
                 + COLUMN_VIDEOURL + " TEXT,"
@@ -41,8 +42,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
                 + COLUMN_POPULARPLAYERS + " TEXT,"
                 + COLUMN_REVIEWS + " TEXT"
 
-                // ... other columns ...
-                 // Storing as JSON string
                 + ")")
         db.execSQL(createGamesTable)
     }
@@ -60,9 +59,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
         contentValues.put(COLUMN_IMAGE_URL, game.imageURL)
         contentValues.put(COLUMN_GAME_NAME, game.gameName)
         contentValues.put(COLUMN_DESC, game.description)
-        // ... other fields ...
         val gson = Gson()
-        contentValues.put(COLUMN_GENRE, gson.toJson(game.genre)) // Serialize ArrayList to JSON
+        contentValues.put(COLUMN_GENRE, gson.toJson(game.genre))
+        contentValues.put(COLUMN_PLATFORM, gson.toJson(game.platform))
         contentValues.put(COLUMN_PRICE, game.price)
         contentValues.put(COLUMN_VIDEOID, game.videoId)
         contentValues.put(COLUMN_VIDEOURL, game.videoUrl)
@@ -78,6 +77,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
         val db = this.readableDatabase
         val cursor = db.query(TABLE_GAMES, null, "$COLUMN_GAME_ID=?", arrayOf(gameId.toString()), null, null, null)
         val genreIndex = cursor.getColumnIndex(COLUMN_GENRE)
+        val platIndex = cursor.getColumnIndex(COLUMN_PLATFORM)
         val similarIndex= cursor.getColumnIndex(COLUMN_SIMILARGAMES)
         val popularIndex= cursor.getColumnIndex(COLUMN_POPULARPLAYERS)
         val reviewIndex= cursor.getColumnIndex(COLUMN_REVIEWS)
@@ -89,15 +89,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
                 imageURL = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_IMAGE_URL))!!,
                 gameName = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_GAME_NAME))!!,
                 description = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_DESC))!!,
-                // ... other fields ...
                 genre = if (genreIndex != -1) gson.fromJson(cursor.getString(genreIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
+                platform = if (platIndex != -1) gson.fromJson(cursor.getString(platIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                 price = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_PRICE))!!,
                 videoId = cursor.getIntOrNull(cursor.getColumnIndex(COLUMN_VIDEOID))!!,
                 videoUrl = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_VIDEOURL))!!,
                 similarGames = if (similarIndex!= -1) gson.fromJson(cursor.getString(similarIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                 popularPlayers = if (popularIndex!= -1) gson.fromJson(cursor.getString(popularIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                 reviews = if (reviewIndex!= -1) gson.fromJson(cursor.getString(reviewIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
-                // Deserialize JSON string back to ArrayList
+
             )
             cursor.close()
             return game
@@ -107,6 +107,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
     }
     fun getGames(): ArrayList<Games>? {
         val db = this.readableDatabase
+        if(db==null){
+            return null
+        }
         val games : ArrayList<Games> = arrayListOf()
         val cursor = db.query(TABLE_GAMES,
             null,
@@ -120,6 +123,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
             val genreIndex = cursor.getColumnIndex(COLUMN_GENRE)
             val similarIndex= cursor.getColumnIndex(COLUMN_SIMILARGAMES)
             val popularIndex= cursor.getColumnIndex(COLUMN_POPULARPLAYERS)
+            val platIndex = cursor.getColumnIndex(COLUMN_PLATFORM)
             val reviewIndex= cursor.getColumnIndex(COLUMN_REVIEWS)
             do {
                 // Assuming you have a method to create a game object from a cursor
@@ -132,6 +136,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
                     description = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_DESC))!!,
                     // ... other fields ...
                     genre = if (genreIndex != -1) gson.fromJson(cursor.getString(genreIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
+                    platform = if (platIndex != -1) gson.fromJson(cursor.getString(platIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                     price = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_PRICE))!!,
                     videoId = cursor.getIntOrNull(cursor.getColumnIndex(COLUMN_VIDEOID))!!,
                     videoUrl = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_VIDEOURL))!!,
@@ -157,9 +162,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
             val genreIndex = cursor.getColumnIndex(COLUMN_GENRE)
             val similarIndex= cursor.getColumnIndex(COLUMN_SIMILARGAMES)
             val popularIndex= cursor.getColumnIndex(COLUMN_POPULARPLAYERS)
+            val platIndex = cursor.getColumnIndex(COLUMN_PLATFORM)
             val reviewIndex= cursor.getColumnIndex(COLUMN_REVIEWS)
             do {
-                // Assuming you have a method to create a game object from a cursor
+
                 val gson = Gson()
                 val game = Games(
                     gameId = cursor.getIntOrNull(cursor.getColumnIndex(COLUMN_GAME_ID))!!,
@@ -167,15 +173,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
                     imageURL = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_IMAGE_URL))!!,
                     gameName = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_GAME_NAME))!!,
                     description = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_DESC))!!,
-                    // ... other fields ...
                     genre = if (genreIndex != -1) gson.fromJson(cursor.getString(genreIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
+                    platform = if (platIndex != -1) gson.fromJson(cursor.getString(platIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                     price = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_PRICE))!!,
                     videoId = cursor.getIntOrNull(cursor.getColumnIndex(COLUMN_VIDEOID))!!,
                     videoUrl = cursor.getStringOrNull(cursor.getColumnIndex(COLUMN_VIDEOURL))!!,
                     similarGames = if (similarIndex!= -1) gson.fromJson(cursor.getString(similarIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                     popularPlayers = if (popularIndex!= -1) gson.fromJson(cursor.getString(popularIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
                     reviews = if (reviewIndex!= -1) gson.fromJson(cursor.getString(reviewIndex), object : TypeToken<ArrayList<String>>() {}.type) else arrayListOf(),
-                    // Deserialize JSON string back to ArrayList
+
                 )
                 gamesList.add(game)
             } while (cursor.moveToNext())
@@ -185,10 +191,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
     }
     fun clearDatabase() {
         val db = this.writableDatabase
-        // Assuming you have a list of all your table names
 
-        db.execSQL("DELETE FROM $TABLE_GAMES") // Clears all data
-        // Optional: if you want to reset the auto-increment primary key
+
+        db.execSQL("DELETE FROM $TABLE_GAMES")
 
         db.close()
     }
@@ -197,6 +202,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "LIKED_GAMES"
             saveGame(i)
         }
     }
-    // ... Insert and retrieve methods ...
+
 
 }

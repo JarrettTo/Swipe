@@ -117,6 +117,9 @@ class MainFragment : Fragment(){
             try{
                 val games= GamesDataHelper.fetchGames(count, likedGames.toList())!!
                 swipeStack.addGames(games)
+                if(swipeStack.adapter?.count==0){
+                    goToMainActivity()
+                }
             } catch (e: Exception) {
                 if(swipeStack.adapter?.count==0){
                     goToMainActivity()
