@@ -149,7 +149,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
                         "Is Group Existing and Not Created by User: $isGroupExistingAndNotCreatedByUser"
                     )
 
-                    if (isGroupExistingAndNotCreatedByUser) {
+                    if (isGroupExistingAndNotCreatedByUser || groupIndex==-1) {
                         val newGroup = groupDataHelper.insertGroup(name, desc, uri, userSession.userName!!)
                         Log.d("CODE", "CODE: ${newGroup?.id}")
                         Log.d("URI:", "$uri")
