@@ -38,30 +38,6 @@ class UserDataHelper {
             })
     }
 
-    fun authenticateUser(username: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        usersBranch.equalTo(username)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (userSnapshot in dataSnapshot.children) {
-                            val user = userSnapshot.getValue(Users::class.java)
-                            if (user != null && user.password == password) {
-                                onSuccess()
-                                return
-                            }
-                        }
-                        onFailure("Incorrect password")
-                    } else {
-                        onFailure("This user does not exist")
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onFailure("Database error: ${error.message}")
-                }
-            })
-    }
-
     suspend fun getAllUsers(): List<Users> = withContext(Dispatchers.IO) {
         val usersList = mutableListOf<Users>()
 
@@ -77,7 +53,28 @@ class UserDataHelper {
                     val password = childSnapshot.child("password").getValue(String::class.java) ?: ""
                     val profileURL = childSnapshot.child("imageURL").getValue(String::class.java)
 
-                    val user = Users(username, firstname, lastname, bio, profile, password, profileURL)
+                    val groups = ArrayList<String>()
+                    childSnapshot.child("groups").children.forEach { groupSnapshot ->
+                        groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                            groups.add(groupId)
+                        }
+                    }
+
+                    val likes = ArrayList<String>()
+                    childSnapshot.child("likes").children.forEach { likeSnapshot ->
+                        likeSnapshot.getValue(String::class.java)?.let { likeId ->
+                            likes.add(likeId)
+                        }
+                    }
+
+                    val playlists = ArrayList<String>()
+                    childSnapshot.child("playlists").children.forEach { playlistSnapshot ->
+                        playlistSnapshot.getValue(String::class.java)?.let { playlistId ->
+                            playlists.add(playlistId)
+                        }
+                    }
+
+                    val user = Users(username, firstname, lastname, bio, profile, password, profileURL, groups, likes, playlists)
                     usersList.add(user)
                 }
             }
@@ -101,6 +98,27 @@ class UserDataHelper {
                 val password = snapshot.child("password").getValue(String::class.java) ?: ""
                 val profileURL = snapshot.child("imageURL").getValue(String::class.java)
 
+                val groups = ArrayList<String>()
+                snapshot.child("groups").children.forEach { groupSnapshot ->
+                    groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                        groups.add(groupId)
+                    }
+                }
+
+                val likes = ArrayList<String>()
+                snapshot.child("likes").children.forEach { likeSnapshot ->
+                    likeSnapshot.getValue(String::class.java)?.let { likeId ->
+                        likes.add(likeId)
+                    }
+                }
+
+                val playlists = ArrayList<String>()
+                snapshot.child("playlists").children.forEach { playlistSnapshot ->
+                    playlistSnapshot.getValue(String::class.java)?.let { playlistId ->
+                        playlists.add(playlistId)
+                    }
+                }
+
                 user = Users(username, firstname, lastname, bio, profile, password, profileURL)
             }
         } catch (e: Exception) {
@@ -123,6 +141,27 @@ class UserDataHelper {
                     val bio = userSnapshot.child("bio").getValue(String::class.java) ?: ""
                     val password = userSnapshot.child("password").getValue(String::class.java) ?: ""
                     val profileURL = userSnapshot.child("imageURL").getValue(String::class.java)
+
+                    val groups = ArrayList<String>()
+                    userSnapshot.child("groups").children.forEach { groupSnapshot ->
+                        groupSnapshot.getValue(String::class.java)?.let { groupId ->
+                            groups.add(groupId)
+                        }
+                    }
+
+                    val likes = ArrayList<String>()
+                    userSnapshot.child("likes").children.forEach { likeSnapshot ->
+                        likeSnapshot.getValue(String::class.java)?.let { likeId ->
+                            likes.add(likeId)
+                        }
+                    }
+
+                    val playlists = ArrayList<String>()
+                    userSnapshot.child("playlists").children.forEach { playlistSnapshot ->
+                        playlistSnapshot.getValue(String::class.java)?.let { playlistId ->
+                            playlists.add(playlistId)
+                        }
+                    }
 
                     val user = Users(username, firstname, lastname, bio, profile, password, profileURL)
                     usersList.add(user)

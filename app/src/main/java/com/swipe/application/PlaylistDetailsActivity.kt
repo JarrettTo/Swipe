@@ -233,6 +233,11 @@ class PlaylistDetailsActivity : AppCompatActivity(), PlaylistGameActionListener 
 
             gameOrUserAdapter.removeGameToPlaylist(game)
             playlistDataHelper.removeGameFromPlaylist(playlistDetails.playlistId, game)
+
+            if (playlistDetails.playlistName == "Liked Games") {
+                userSession.removeLikedGameId(game.gameId.toString())
+            }
+
         }
     }
 

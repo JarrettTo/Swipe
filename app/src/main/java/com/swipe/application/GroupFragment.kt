@@ -212,7 +212,7 @@ class GroupFragment : Fragment() , GroupDetailsListener {
             val group = groupDataHelper.retrieveGroup(code)
 
             val UserGroupList = userDataHelper.retrieveUserGroups(userSession.userName)
-            val isPartOfGroup = UserGroupList?.any { checkGroup -> checkGroup == code }
+            val isPartOfGroup = UserGroupList?.any { checkGroup -> checkGroup.trim() == code }
 
             if (group != null) {
                 if (isPartOfGroup == true) {

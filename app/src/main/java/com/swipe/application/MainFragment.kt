@@ -41,8 +41,6 @@ class MainFragment : Fragment(){
         val view = inflater.inflate(R.layout.home_page, container, false)
         userSession = UserSession(requireContext())
         val userName = userSession.userName
-        val userId = userSession.userId
-        val likedMessageIds = userSession.likedGameIds
 
         val usernameTextView: TextView = view.findViewById(R.id.home_username)
         if (userName != "") {

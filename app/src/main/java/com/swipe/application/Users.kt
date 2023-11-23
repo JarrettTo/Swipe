@@ -9,5 +9,9 @@ data class Users(
     val bio: String = "",
     val profile: Int = 0,
     val password: String = "",
-    val profileURL: String? = null
+    val profileURL: String? = null,
+    val groups: ArrayList<String>? = arrayListOf(),
+    val likes: ArrayList<String>? = arrayListOf(),
+    val playlist: ArrayList<String>? = arrayListOf()
+
     ) : Serializable
