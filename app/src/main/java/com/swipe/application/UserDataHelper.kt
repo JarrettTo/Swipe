@@ -14,28 +14,14 @@ class UserDataHelper {
     private val databaseReference = FirebaseDatabase.getInstance().getReference("test")
     private val usersBranch = databaseReference.child("users")
 
-    fun createUser(username: String, password: String, onSuccess: () -> Unit, onFailure: () -> Unit, onUserExists: () -> Unit) {
-        usersBranch.equalTo(username)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (userSnapshot in dataSnapshot.children) {
-                            val user = userSnapshot.getValue(Users::class.java)
-                            if (user != null && user.password == password) {
-                                onUserExists()
-                                return
-                            }
-                        }
-                    } else {
-                        usersBranch.child(username).child("password").setValue(password)
-                        onSuccess()
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onFailure()
-                }
-            })
+    suspend fun createUser(username: String, password: String) : Boolean = withContext(Dispatchers.IO) {
+        try{
+            usersBranch.child(username).child("password").setValue(password)
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e("FirebaseError", "Error updating playlist image", e)
+            return@withContext false
+        }
     }
 
     suspend fun getAllUsers(): List<Users> = withContext(Dispatchers.IO) {
