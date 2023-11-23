@@ -126,9 +126,15 @@ class MainActivity : AppCompatActivity() {
     }
     private fun setupButtons(bundle: Bundle) {
         findViewById<Button>(R.id.home_button).setOnClickListener {
-            val mf = MainFragment().apply { arguments = bundle }
-            replaceFragment(mf)
-        }
+            if (this@MainActivity is MainActivity) {
+                // If in MainActivity, replace fragment
+                val mf = MainFragment().apply { arguments = bundle }
+                replaceFragment(mf)
+            } else {
+                // If not in MainActivity, start MainActivity
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+             }}
         findViewById<Button>(R.id.search_button).setOnClickListener {
             replaceFragment(SearchFragment())
         }
