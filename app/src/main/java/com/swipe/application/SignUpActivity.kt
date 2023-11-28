@@ -46,10 +46,13 @@ class SignUpActivity : AppCompatActivity() {
                 if (password != confirm) {
                     showCustomToast("Password does not match")
                 } else {
+                    val intent = Intent(this, LoginActivity::class.java)
                     lifecycleScope.launch{
                         if (userDataHelper.getUserByUsername(username) == null) {
                             userDataHelper.createUser(username, password)
-                            storeUserSession(username)
+
+                            startActivity(intent)
+                            finish()
                         } else {
                             showCustomToast("User already exists. Try another one")
                         }

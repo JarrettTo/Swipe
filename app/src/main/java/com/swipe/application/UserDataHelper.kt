@@ -71,7 +71,7 @@ class UserDataHelper {
         return@withContext usersList
     }
 
-    suspend fun getUserByUsername(username: String): Users = withContext(Dispatchers.IO) {
+    suspend fun getUserByUsername(username: String): Users? = withContext(Dispatchers.IO) {
         var user = Users()
 
         try {
@@ -106,6 +106,9 @@ class UserDataHelper {
                 }
 
                 user = Users(username, firstname, lastname, bio, profile, password, profileURL)
+            }
+            else{
+                return@withContext null
             }
         } catch (e: Exception) {
             Log.e("FirebaseError", "Error fetching user by username", e)

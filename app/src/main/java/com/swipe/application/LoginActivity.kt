@@ -55,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
                     val passMatch = userDataHelper.isOldPasswordCorrect(username, password)
 
                     if(passMatch){
-                        user = userDataHelper.getUserByUsername(username)
+                        user = userDataHelper.getUserByUsername(username)!!
                         userSession.user = user
 
                         storeUserSession(username)

@@ -187,7 +187,7 @@ class GameDetailsHolder(
                     val userReview = userDataHelper.getUserByUsername(review.user.username)
                     var updatedReview: Reviews
 
-                    if (review.user.profileURL != userReview.profileURL) {
+                    if (review.user.profileURL != userReview!!.profileURL) {
                         updatedReview =
                             reviewDataHelper.updateUserInReview(review.reviewID, userReview)!!
                     } else {
